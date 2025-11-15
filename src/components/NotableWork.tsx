@@ -1,22 +1,12 @@
-import { Brain, Eye, Gamepad2, ExternalLink } from 'lucide-react';
-import { useScrollReveal } from '../hooks/useScrollReveal';
+import { Eye, Glasses, Music, Code, ExternalLink } from 'lucide-react';
+import { useSimpleScrollReveal } from '../hooks/useSimpleScrollReveal';
 import { useStaggerFadeIn } from '../hooks/useStaggerFadeIn';
 
 export function NotableWork() {
-  const sectionReveal = useScrollReveal();
-  const { ref: projectsRef, getItemStyle } = useStaggerFadeIn(3);
+  const sectionReveal = useSimpleScrollReveal();
+  const { ref: cardsRef, getItemStyle } = useStaggerFadeIn(4);
 
   const projects = [
-    {
-      icon: Brain,
-      title: 'Forex ML/RL System',
-      period: 'Current',
-      description: 'Building an experimental trading system using machine learning and reinforcement learning with bio-inspired algorithms. Exploring technical analysis, pattern recognition, and adaptive strategies.',
-      tech: ['Python', 'Machine Learning', 'XGBoost', 'Reinforcement Learning'],
-      iconColor: 'text-cyan-400',
-      glowColor: 'rgba(34,211,238,0.5)',
-      innerGlow: 'rgba(34,211,238,0.08)'
-    },
     {
       icon: Eye,
       title: 'Collaborative AR System',
@@ -29,7 +19,7 @@ export function NotableWork() {
       innerGlow: 'rgba(59,130,246,0.08)'
     },
     {
-      icon: Gamepad2,
+      icon: Glasses,
       title: 'VR Shader Programming',
       period: 'Bachelor\'s Thesis',
       description: 'Created immersive VR experiences with custom shader programming, exploring real-time rendering techniques and visual effects in virtual reality environments.',
@@ -37,6 +27,26 @@ export function NotableWork() {
       iconColor: 'text-cyan-400',
       glowColor: 'rgba(34,211,238,0.5)',
       innerGlow: 'rgba(34,211,238,0.08)'
+    },
+    {
+      icon: Music,
+      title: 'Audio Processing System',
+      period: 'Current',
+      description: 'Building an experimental audio processing system using machine learning and signal processing techniques. Exploring feature extraction, pattern recognition, and adaptive strategies.',
+      tech: ['Python', 'Machine Learning', 'Signal Processing'],
+      iconColor: 'text-pink-400',
+      glowColor: 'rgba(236,72,153,0.5)',
+      innerGlow: 'rgba(236,72,153,0.08)'
+    },
+    {
+      icon: Code,
+      title: 'Web Development Framework',
+      period: 'Current',
+      description: 'Developing a modern web development framework with a focus on performance and scalability. Incorporating best practices in front-end and back-end development.',
+      tech: ['JavaScript', 'React', 'Node.js', 'Express'],
+      iconColor: 'text-yellow-400',
+      glowColor: 'rgba(255,204,0,0.5)',
+      innerGlow: 'rgba(255,204,0,0.08)'
     }
   ];
 
@@ -63,7 +73,7 @@ export function NotableWork() {
         </div>
 
         {/* PROJECTS */}
-        <div ref={projectsRef} className="grid md:grid-cols-2 gap-3">
+        <div ref={cardsRef} className="grid md:grid-cols-2 gap-3">
           {projects.map((project, index) => (
             <div key={index} className="relative h-full">
               {/* Card */}

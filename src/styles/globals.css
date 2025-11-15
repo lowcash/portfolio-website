@@ -201,17 +201,26 @@
 
 html {
   font-size: var(--font-size);
+  overflow-x: hidden;
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+  scroll-snap-type: y mandatory;
   scroll-behavior: smooth;
+  scroll-snap-stop: normal; /* Faster scrolling */
 }
 
-/* Soft scroll snapping for sections */
+/* HIDE SCROLLBAR - minimalistický look */
+html::-webkit-scrollbar {
+  display: none;
+}
+
+body::-webkit-scrollbar {
+  display: none;
+}
+
 body {
-  scroll-snap-type: y proximity;
-}
-
-section {
-  scroll-snap-align: start;
-  scroll-snap-stop: normal;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
 }
 
 /* Performance optimizations for animations */

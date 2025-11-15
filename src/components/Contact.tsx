@@ -1,9 +1,9 @@
 import { Mail, Github, Linkedin, Send } from 'lucide-react';
-import { useScrollReveal } from '../hooks/useScrollReveal';
+import { useSimpleScrollReveal } from '../hooks/useSimpleScrollReveal';
 import { useStaggerFadeIn } from '../hooks/useStaggerFadeIn';
 
 export function Contact() {
-  const sectionReveal = useScrollReveal();
+  const sectionReveal = useSimpleScrollReveal();
   const { ref: socialsRef, getItemStyle } = useStaggerFadeIn(3);
 
   const socials = [

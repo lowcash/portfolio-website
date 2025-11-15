@@ -1,14 +1,14 @@
-import { Code2, Laptop, Brain, Sparkles } from 'lucide-react';
-import { useScrollReveal } from '../hooks/useScrollReveal';
+import { Code, Database, Cpu, Globe, Terminal, Cloud } from 'lucide-react';
+import { useSimpleScrollReveal } from '../hooks/useSimpleScrollReveal';
 import { useStaggerFadeIn } from '../hooks/useStaggerFadeIn';
 
 export function TechJourney() {
-  const sectionReveal = useScrollReveal();
-  const { ref: skillsRef, getItemStyle } = useStaggerFadeIn(4);
+  const sectionReveal = useSimpleScrollReveal();
+  const { ref: cardsRef, getItemStyle } = useStaggerFadeIn(6);
 
   const skills = [
     { 
-      icon: Laptop,
+      icon: Code,
       category: 'Frontend', 
       items: ['React', 'Next.js', 'TypeScript', 'Tailwind CSS', 'Electron.js'], 
       description: 'Building responsive, modern UIs with type-safe code and smooth user experiences',
@@ -17,7 +17,7 @@ export function TechJourney() {
       innerGlow: 'rgba(251,146,60,0.08)'
     },
     { 
-      icon: Code2,
+      icon: Database,
       category: 'Backend', 
       items: ['Node.js', 'tRPC', 'GraphQL', 'Express', 'REST APIs'], 
       description: 'End-to-end type safety with tRPC, building scalable APIs and server-side logic',
@@ -26,7 +26,7 @@ export function TechJourney() {
       innerGlow: 'rgba(244,114,182,0.08)'
     },
     { 
-      icon: Brain,
+      icon: Cpu,
       category: 'AI & ML', 
       items: ['Machine Learning', 'Computer Vision', 'OpenCV', 'XGBoost', 'Python'], 
       description: 'Currently building Forex ML/RL system, experienced with OpenCV and Lucas-Kanade optical flow',
@@ -35,10 +35,28 @@ export function TechJourney() {
       innerGlow: 'rgba(251,146,60,0.08)'
     },
     { 
-      icon: Sparkles,
+      icon: Globe,
       category: 'Agentic & Design', 
       items: ['GitHub Copilot', 'AI-Assisted Dev', 'Figma', 'System Architecture'], 
       description: 'Leveraging AI tools to ship faster, architect better systems, and bridge design-to-code gap',
+      iconColor: 'text-pink-400',
+      glowColor: 'rgba(244,114,182,0.5)',
+      innerGlow: 'rgba(244,114,182,0.08)'
+    },
+    { 
+      icon: Terminal,
+      category: 'DevOps', 
+      items: ['Docker', 'Kubernetes', 'CI/CD', 'AWS', 'Azure'], 
+      description: 'Containerization, orchestration, and cloud deployment for scalable applications',
+      iconColor: 'text-orange-400',
+      glowColor: 'rgba(251,146,60,0.5)',
+      innerGlow: 'rgba(251,146,60,0.08)'
+    },
+    { 
+      icon: Cloud,
+      category: 'Cloud Services', 
+      items: ['AWS', 'Azure', 'Google Cloud', 'Firebase', 'Heroku'], 
+      description: 'Building and deploying applications on cloud platforms for reliability and scalability',
       iconColor: 'text-pink-400',
       glowColor: 'rgba(244,114,182,0.5)',
       innerGlow: 'rgba(244,114,182,0.08)'
@@ -68,7 +86,7 @@ export function TechJourney() {
         </div>
 
         {/* CARDS */}
-        <div ref={skillsRef} className="grid md:grid-cols-2 gap-3">
+        <div ref={cardsRef} className="grid md:grid-cols-2 gap-3">
           {skills.map((skillGroup, groupIndex) => (
             <div key={groupIndex} className="relative h-full">
               {/* Card */}

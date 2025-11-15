@@ -1,9 +1,9 @@
-import { GraduationCap, Briefcase } from 'lucide-react';
-import { useScrollReveal } from '../hooks/useScrollReveal';
+import { GraduationCap, Award } from 'lucide-react';
+import { useSimpleScrollReveal } from '../hooks/useSimpleScrollReveal';
 import { useStaggerFadeIn } from '../hooks/useStaggerFadeIn';
 
 export function Education() {
-  const sectionReveal = useScrollReveal();
+  const sectionReveal = useSimpleScrollReveal();
   const { ref: cardsRef, getItemStyle } = useStaggerFadeIn(2);
 
   const degrees = [

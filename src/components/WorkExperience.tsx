@@ -1,10 +1,10 @@
 import { Briefcase } from 'lucide-react';
-import { useScrollReveal } from '../hooks/useScrollReveal';
+import { useSimpleScrollReveal } from '../hooks/useSimpleScrollReveal';
 import { useStaggerFadeIn } from '../hooks/useStaggerFadeIn';
 
 export function WorkExperience() {
-  const sectionReveal = useScrollReveal();
-  const { ref: jobsRef, getItemStyle } = useStaggerFadeIn(2);
+  const sectionReveal = useSimpleScrollReveal();
+  const { ref: cardsRef, getItemStyle } = useStaggerFadeIn(3);
 
   const experiences = [
     {
@@ -52,7 +52,7 @@ export function WorkExperience() {
         </div>
 
         {/* JOBS */}
-        <div ref={jobsRef} className="space-y-3 max-w-5xl mx-auto">
+        <div ref={cardsRef} className="space-y-3 max-w-5xl mx-auto">
           {experiences.map((exp, index) => (
             <div key={index} className="relative">
               {/* Card */}

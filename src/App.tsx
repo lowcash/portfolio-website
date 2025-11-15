@@ -13,34 +13,22 @@ import { ScrollNavigation } from './components/ScrollNavigation';
 import { MetaTags } from './components/MetaTags';
 import { AnimatedBackground } from './components/AnimatedBackground';
 import { useEffect } from 'react';
-import { useSectionNavigation } from './hooks/useSectionNavigation';
+import { useScrollProgressWithInterpolation } from './hooks/useScrollProgressWithInterpolation';
 
 export default function App() {
   const sections = [
-    Hero,
-    WhoIAm,
-    TechJourney,
-    NotableWork,
-    Education,
-    WorkExperience,
-    BeyondCode,
-    WhatsNext,
-    Contact,
+    { Component: Hero, name: 'Home', id: 'hero' },
+    { Component: WhoIAm, name: 'Who I Am', id: 'who-i-am' },
+    { Component: TechJourney, name: 'Tech Stack', id: 'tech-journey' },
+    { Component: NotableWork, name: 'Notable Work', id: 'notable-work' },
+    { Component: Education, name: 'Education', id: 'education' },
+    { Component: WorkExperience, name: 'Experience', id: 'work-experience' },
+    { Component: BeyondCode, name: 'Beyond Code', id: 'beyond-code' },
+    { Component: WhatsNext, name: "What's Next", id: 'whats-next' },
+    { Component: Contact, name: 'Contact', id: 'contact' },
   ];
 
-  const sectionNames = [
-    'Home',
-    'Who I Am',
-    'Tech Stack',
-    'Notable Work',
-    'Education',
-    'Experience',
-    'Beyond Code',
-    "What's Next",
-    'Contact',
-  ];
-
-  const { currentSection, progress, goToSection, sectionContainerRef } = useSectionNavigation(sections.length);
+  const { progress, currentSection, sectionProgress } = useScrollProgressWithInterpolation();
 
   useEffect(() => {
     // Set favicon
@@ -60,60 +48,46 @@ export default function App() {
     setFavicon();
   }, []);
 
+  const scrollToSection = (index: number) => {
+    const sectionId = sections[index].id;
+    const element = document.getElementById(sectionId);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  };
+
   return (
     <>
       <MetaTags />
       
-      {/* ANIMATED BACKGROUND - Outside main container, always visible */}
-      <AnimatedBackground currentSection={currentSection} />
+      {/* ANIMATED BACKGROUND */}
+      <AnimatedBackground currentSection={currentSection} sectionProgress={sectionProgress} />
       
-      <div className="text-white overflow-hidden h-screen relative" style={{ background: 'transparent' }}>
-        <ScrollProgress progress={progress} currentSection={currentSection} />
+      <div className="text-white" style={{ background: 'transparent' }}>
+        <ScrollProgress progress={progress} currentSection={currentSection} sectionProgress={sectionProgress} />
         
-        {/* Render all sections, only show current one */}
-        {sections.map((SectionComponent, index) => {
-          const isActive = currentSection === index;
-          const isNext = index > currentSection;
-          
-          return (
-            <div
-              key={index}
-              ref={isActive ? sectionContainerRef : null}
-              className="absolute inset-0 min-h-screen transition-all duration-300 ease-out"
-              style={{
-                opacity: isActive ? 1 : 0,
-                transform: isActive ? 'translateY(0)' : isNext ? 'translateY(50px)' : 'translateY(-50px)',
-                filter: isActive ? 'blur(0px)' : 'blur(8px)',
-                pointerEvents: isActive ? 'auto' : 'none',
-                zIndex: isActive ? 10 : 0,
-              }}
-            >
-              {/* Scrollable wrapper for section content */}
-              <div 
-                data-section-scroll
-                className="h-full overflow-y-auto overflow-x-hidden"
-                style={{
-                  scrollbarWidth: 'thin',
-                  scrollbarColor: 'rgba(168, 85, 247, 0.5) transparent',
-                  scrollBehavior: 'smooth',
-                }}
-              >
-                <SectionComponent />
-              </div>
-            </div>
-          );
-        })}
+        {/* All sections */}
+        {sections.map(({ Component, id }) => (
+          <section
+            key={id}
+            id={id}
+            className="min-h-screen"
+            style={{ scrollSnapAlign: 'start' }}
+          >
+            <Component />
+          </section>
+        ))}
         
         <ScrollToTop 
           currentSection={currentSection}
-          onGoToFirst={() => goToSection(0)}
+          onGoToFirst={() => scrollToSection(0)}
         />
         
         <ScrollNavigation
           currentSection={currentSection}
           totalSections={sections.length}
-          sectionNames={sectionNames}
-          onSectionClick={goToSection}
+          sectionNames={sections.map(s => s.name)}
+          onSectionClick={scrollToSection}
         />
       </div>
     </>

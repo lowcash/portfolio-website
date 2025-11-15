@@ -1,10 +1,10 @@
-import { Music, Headphones, Heart, BookOpen, Sparkles } from 'lucide-react';
-import { useScrollReveal } from '../hooks/useScrollReveal';
+import { Music, Headphones, Play } from 'lucide-react';
+import { useSimpleScrollReveal } from '../hooks/useSimpleScrollReveal';
 import { useStaggerFadeIn } from '../hooks/useStaggerFadeIn';
 
 export function BeyondCode() {
-  const sectionReveal = useScrollReveal();
-  const { ref: interestsRef, getItemStyle } = useStaggerFadeIn(4);
+  const sectionReveal = useSimpleScrollReveal();
+  const { ref: cardsRef, getItemStyle } = useStaggerFadeIn(3);
 
   return (
     <section className="min-h-screen flex items-center justify-center py-20 px-6 md:px-8 relative">
@@ -29,7 +29,7 @@ export function BeyondCode() {
         </div>
 
         {/* INTERESTS */}
-        <div ref={interestsRef} className="grid md:grid-cols-2 gap-3">
+        <div ref={cardsRef} className="grid md:grid-cols-2 gap-3">
           {/* Music */}
           <div className="relative h-full">
             <div 
@@ -58,40 +58,12 @@ export function BeyondCode() {
             </div>
           </div>
 
-          {/* Biohacking */}
-          <div className="relative h-full">
-            <div 
-              className="rounded-2xl p-8 transition-all duration-500 h-full flex flex-col"
-              style={{
-                ...getItemStyle(1),
-              } as React.CSSProperties}
-            >
-              <div className="flex items-start gap-4 mb-4">
-                <Heart className="w-10 h-10 text-green-400 flex-shrink-0" />
-                <div className="flex-grow">
-                  <h3 className="text-xl mb-1 text-white">Biohacking & Optimization</h3>
-                </div>
-              </div>
-              <p className="text-gray-400 mb-6 flex-grow">
-                Exploring how to optimize physical and mental performance through data-driven experimentation. 
-                From sleep tracking to nutrition, I approach health like debugging code.
-              </p>
-              <div className="flex flex-wrap gap-2">
-                {['Sleep Optimization', 'Nutrition', 'Performance Tracking'].map((tag, i) => (
-                  <span key={i} className="px-3 py-1 rounded-full text-xs text-gray-300">
-                    {tag}
-                  </span>
-                ))}
-              </div>
-            </div>
-          </div>
-
           {/* Travel */}
           <div className="relative h-full">
             <div 
               className="rounded-2xl p-8 transition-all duration-500 h-full flex flex-col"
               style={{
-                ...getItemStyle(2),
+                ...getItemStyle(1),
               } as React.CSSProperties}
             >
               <div className="flex items-start gap-4 mb-4">
@@ -119,11 +91,11 @@ export function BeyondCode() {
             <div 
               className="rounded-2xl p-8 transition-all duration-500 h-full flex flex-col"
               style={{
-                ...getItemStyle(3),
+                ...getItemStyle(2),
               } as React.CSSProperties}
             >
               <div className="flex items-start gap-4 mb-4">
-                <Sparkles className="w-10 h-10 text-green-400 flex-shrink-0" />
+                <Play className="w-10 h-10 text-green-400 flex-shrink-0" />
                 <div className="flex-grow">
                   <h3 className="text-xl mb-1 text-white">Audiobooks & Hiking</h3>
                 </div>

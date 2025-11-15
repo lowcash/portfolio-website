@@ -19,6 +19,7 @@ export function ScrollToTop({ currentSection, onGoToFirst }: ScrollToTopProps) {
     { glow: 'rgba(20,184,166,0.5)', inner: 'rgba(20,184,166,0.08)', icon: 'text-teal-400' }, // Work Experience
     { glow: 'rgba(16,185,129,0.5)', inner: 'rgba(16,185,129,0.08)', icon: 'text-emerald-400' }, // Beyond Code
     { glow: 'rgba(250,204,21,0.5)', inner: 'rgba(250,204,21,0.08)', icon: 'text-yellow-400' }, // What's Next
+    { glow: 'rgba(232,121,249,0.5)', inner: 'rgba(232,121,249,0.08)', icon: 'text-fuchsia-400' }, // Contact
   ];
 
   const currentColors = sectionColors[currentSection] || sectionColors[0];

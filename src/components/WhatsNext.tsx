@@ -1,26 +1,26 @@
-import { Handshake, FlaskConical, Network } from 'lucide-react';
-import { useScrollReveal } from '../hooks/useScrollReveal';
+import { Rocket, TrendingUp, Target } from 'lucide-react';
+import { useSimpleScrollReveal } from '../hooks/useSimpleScrollReveal';
 import { useStaggerFadeIn } from '../hooks/useStaggerFadeIn';
 
 export function WhatsNext() {
-  const sectionReveal = useScrollReveal();
+  const sectionReveal = useSimpleScrollReveal();
   const { ref: cardsRef, getItemStyle } = useStaggerFadeIn(3);
 
   const items = [
     {
-      icon: Handshake,
+      icon: Rocket,
       title: 'Freelance Projects',
       description: 'Open to building web applications with modern fullstack tools and AI-assisted workflows',
       iconColor: 'text-yellow-400'
     },
     {
-      icon: FlaskConical,
+      icon: TrendingUp,
       title: 'ML Experiments',
       description: 'Currently focused on Forex ML/RL system, eager to collaborate on innovative AI projects',
       iconColor: 'text-amber-400'
     },
     {
-      icon: Network,
+      icon: Target,
       title: 'Networking',
       description: 'Always happy to connect with fellow developers, entrepreneurs, and tech enthusiasts',
       iconColor: 'text-yellow-400'

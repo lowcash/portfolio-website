@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 
-export function useStaggerFadeIn(itemCount: number, options = {}) {
-  const ref = useRef<HTMLDivElement>(null);
+export function useSimpleScrollReveal(threshold = 0.1, options: IntersectionObserverInit = {}) {
+  const ref = useRef<HTMLElement>(null);
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
@@ -28,13 +28,12 @@ export function useStaggerFadeIn(itemCount: number, options = {}) {
     };
   }, []);
 
-  // Generate delay for each item (80ms stagger for faster transitions)
-  const getItemStyle = (index: number) => ({
-    opacity: isVisible ? 1 : 0,
-    transform: isVisible ? 'translateY(0)' : 'translateY(20px)',
-    transition: 'opacity 0.4s ease-out, transform 0.4s ease-out',
-    transitionDelay: `${index * 80}ms`,
-  });
-
-  return { ref, isVisible, getItemStyle };
+  return {
+    ref,
+    style: {
+      opacity: isVisible ? 1 : 0,
+      transform: isVisible ? 'translateY(0)' : 'translateY(30px)',
+      transition: 'opacity 0.4s ease-out, transform 0.4s ease-out',
+    },
+  };
 }
