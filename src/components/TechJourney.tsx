@@ -1,10 +1,10 @@
-import { Code, Database, Cpu, Globe, Terminal, Cloud } from 'lucide-react';
+import { Code, Database, Cpu, Globe, Box } from 'lucide-react';
 import { useSimpleScrollReveal } from '../hooks/useSimpleScrollReveal';
 import { useStaggerFadeIn } from '../hooks/useStaggerFadeIn';
 
 export function TechJourney() {
   const sectionReveal = useSimpleScrollReveal();
-  const { ref: cardsRef, getItemStyle } = useStaggerFadeIn(6);
+  const { ref: cardsRef, getItemStyle } = useStaggerFadeIn(5);
 
   const skills = [
     { 
@@ -19,47 +19,38 @@ export function TechJourney() {
     { 
       icon: Database,
       category: 'Backend', 
-      items: ['Node.js', 'tRPC', 'GraphQL', 'Express', 'REST APIs'], 
-      description: 'End-to-end type safety with tRPC, building scalable APIs and server-side logic',
+      items: ['Node.js', 'tRPC', 'GraphQL', 'Prisma', 'REST APIs'], 
+      description: 'End-to-end type safety with tRPC, building scalable APIs and server-side logic with Prisma ORM',
       iconColor: 'text-pink-400',
       glowColor: 'rgba(244,114,182,0.5)',
       innerGlow: 'rgba(244,114,182,0.08)'
     },
     { 
-      icon: Cpu,
-      category: 'AI & ML', 
-      items: ['Machine Learning', 'Computer Vision', 'OpenCV', 'XGBoost', 'Python'], 
-      description: 'Currently building Forex ML/RL system, experienced with OpenCV and Lucas-Kanade optical flow',
+      icon: Box,
+      category: 'Computer Graphics', 
+      items: ['Unity', 'Shader Programming (Cg)', 'OpenCV', 'Real-time Rendering'], 
+      description: 'Academic experience with VR, custom shaders, and computer vision from university projects',
       iconColor: 'text-orange-400',
       glowColor: 'rgba(251,146,60,0.5)',
       innerGlow: 'rgba(251,146,60,0.08)'
+    },
+    { 
+      icon: Cpu,
+      category: 'AI & ML', 
+      items: ['Machine Learning', 'Computer Vision', 'XGBoost', 'Reinforcement Learning', 'Python'], 
+      description: 'Currently building Forex ML/RL system, experienced with OpenCV and Lucas-Kanade optical flow',
+      iconColor: 'text-pink-400',
+      glowColor: 'rgba(244,114,182,0.5)',
+      innerGlow: 'rgba(244,114,182,0.08)'
     },
     { 
       icon: Globe,
       category: 'Agentic & Design', 
       items: ['GitHub Copilot', 'AI-Assisted Dev', 'Figma', 'System Architecture'], 
       description: 'Leveraging AI tools to ship faster, architect better systems, and bridge design-to-code gap',
-      iconColor: 'text-pink-400',
-      glowColor: 'rgba(244,114,182,0.5)',
-      innerGlow: 'rgba(244,114,182,0.08)'
-    },
-    { 
-      icon: Terminal,
-      category: 'DevOps', 
-      items: ['Docker', 'Kubernetes', 'CI/CD', 'AWS', 'Azure'], 
-      description: 'Containerization, orchestration, and cloud deployment for scalable applications',
       iconColor: 'text-orange-400',
       glowColor: 'rgba(251,146,60,0.5)',
       innerGlow: 'rgba(251,146,60,0.08)'
-    },
-    { 
-      icon: Cloud,
-      category: 'Cloud Services', 
-      items: ['AWS', 'Azure', 'Google Cloud', 'Firebase', 'Heroku'], 
-      description: 'Building and deploying applications on cloud platforms for reliability and scalability',
-      iconColor: 'text-pink-400',
-      glowColor: 'rgba(244,114,182,0.5)',
-      innerGlow: 'rgba(244,114,182,0.08)'
     },
   ];
 
@@ -78,7 +69,7 @@ export function TechJourney() {
               filter: 'drop-shadow(0 0 12px rgba(251, 146, 60, 0.6)) drop-shadow(0 0 24px rgba(245, 158, 11, 0.4))'
             }}
           >
-            My Tech Journey
+            Tech Stack
           </h2>
           <p className="text-base md:text-lg text-gray-400">
             A diverse toolkit built over years of exploration and real-world projects
@@ -104,14 +95,14 @@ export function TechJourney() {
                     </h3>
                   </div>
                 </div>
-                <p className="text-gray-400 mb-6 flex-grow">
+                <p className="text-gray-400 mb-6">
                   {skillGroup.description}
                 </p>
                 <div className="flex flex-wrap gap-2">
                   {skillGroup.items.map((item, itemIndex) => (
                     <span
                       key={itemIndex}
-                      className="px-3 py-1 rounded-full text-xs text-gray-300"
+                      className="px-3 py-1 rounded-full text-xs text-gray-300 bg-white/5 border border-white/10"
                     >
                       {item}
                     </span>

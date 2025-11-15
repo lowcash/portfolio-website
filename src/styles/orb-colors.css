@@ -1,0 +1,64 @@
+/* ====================================================================
+   ORB COLOR INTERPOLATION SYSTEM
+   Používá CSS custom properties --orb-r, --orb-g, --orb-b
+   nastavované z JavaScript podle scroll progressu
+   ==================================================================== */
+
+/* Smooth transitions pro orby */
+.orb-1, .orb-2, .orb-3, .orb-4, .orb-5, .orb-6 {
+  transition: background 0.2s ease-out;
+}
+
+/* Orb 1 - nejvyšší opacity (0.15) */
+.orb-1 {
+  background: radial-gradient(
+    circle,
+    rgba(var(--orb-r), var(--orb-g), var(--orb-b), 0.15) 0%,
+    transparent 70%
+  );
+}
+
+/* Orb 2 - opacity 0.13 */
+.orb-2 {
+  background: radial-gradient(
+    circle,
+    rgba(var(--orb-r), var(--orb-g), var(--orb-b), 0.13) 0%,
+    transparent 70%
+  );
+}
+
+/* Orb 3 - opacity 0.12 */
+.orb-3 {
+  background: radial-gradient(
+    circle,
+    rgba(var(--orb-r), var(--orb-g), var(--orb-b), 0.12) 0%,
+    transparent 70%
+  );
+}
+
+/* Orb 4 - opacity 0.14 */
+.orb-4 {
+  background: radial-gradient(
+    circle,
+    rgba(var(--orb-r), var(--orb-g), var(--orb-b), 0.14) 0%,
+    transparent 70%
+  );
+}
+
+/* Orb 5 - opacity 0.13 */
+.orb-5 {
+  background: radial-gradient(
+    circle,
+    rgba(var(--orb-r), var(--orb-g), var(--orb-b), 0.13) 0%,
+    transparent 70%
+  );
+}
+
+/* Orb 6 - opacity 0.12 */
+.orb-6 {
+  background: radial-gradient(
+    circle,
+    rgba(var(--orb-r), var(--orb-g), var(--orb-b), 0.12) 0%,
+    transparent 70%
+  );
+}

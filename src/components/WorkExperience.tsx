@@ -4,7 +4,7 @@ import { useStaggerFadeIn } from '../hooks/useStaggerFadeIn';
 
 export function WorkExperience() {
   const sectionReveal = useSimpleScrollReveal();
-  const { ref: cardsRef, getItemStyle } = useStaggerFadeIn(3);
+  const { ref: cardsRef, getItemStyle } = useStaggerFadeIn(2);
 
   const experiences = [
     {
@@ -19,10 +19,10 @@ export function WorkExperience() {
     },
     {
       icon: Briefcase,
-      title: 'CRM & Enterprise Systems',
+      title: 'CRM & Fullstack Systems',
       period: '3 years (Part-time)',
-      description: 'Built and maintained CRM information systems during university. Worked with ASP.NET MVC, JavaScript, and database design - learning enterprise architecture patterns and business logic implementation.',
-      technologies: ['ASP.NET MVC', 'JavaScript', 'SQL', 'C#', 'Enterprise Patterns'],
+      description: 'Built and maintained CRM information systems during university. Worked with ASP.NET MVC, JavaScript, and database design - learning fullstack development, Prisma ORM, and design patterns.',
+      technologies: ['ASP.NET MVC', 'JavaScript', 'SQL', 'C#', 'Prisma', 'Fullstack'],
       iconColor: 'text-blue-400',
       glowColor: 'rgba(59,130,246,0.5)',
       innerGlow: 'rgba(59,130,246,0.08)'
@@ -44,10 +44,10 @@ export function WorkExperience() {
               filter: 'drop-shadow(0 0 12px rgba(34, 211, 238, 0.6)) drop-shadow(0 0 24px rgba(20, 184, 166, 0.4))'
             }}
           >
-            Work Experience
+            Experience
           </h2>
           <p className="text-base md:text-lg text-gray-400">
-            Building production software across gaming and enterprise systems
+            Building production software across gaming and fullstack systems
           </p>
         </div>
 
@@ -69,12 +69,12 @@ export function WorkExperience() {
                     <span className="text-sm text-gray-500">{exp.period}</span>
                   </div>
                 </div>
-                <p className="text-gray-400 mb-6 flex-grow">{exp.description}</p>
+                <p className="text-gray-400 mb-6">{exp.description}</p>
                 <div className="flex flex-wrap gap-2">
                   {exp.technologies.map((tech, techIndex) => (
                     <span
                       key={techIndex}
-                      className="px-3 py-1 rounded-full text-xs text-gray-300"
+                      className="px-3 py-1 rounded-full text-xs text-gray-300 bg-white/5 border border-white/10"
                     >
                       {tech}
                     </span>

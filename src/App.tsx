@@ -17,7 +17,7 @@ import { useScrollProgressWithInterpolation } from './hooks/useScrollProgressWit
 
 export default function App() {
   const sections = [
-    { Component: Hero, name: 'Home', id: 'hero' },
+    { Component: Hero, name: 'Hero', id: 'hero' },
     { Component: WhoIAm, name: 'Who I Am', id: 'who-i-am' },
     { Component: TechJourney, name: 'Tech Stack', id: 'tech-journey' },
     { Component: NotableWork, name: 'Notable Work', id: 'notable-work' },
@@ -28,7 +28,7 @@ export default function App() {
     { Component: Contact, name: 'Contact', id: 'contact' },
   ];
 
-  const { progress, currentSection, sectionProgress } = useScrollProgressWithInterpolation();
+  const { progress, currentSection, sectionProgress, rawSection } = useScrollProgressWithInterpolation();
 
   useEffect(() => {
     // Set favicon
@@ -61,7 +61,7 @@ export default function App() {
       <MetaTags />
       
       {/* ANIMATED BACKGROUND */}
-      <AnimatedBackground currentSection={currentSection} sectionProgress={sectionProgress} />
+      <AnimatedBackground currentSection={currentSection} sectionProgress={sectionProgress} interpolationFactor={rawSection} />
       
       <div className="text-white" style={{ background: 'transparent' }}>
         <ScrollProgress progress={progress} currentSection={currentSection} sectionProgress={sectionProgress} />

@@ -4,6 +4,7 @@ export function useScrollProgressWithInterpolation() {
   const [progress, setProgress] = useState(0);
   const [currentSection, setCurrentSection] = useState(0);
   const [sectionProgress, setSectionProgress] = useState(0);
+  const [rawSection, setRawSection] = useState(0); // Raw float value for interpolation
   
   const rafRef = useRef<number | null>(null);
 
@@ -21,14 +22,15 @@ export function useScrollProgressWithInterpolation() {
         
         setProgress(progressPercent);
         
-        // Section detection with smooth interpolation
+        // Section detection - simple and reliable
         const sectionHeight = window.innerHeight;
-        const rawSection = scrolled / sectionHeight;
-        const section = Math.max(0, Math.min(8, Math.floor(rawSection)));
-        const sectionProgressValue = rawSection - section; // 0-1 progress within section
+        const rawSectionValue = scrolled / sectionHeight;
+        const section = Math.max(0, Math.min(8, Math.round(rawSectionValue))); // Switch at midpoint
+        const sectionProgressValue = rawSectionValue - Math.floor(rawSectionValue); // 0-1 progress within section
         
         setCurrentSection(section);
         setSectionProgress(sectionProgressValue);
+        setRawSection(rawSectionValue);
       });
     };
     
@@ -43,5 +45,5 @@ export function useScrollProgressWithInterpolation() {
     };
   }, []);
 
-  return { progress, currentSection, sectionProgress };
+  return { progress, currentSection, sectionProgress, rawSection };
 }

@@ -1,10 +1,10 @@
-import { Eye, Glasses, Music, Code, ExternalLink } from 'lucide-react';
+import { Eye, Glasses, TrendingUp, ExternalLink } from 'lucide-react';
 import { useSimpleScrollReveal } from '../hooks/useSimpleScrollReveal';
 import { useStaggerFadeIn } from '../hooks/useStaggerFadeIn';
 
 export function NotableWork() {
   const sectionReveal = useSimpleScrollReveal();
-  const { ref: cardsRef, getItemStyle } = useStaggerFadeIn(4);
+  const { ref: cardsRef, getItemStyle } = useStaggerFadeIn(3);
 
   const projects = [
     {
@@ -22,31 +22,21 @@ export function NotableWork() {
       icon: Glasses,
       title: 'VR Shader Programming',
       period: 'Bachelor\'s Thesis',
-      description: 'Created immersive VR experiences with custom shader programming, exploring real-time rendering techniques and visual effects in virtual reality environments.',
-      tech: ['GLSL', 'Unity', 'VR', 'Shader Programming'],
+      description: 'Created immersive VR experiences with custom shader programming in Cg. Explored real-time rendering techniques and visual effects in virtual reality environments.',
+      tech: ['Cg', 'Unity', 'VR', 'Shader Programming'],
       iconColor: 'text-cyan-400',
       glowColor: 'rgba(34,211,238,0.5)',
       innerGlow: 'rgba(34,211,238,0.08)'
     },
     {
-      icon: Music,
-      title: 'Audio Processing System',
+      icon: TrendingUp,
+      title: 'Forex ML/RL System',
       period: 'Current',
-      description: 'Building an experimental audio processing system using machine learning and signal processing techniques. Exploring feature extraction, pattern recognition, and adaptive strategies.',
-      tech: ['Python', 'Machine Learning', 'Signal Processing'],
+      description: 'Building an experimental trading system using machine learning and reinforcement learning with bio-inspired algorithms. Exploring technical analysis, pattern recognition, and adaptive strategies.',
+      tech: ['Python', 'Machine Learning', 'XGBoost', 'Reinforcement Learning'],
       iconColor: 'text-pink-400',
       glowColor: 'rgba(236,72,153,0.5)',
       innerGlow: 'rgba(236,72,153,0.08)'
-    },
-    {
-      icon: Code,
-      title: 'Web Development Framework',
-      period: 'Current',
-      description: 'Developing a modern web development framework with a focus on performance and scalability. Incorporating best practices in front-end and back-end development.',
-      tech: ['JavaScript', 'React', 'Node.js', 'Express'],
-      iconColor: 'text-yellow-400',
-      glowColor: 'rgba(255,204,0,0.5)',
-      innerGlow: 'rgba(255,204,0,0.08)'
     }
   ];
 
@@ -90,12 +80,12 @@ export function NotableWork() {
                     <span className="text-sm text-gray-500">{project.period}</span>
                   </div>
                 </div>
-                <p className="text-gray-400 mb-6 flex-grow">{project.description}</p>
+                <p className="text-gray-400 mb-6">{project.description}</p>
                 <div className="flex flex-wrap gap-2 mb-4">
                   {project.tech.map((tech, techIndex) => (
                     <span
                       key={techIndex}
-                      className="px-3 py-1 rounded-full text-xs text-gray-300"
+                      className="px-3 py-1 rounded-full text-xs text-gray-300 bg-white/5 border border-white/10"
                     >
                       {tech}
                     </span>

@@ -1,10 +1,10 @@
-import { Music, Headphones, Play } from 'lucide-react';
+import { Music, Headphones, Play, Activity } from 'lucide-react';
 import { useSimpleScrollReveal } from '../hooks/useSimpleScrollReveal';
 import { useStaggerFadeIn } from '../hooks/useStaggerFadeIn';
 
 export function BeyondCode() {
   const sectionReveal = useSimpleScrollReveal();
-  const { ref: cardsRef, getItemStyle } = useStaggerFadeIn(3);
+  const { ref: cardsRef, getItemStyle } = useStaggerFadeIn(4);
 
   return (
     <section className="min-h-screen flex items-center justify-center py-20 px-6 md:px-8 relative">
@@ -44,13 +44,13 @@ export function BeyondCode() {
                   <h3 className="text-xl mb-1 text-white">Music Production</h3>
                 </div>
               </div>
-              <p className="text-gray-400 mb-6 flex-grow">
+              <p className="text-gray-400 mb-6">
                 As DJ Lowcash, I explore electronic music production and live DJ sets. 
                 From house to techno, music is where creativity meets technical precision - just like coding.
               </p>
               <div className="flex flex-wrap gap-2">
                 {['Electronic Music', 'DJing', 'Sound Design'].map((tag, i) => (
-                  <span key={i} className="px-3 py-1 rounded-full text-xs text-gray-300">
+                  <span key={i} className="px-3 py-1 rounded-full text-xs text-gray-300 bg-white/5 border border-white/10">
                     {tag}
                   </span>
                 ))}
@@ -72,13 +72,13 @@ export function BeyondCode() {
                   <h3 className="text-xl mb-1 text-white">Digital Nomad Life</h3>
                 </div>
               </div>
-              <p className="text-gray-400 mb-6 flex-grow">
+              <p className="text-gray-400 mb-6">
                 Embracing location independence and exploring the world while building software. 
                 Remote work enables experiencing different cultures and perspectives.
               </p>
               <div className="flex flex-wrap gap-2">
                 {['Remote Work', 'Travel', 'Cultural Exploration'].map((tag, i) => (
-                  <span key={i} className="px-3 py-1 rounded-full text-xs text-gray-300">
+                  <span key={i} className="px-3 py-1 rounded-full text-xs text-gray-300 bg-white/5 border border-white/10">
                     {tag}
                   </span>
                 ))}
@@ -100,13 +100,41 @@ export function BeyondCode() {
                   <h3 className="text-xl mb-1 text-white">Audiobooks & Hiking</h3>
                 </div>
               </div>
-              <p className="text-gray-400 mb-6 flex-grow">
+              <p className="text-gray-400 mb-6">
                 Combining long hikes with audiobooks - learning while moving. 
                 Nature provides clarity, books provide knowledge, together they create space for thinking.
               </p>
               <div className="flex flex-wrap gap-2">
                 {['Continuous Learning', 'Nature', 'Deep Thinking'].map((tag, i) => (
-                  <span key={i} className="px-3 py-1 rounded-full text-xs text-gray-300">
+                  <span key={i} className="px-3 py-1 rounded-full text-xs text-gray-300 bg-white/5 border border-white/10">
+                    {tag}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Biohacking */}
+          <div className="relative h-full">
+            <div 
+              className="rounded-2xl p-8 transition-all duration-500 h-full flex flex-col"
+              style={{
+                ...getItemStyle(3),
+              } as React.CSSProperties}
+            >
+              <div className="flex items-start gap-4 mb-4">
+                <Activity className="w-10 h-10 text-green-400 flex-shrink-0" />
+                <div className="flex-grow">
+                  <h3 className="text-xl mb-1 text-white">Biohacking & Optimization</h3>
+                </div>
+              </div>
+              <p className="text-gray-400 mb-6">
+                Exploring how to optimize physical and mental performance through data-driven experimentation. 
+                From sleep tracking to nutrition, I approach health like debugging code.
+              </p>
+              <div className="flex flex-wrap gap-2">
+                {['Sleep Optimization', 'Nutrition', 'Performance Tracking'].map((tag, i) => (
+                  <span key={i} className="px-3 py-1 rounded-full text-xs text-gray-300 bg-white/5 border border-white/10">
                     {tag}
                   </span>
                 ))}
