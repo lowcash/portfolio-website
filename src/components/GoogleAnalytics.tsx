@@ -1,8 +1,13 @@
 // Google Analytics component
-// Replace 'G-XXXXXXXXXX' with your actual Measurement ID from Google Analytics
+// Uses VITE_GA_TRACKING_ID from .env
 
 export function GoogleAnalytics() {
-  const GA_MEASUREMENT_ID = 'G-XXXXXXXXXX'; // TODO: Replace with your GA4 Measurement ID
+  const GA_MEASUREMENT_ID = import.meta.env.VITE_GA_TRACKING_ID;
+
+  if (!GA_MEASUREMENT_ID) {
+    console.warn('Google Analytics Measurement ID not found. Please set VITE_GA_TRACKING_ID in .env');
+    return null;
+  }
 
   return (
     <>
