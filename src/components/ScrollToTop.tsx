@@ -16,9 +16,6 @@ export function ScrollToTop({ currentSection, onGoToFirst }: ScrollToTopProps) {
         isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10 pointer-events-none'
       }`}
       aria-label="Go to first section"
-      style={{
-        animation: isVisible ? 'gentle-bounce 2s ease-in-out infinite' : 'none'
-      }}
     >
       <div className="relative group">
         {/* Shimmer glow layer - CSS CLASS */}
