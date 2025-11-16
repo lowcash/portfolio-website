@@ -81,22 +81,29 @@ export default function App() {
       
       const scrollTop = window.scrollY;
       const windowHeight = window.innerHeight;
+      const viewportMiddle = windowHeight / 2;
       
-      // Find which section we're in (middle of viewport)
-      const sectionIndex = sections.findIndex((_, index) => {
+      // Find which section's middle is closest to viewport middle
+      let closestIndex = 0;
+      let closestDistance = Infinity;
+      
+      sections.forEach((_, index) => {
         const element = document.getElementById(sections[index].id);
-        if (!element) return false;
+        if (!element) return;
         
         const rect = element.getBoundingClientRect();
         const sectionMiddle = rect.top + rect.height / 2;
         
-        // Check if section middle is near viewport middle
-        return sectionMiddle > 0 && sectionMiddle < windowHeight;
+        // Calculate distance from section middle to viewport middle
+        const distance = Math.abs(sectionMiddle - viewportMiddle);
+        
+        if (distance < closestDistance) {
+          closestDistance = distance;
+          closestIndex = index;
+        }
       });
       
-      if (sectionIndex !== -1) {
-        setCurrentSection(sectionIndex);
-      }
+      setCurrentSection(closestIndex);
     };
 
     handleScroll(); // Initial
