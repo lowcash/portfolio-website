@@ -49,7 +49,7 @@ export function BeyondCode() {
                 From house to techno, music is where creativity meets technical precision - just like coding.
               </p>
               <div className="flex flex-wrap gap-2">
-                {['Electronic Music', 'DJing', 'Sound Design'].map((tag, i) => (
+                {['Electronic Music', 'DJing', 'Live Performance'].map((tag, i) => (
                   <span key={i} className="px-3 py-1 rounded-full text-xs text-gray-300 bg-white/5 border border-white/10">
                     {tag}
                   </span>
