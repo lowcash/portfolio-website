@@ -1,5 +1,5 @@
 import { Menu, X } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 
 interface ScrollNavigationProps {
   currentSection: number;
@@ -10,6 +10,9 @@ interface ScrollNavigationProps {
 
 export function ScrollNavigation({ currentSection, totalSections, sectionNames, onSectionClick }: ScrollNavigationProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [dragStartY, setDragStartY] = useState<number | null>(null);
+  const [dragCurrentY, setDragCurrentY] = useState<number | null>(null);
+  const drawerRef = useRef<HTMLDivElement>(null);
   
   const sections = Array.from({ length: totalSections }, (_, i) => ({
     id: i,
@@ -20,6 +23,56 @@ export function ScrollNavigation({ currentSection, totalSections, sectionNames, 
     onSectionClick(index);
     setMobileMenuOpen(false);
   };
+
+  // Swipe to close functionality
+  const handleTouchStart = (e: React.TouchEvent) => {
+    setDragStartY(e.touches[0].clientY);
+  };
+
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (dragStartY === null) return;
+    
+    const currentY = e.touches[0].clientY;
+    const diff = currentY - dragStartY;
+    
+    // Only allow dragging down
+    if (diff > 0) {
+      setDragCurrentY(currentY);
+    }
+  };
+
+  const handleTouchEnd = () => {
+    if (dragStartY === null || dragCurrentY === null) {
+      setDragStartY(null);
+      setDragCurrentY(null);
+      return;
+    }
+
+    const diff = dragCurrentY - dragStartY;
+    
+    // Close if dragged down more than 100px
+    if (diff > 100) {
+      setMobileMenuOpen(false);
+    }
+    
+    setDragStartY(null);
+    setDragCurrentY(null);
+  };
+
+  // Calculate drag offset for visual feedback
+  const getDragOffset = () => {
+    if (dragStartY === null || dragCurrentY === null) return 0;
+    const diff = dragCurrentY - dragStartY;
+    return diff > 0 ? diff : 0;
+  };
+
+  // Reset drag state when menu closes
+  useEffect(() => {
+    if (!mobileMenuOpen) {
+      setDragStartY(null);
+      setDragCurrentY(null);
+    }
+  }, [mobileMenuOpen]);
 
   return (
     <>
@@ -49,20 +102,25 @@ export function ScrollNavigation({ currentSection, totalSections, sectionNames, 
         </div>
       </div>
 
-      {/* MOBILE - Hamburger button (top-right) */}
+      {/* MOBILE - Hamburger button (top-right) with dynamic glow */}
       <button
         onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-        className="md:hidden fixed top-6 right-6 z-[60] bg-black/40 backdrop-blur-sm rounded-xl p-3 transition-all duration-300 hover:scale-105"
+        className="md:hidden fixed top-6 right-6 z-[60] transition-all duration-300 hover:scale-105"
         aria-label="Toggle menu"
-        style={{
-          boxShadow: '0 0 20px rgba(139, 92, 246, 0.3)'
-        }}
       >
-        {mobileMenuOpen ? (
-          <X className="w-6 h-6 text-purple-400" />
-        ) : (
-          <Menu className="w-6 h-6 text-purple-400" />
-        )}
+        <div className="relative group">
+          {/* Shimmer glow layer - same as scroll-to-top */}
+          <div className="absolute inset-0 pointer-events-none rounded-xl animate-glow-shimmer -z-10 scroll-to-top-glow" />
+          
+          {/* Button - same styling as scroll-to-top */}
+          <div className="bg-black/40 backdrop-blur-sm rounded-xl p-3 transition-all duration-500 scroll-to-top-inner">
+            {mobileMenuOpen ? (
+              <X className="w-6 h-6 scroll-to-top-icon" />
+            ) : (
+              <Menu className="w-6 h-6 scroll-to-top-icon" />
+            )}
+          </div>
+        </div>
       </button>
 
       {/* MOBILE - Slide-in menu panel */}
@@ -79,17 +137,25 @@ export function ScrollNavigation({ currentSection, totalSections, sectionNames, 
           onClick={() => setMobileMenuOpen(false)}
         />
         
-        {/* Menu panel - slide from bottom */}
+        {/* Menu panel - slide from bottom with swipe support */}
         <div 
-          className={`absolute bottom-0 left-0 right-0 bg-black/95 backdrop-blur-xl rounded-t-3xl transition-transform duration-300 ${
+          ref={drawerRef}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
+          className={`absolute bottom-0 left-0 right-0 bg-black/95 backdrop-blur-xl rounded-t-3xl transition-all duration-300 ${
             mobileMenuOpen ? 'translate-y-0' : 'translate-y-full'
           }`}
           style={{
-            boxShadow: '0 -10px 60px rgba(139, 92, 246, 0.3)'
+            boxShadow: '0 -10px 60px rgba(139, 92, 246, 0.3)',
+            transform: mobileMenuOpen 
+              ? `translateY(${getDragOffset()}px)` 
+              : 'translateY(100%)',
+            transition: dragStartY !== null ? 'none' : 'transform 0.3s ease-out'
           }}
         >
-          {/* Handle bar */}
-          <div className="flex justify-center pt-4 pb-2">
+          {/* Handle bar - visual hint for swipe */}
+          <div className="flex justify-center pt-4 pb-2 cursor-grab active:cursor-grabbing">
             <div className="w-12 h-1 bg-gray-600 rounded-full" />
           </div>
           
