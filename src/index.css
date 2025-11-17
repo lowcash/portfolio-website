@@ -880,6 +880,10 @@
     touch-action: var(--tw-pan-x, ) var(--tw-pan-y, ) var(--tw-pinch-zoom, );
   }
 
+  .touch-none {
+    touch-action: none;
+  }
+
   .resize {
     resize: both;
   }
@@ -1103,6 +1107,16 @@
   @supports (color: color-mix(in lab, red, red)) {
     .bg-gray-800\/30 {
       background-color: color-mix(in oklab, var(--color-gray-800) 30%, transparent);
+    }
+  }
+
+  .bg-gray-800\/80 {
+    background-color: color-mix(in srgb, oklch(.278 .033 256.848) 80%, transparent);
+  }
+
+  @supports (color: color-mix(in lab, red, red)) {
+    .bg-gray-800\/80 {
+      background-color: color-mix(in oklab, var(--color-gray-800) 80%, transparent);
     }
   }
 
@@ -1673,12 +1687,6 @@
     transition-duration: var(--tw-duration, var(--default-transition-duration));
   }
 
-  .transition-transform {
-    transition-property: transform, translate, scale, rotate;
-    transition-timing-function: var(--tw-ease, var(--default-transition-timing-function));
-    transition-duration: var(--tw-duration, var(--default-transition-duration));
-  }
-
   .duration-200 {
     --tw-duration: .2s;
     transition-duration: .2s;
@@ -1715,13 +1723,6 @@
 
   .slide-in-from-right {
     --tw-enter-translate-x: 100%;
-  }
-
-  @media (hover: hover) {
-    .group-hover\:translate-x-1:is(:where(.group):hover *) {
-      --tw-translate-x: calc(var(--spacing) * 1);
-      translate: var(--tw-translate-x) var(--tw-translate-y);
-    }
   }
 
   @media (hover: hover) {

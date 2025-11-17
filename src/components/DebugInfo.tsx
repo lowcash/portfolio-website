@@ -425,7 +425,7 @@ export function DebugInfo() {
   if (!isVisible) {
     return (
       <div 
-        className="fixed z-[70] bottom-4 left-4 opacity-20 hover:opacity-100 transition-opacity cursor-pointer"
+        className="fixed z-[100] bottom-4 left-4 opacity-20 hover:opacity-100 transition-opacity cursor-pointer touch-none"
         onClick={() => {
           setIsVisible(true);
           // Mark dev console as opened (enables achievement system)
@@ -435,10 +435,26 @@ export function DebugInfo() {
             'color: #10b981; font-size: 12px; font-weight: bold;'
           );
         }}
+        onTouchEnd={(e) => {
+          e.preventDefault();
+          setIsVisible(true);
+          localStorage.setItem('dev_console_opened', 'true');
+          console.log(
+            '%c🎮 Achievement system activated!',
+            'color: #10b981; font-size: 12px; font-weight: bold;'
+          );
+        }}
         title="Tap to open dev console (or press 'D' on desktop)"
         aria-label="Toggle debug console"
+        style={{
+          // iOS safe area
+          paddingBottom: 'env(safe-area-inset-bottom)',
+          paddingLeft: 'env(safe-area-inset-left)',
+        }}
       >
-        <Terminal className="w-6 h-6 text-gray-400" aria-hidden="true" />
+        <div className="bg-gray-800/80 backdrop-blur-sm rounded-lg p-2 border border-gray-700">
+          <Terminal className="w-6 h-6 text-gray-400" aria-hidden="true" />
+        </div>
       </div>
     );
   }
