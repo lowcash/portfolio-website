@@ -20,7 +20,7 @@ import { Trophy, Zap, Target, Timer, MousePointer, Copy, Calendar, Sparkles } fr
  * 13. Reach bottom <2min → "Speed Reader"
  * 14. Visit 3+ times → "Repeat Visitor"
  * 
- * Open Dev Console (press D) to see all achievements!
+ * Open Dev Console (tap terminal icon bottom-left or press D on desktop) to see all achievements!
  */
 
 export interface Achievement {
@@ -322,7 +322,7 @@ export function EasterEggs() {
           
           // Special console message with explanation
           console.log(
-            '%c⚖��� PERFECTLY BALANCED!',
+            '%c⚖ PERFECTLY BALANCED!',
             'color: #10b981; font-size: 16px; font-weight: bold;'
           );
           console.log(

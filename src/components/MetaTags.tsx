@@ -3,9 +3,9 @@ import { useEffect } from 'react';
 // Meta tags for SEO - sets document metadata
 export function MetaTags() {
   useEffect(() => {
-    // OG Image URL - using absolute URL for social media crawlers
-    // Image should be placed at /public/og-image.png (1200x630px)
-    const ogImageUrl = 'https://lowcash.dev/og-image.png';
+    // OG Image URL - dynamically constructed from current origin
+    // Works on localhost, staging, and production
+    const ogImageUrl = `${window.location.origin}/og-image.png`;
 
     // Set document title
     document.title = "Lukáš Machala - Fullstack Developer & Software Architect";

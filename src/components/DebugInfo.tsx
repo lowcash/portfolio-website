@@ -435,7 +435,7 @@ export function DebugInfo() {
             'color: #10b981; font-size: 12px; font-weight: bold;'
           );
         }}
-        title="Press 'D' to toggle debug info"
+        title="Tap to open dev console (or press 'D' on desktop)"
         aria-label="Toggle debug console"
       >
         <Terminal className="w-6 h-6 text-gray-400" aria-hidden="true" />

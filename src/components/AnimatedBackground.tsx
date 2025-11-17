@@ -298,7 +298,7 @@ export function AnimatedBackground() {
       <div 
         className="absolute rounded-full"
         style={{
-          top: '-10%',
+          top: '-15%', // CHANGED: -10% → -15% to hide better on mobile
           left: '50%',
           transform: 'translateX(-50%)',
           width: '700px',
