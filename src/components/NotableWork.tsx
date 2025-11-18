@@ -67,7 +67,7 @@ export function NotableWork() {
                 href={project.link}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="group inline-flex items-center gap-2 text-sm text-gray-400 hover:text-white transition-colors duration-300"
+                className="group inline-flex items-center gap-2 text-sm section-link"
               >
                 <ExternalLink className="w-4 h-4" />
                 <span>Watch Demo Video</span>

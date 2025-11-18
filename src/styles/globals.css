@@ -724,3 +724,14 @@ body {
     box-shadow: 0 0 8px rgba(var(--orb-r), var(--orb-g), var(--orb-b), 0.8);
   }
 }
+
+/* Section-themed links - using dynamic color from orb */
+.section-link {
+  color: rgb(var(--orb-r), var(--orb-g), var(--orb-b));
+  transition: all 0.3s ease-out;
+}
+
+.section-link:hover {
+  color: rgba(var(--orb-r), var(--orb-g), var(--orb-b), 0.8);
+  filter: brightness(1.2);
+}
