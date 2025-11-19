@@ -1,4 +1,4 @@
-import { Eye, Glasses, TrendingUp, ExternalLink } from 'lucide-react';
+import { Eye, Glasses, TrendingUp, ExternalLink, Heart } from 'lucide-react';
 import { SectionWrapper } from './shared/SectionWrapper';
 import { SectionHeader } from './shared/SectionHeader';
 import { Card } from './shared/Card';
@@ -7,7 +7,7 @@ import { useStaggerFadeIn } from '../hooks/useStaggerFadeIn';
 import { SECTION_STYLES } from '../lib/section-config';
 
 export function NotableWork() {
-  const { ref: cardsRef, getItemStyle } = useStaggerFadeIn(3);
+  const { ref: cardsRef, getItemStyle } = useStaggerFadeIn(4);
 
   const projects = [
     {
@@ -34,6 +34,16 @@ export function NotableWork() {
       description: 'Building an experimental trading system using machine learning and reinforcement learning with bio-inspired algorithms. Exploring technical analysis, pattern recognition, and adaptive strategies.',
       tech: ['Python', 'Machine Learning', 'XGBoost', 'Reinforcement Learning'],
       iconColor: 'text-pink-400'
+    },
+    {
+      icon: Heart,
+      title: 'Massage Therapy Website',
+      period: 'Family Project',
+      description: 'Full-stack website for my mom\'s massage therapy practice with appointment management system. Built with modern Next.js features including server actions for real-time updates.',
+      tech: ['Next.js', 'Server Actions', 'TypeScript'],
+      link: 'https://pohlazenipoteleadusi.cz',
+      linkText: 'Visit Live Site',
+      iconColor: 'text-rose-400'
     }
   ];
 
@@ -70,7 +80,7 @@ export function NotableWork() {
                 className="group inline-flex items-center gap-2 text-sm section-link"
               >
                 <ExternalLink className="w-4 h-4" />
-                <span>Watch Demo Video</span>
+                <span>{project.linkText || 'Watch Demo Video'}</span>
               </a>
             )}
           </Card>
