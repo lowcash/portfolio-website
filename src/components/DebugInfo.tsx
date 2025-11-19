@@ -90,10 +90,6 @@ export function DebugInfo() {
   const [colorVariation, setColorVariation] = useState(() => {
     return parseFloat(localStorage.getItem('color_variation') || '50'); // CHANGED default to 50%
   });
-
-  // Only render in development OR if manually enabled via localStorage
-  const isEnabled = process.env.NODE_ENV === 'development' || 
-                   localStorage.getItem('debug_mode') === 'true';
   
   // Apply settings to CSS custom properties
   useEffect(() => {
@@ -110,8 +106,6 @@ export function DebugInfo() {
 
   // Toggle visibility with "D" key
   useEffect(() => {
-    if (!isEnabled) return;
-
     // Show console hint on first load
     const hasSeenHint = sessionStorage.getItem('debug_hint_shown');
     if (!hasSeenHint) {
@@ -416,11 +410,6 @@ export function DebugInfo() {
       localStorage.setItem('debug_scale', String(scale));
     }
   }, [isResizing, scale]);
-
-  // Don't render at all if not enabled
-  if (!isEnabled) {
-    return null;
-  }
 
   if (!isVisible) {
     return (
