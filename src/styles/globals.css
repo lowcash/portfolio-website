@@ -349,10 +349,16 @@ html {
   overflow-x: hidden;
   -ms-overflow-style: none;  /* IE and Edge */
   scrollbar-width: none;  /* Firefox */
-  scroll-snap-type: y mandatory;
+  scroll-snap-type: y proximity; /* Changed from mandatory - less aggressive snapping */
+  scroll-padding-top: 0; /* Ensure sections snap to top of viewport */
   scroll-behavior: smooth;
   background-color: #030712; /* Dark background - prevents white flash on overscroll */
   overscroll-behavior: none; /* Prevents bounce effect on mobile */
+}
+
+/* Disable scroll snap when mobile menu is open */
+html.no-scroll-snap {
+  scroll-snap-type: none !important;
 }
 
 /* HIDE SCROLLBAR - minimalistický look */

@@ -7,7 +7,7 @@ import { useStaggerFadeIn } from '../hooks/useStaggerFadeIn';
 import { SECTION_STYLES } from '../lib/section-config';
 
 export function BeyondCode() {
-  const { ref: cardsRef, getItemStyle } = useStaggerFadeIn(5);
+  const { ref: cardsRef, getItemStyle } = useStaggerFadeIn(4);
 
   const interests = [
     {
@@ -39,15 +39,6 @@ export function BeyondCode() {
       description: 'Exploring how to optimize physical and mental performance through data-driven experimentation. From sleep tracking to nutrition, I approach health like debugging code.',
       tags: ['Sleep Optimization', 'Nutrition', 'Performance Tracking'],
       iconColor: 'text-teal-400'
-    },
-    {
-      icon: TrendingUp,
-      title: 'Family Projects',
-      description: 'Building websites for family members. Created a massage therapy website for my mom - combining web development skills with helping those closest to me.',
-      tags: ['Web Development', 'Family', 'Helping Others'],
-      link: 'https://pohlazenipoteleadusi.cz',
-      linkText: 'Visit the site',
-      iconColor: 'text-lime-400'
     }
   ];
 

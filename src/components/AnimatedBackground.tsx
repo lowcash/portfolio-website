@@ -120,9 +120,18 @@ export function AnimatedBackground() {
     return () => clearInterval(interval);
   }, []);
 
-  // RAW SCROLL TRACKING - set target
+  // RAW SCROLL TRACKING - set target (SKIP when mobile menu is open to prevent progress bar jumping to 0)
   useEffect(() => {
     const handleScroll = () => {
+      // Check if mobile menu is open by checking if body has position: fixed
+      const body = document.body;
+      const isMenuOpen = body.style.position === 'fixed';
+      
+      // SKIP scroll tracking when menu is open - prevents progress bar from jumping to 0
+      if (isMenuOpen) {
+        return;
+      }
+      
       const scrollTop = window.scrollY;
       const docHeight = document.documentElement.scrollHeight;
       const winHeight = window.innerHeight;

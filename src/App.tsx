@@ -35,7 +35,37 @@ export default function App() {
   const [currentSection, setCurrentSection] = useState(0);
   const [visibleSections, setVisibleSections] = useState<Set<string>>(new Set(['hero'])); // Hero je vždycky visible na začátku!
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isDevConsoleOpen, setIsDevConsoleOpen] = useState(false);
+  const [savedSection, setSavedSection] = useState(0); // Save section when menu opens
+  const [isRestoringScroll, setIsRestoringScroll] = useState(false); // Flag for scroll restoration
   const observerRef = useRef<IntersectionObserver | null>(null);
+
+  // Prevent body scroll when dev console is open on mobile (hamburger menu handled by ScrollNavigation)
+  useEffect(() => {
+    const isMobile = window.innerWidth < 768;
+    
+    if (isDevConsoleOpen && isMobile) {
+      // Prevent scroll on mobile without jumping
+      const preventDefault = (e: TouchEvent) => {
+        // Allow scrolling within dev console
+        const target = e.target as HTMLElement;
+        const isInScrollableContainer = target.closest('[role="region"][aria-label="Developer debug console"]');
+        
+        if (!isInScrollableContainer) {
+          e.preventDefault();
+        }
+      };
+      
+      // Disable scroll on body - passive: false to allow preventDefault
+      document.body.addEventListener('touchmove', preventDefault, { passive: false });
+      document.body.style.overflow = 'hidden';
+      
+      return () => {
+        document.body.removeEventListener('touchmove', preventDefault);
+        document.body.style.overflow = '';
+      };
+    }
+  }, [isDevConsoleOpen]);
 
   // Intersection Observer pro fade efekt
   useEffect(() => {
@@ -77,8 +107,8 @@ export default function App() {
   // Simple scroll tracking - which section is in view (DISABLED when mobile menu is open)
   useEffect(() => {
     const handleScroll = () => {
-      // SKIP if mobile menu is open - prevents jumping
-      if (isMobileMenuOpen) {
+      // SKIP if mobile menu is open OR if we're restoring scroll - prevents jumping
+      if (isMobileMenuOpen || isRestoringScroll) {
         return;
       }
       
@@ -112,7 +142,16 @@ export default function App() {
     handleScroll(); // Initial
     window.addEventListener('scroll', handleScroll, { passive: true });
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [sections, isMobileMenuOpen]);
+  }, [sections, isMobileMenuOpen, isRestoringScroll]);
+
+  // Save and restore currentSection when menu opens/closes
+  useEffect(() => {
+    if (isMobileMenuOpen) {
+      // Menu just opened - save current section
+      setSavedSection(currentSection);
+    }
+    // Don't restore on close - let handleScroll do its job naturally
+  }, [isMobileMenuOpen, currentSection]);
 
   useEffect(() => {
     // Set favicon
@@ -189,9 +228,10 @@ export default function App() {
           sectionNames={sections.map(s => s.name)}
           onSectionClick={scrollToSection}
           onMenuStateChange={setIsMobileMenuOpen}
+          onScrollRestore={setIsRestoringScroll}
         />
         
-        <DebugInfo />
+        <DebugInfo onVisibilityChange={setIsDevConsoleOpen} />
       </div>
     </>
   );

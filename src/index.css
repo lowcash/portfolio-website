@@ -105,6 +105,7 @@
     --color-fuchsia-400: oklch(.74 .238 322.16);
     --color-pink-400: oklch(.718 .202 349.761);
     --color-pink-500: oklch(.656 .241 354.308);
+    --color-rose-400: oklch(.712 .194 13.428);
     --color-gray-300: oklch(.872 .01 258.338);
     --color-gray-400: oklch(.707 .022 261.325);
     --color-gray-500: oklch(.551 .027 264.364);
@@ -692,6 +693,10 @@
     height: calc(var(--spacing) * 4);
   }
 
+  .h-5 {
+    height: calc(var(--spacing) * 5);
+  }
+
   .h-6 {
     height: calc(var(--spacing) * 6);
   }
@@ -730,6 +735,10 @@
 
   .w-4 {
     width: calc(var(--spacing) * 4);
+  }
+
+  .w-5 {
+    width: calc(var(--spacing) * 5);
   }
 
   .w-6 {
@@ -951,6 +960,14 @@
     overflow: hidden;
   }
 
+  .overflow-y-auto {
+    overflow-y: auto;
+  }
+
+  .overscroll-contain {
+    overscroll-behavior: contain;
+  }
+
   .rounded {
     border-radius: .25rem;
   }
@@ -1067,6 +1084,16 @@
     }
   }
 
+  .bg-black\/80 {
+    background-color: #000c;
+  }
+
+  @supports (color: color-mix(in lab, red, red)) {
+    .bg-black\/80 {
+      background-color: color-mix(in oklab, var(--color-black) 80%, transparent);
+    }
+  }
+
   .bg-black\/90 {
     background-color: #000000e6;
   }
@@ -1102,16 +1129,6 @@
   @supports (color: color-mix(in lab, red, red)) {
     .bg-gray-800\/30 {
       background-color: color-mix(in oklab, var(--color-gray-800) 30%, transparent);
-    }
-  }
-
-  .bg-gray-800\/80 {
-    background-color: color-mix(in srgb, oklch(.278 .033 256.848) 80%, transparent);
-  }
-
-  @supports (color: color-mix(in lab, red, red)) {
-    .bg-gray-800\/80 {
-      background-color: color-mix(in oklab, var(--color-gray-800) 80%, transparent);
     }
   }
 
@@ -1386,6 +1403,10 @@
     padding-block: calc(var(--spacing) * 2);
   }
 
+  .py-3 {
+    padding-block: calc(var(--spacing) * 3);
+  }
+
   .py-4 {
     padding-block: calc(var(--spacing) * 4);
   }
@@ -1566,6 +1587,10 @@
 
   .text-red-400 {
     color: var(--color-red-400);
+  }
+
+  .text-rose-400 {
+    color: var(--color-rose-400);
   }
 
   .text-teal-400 {
@@ -2158,11 +2183,16 @@ html {
   font-size: var(--font-size);
   -ms-overflow-style: none;
   scrollbar-width: none;
-  scroll-snap-type: y mandatory;
+  scroll-snap-type: y proximity;
   scroll-behavior: smooth;
   overscroll-behavior: none;
   background-color: #030712;
+  scroll-padding-top: 0;
   overflow-x: hidden;
+}
+
+html.no-scroll-snap {
+  scroll-snap-type: none !important;
 }
 
 html::-webkit-scrollbar {
