@@ -7,9 +7,10 @@ interface ScrollNavigationProps {
   sectionNames: string[];
   onSectionClick: (index: number) => void;
   onMenuStateChange?: (isOpen: boolean) => void;
+  onScrollRestore?: (isRestoring: boolean) => void;
 }
 
-export function ScrollNavigation({ currentSection, totalSections, sectionNames, onSectionClick, onMenuStateChange }: ScrollNavigationProps) {
+export function ScrollNavigation({ currentSection, totalSections, sectionNames, onSectionClick, onMenuStateChange, onScrollRestore }: ScrollNavigationProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [dragStartY, setDragStartY] = useState<number | null>(null);
   const [dragCurrentY, setDragCurrentY] = useState<number | null>(null);
@@ -142,44 +143,60 @@ export function ScrollNavigation({ currentSection, totalSections, sectionNames, 
 
   // Prevent body scroll when menu is open - PROPER SOLUTION
   useEffect(() => {
+    const html = document.documentElement;
+    const body = document.body;
+    
     if (mobileMenuOpen) {
-      // Save current scroll position
-      scrollPositionRef.current = window.scrollY;
+      // Save current scroll position IMMEDIATELY
+      const currentScrollY = window.scrollY;
+      scrollPositionRef.current = currentScrollY;
       
-      // Prevent scroll - use HTML element instead of body to avoid layout shift
-      const html = document.documentElement;
-      const body = document.body;
+      // CRITICAL: Disable scroll snap AND smooth scrolling FIRST
+      html.classList.add('no-scroll-snap');
+      html.style.scrollBehavior = 'auto'; // Prevent smooth scroll during restoration
       
-      // Store original styles
-      const originalHtmlOverflow = html.style.overflow;
-      const originalBodyOverflow = body.style.overflow;
-      
-      // Lock scroll
-      //html.style.overflow = 'hidden';
-      //body.style.overflow = 'hidden';
-      
-      // Also prevent touch scrolling on mobile
-      const preventScroll = (e: TouchEvent) => {
-        // Allow scrolling within the drawer itself
-        if (drawerRef.current && drawerRef.current.contains(e.target as Node)) {
-          return;
-        }
-        e.preventDefault();
-      };
-      
-      document.body.addEventListener('touchmove', preventScroll, { passive: false });
+      // Prevent scroll using position fixed on body to avoid any layout shift
+      body.style.position = 'fixed';
+      body.style.top = `-${currentScrollY}px`;
+      body.style.width = '100%';
       
       return () => {
-        // Restore scroll
-        html.style.overflow = originalHtmlOverflow;
-        body.style.overflow = originalBodyOverflow;
-        document.body.removeEventListener('touchmove', preventScroll);
+        // START scroll restoration - notify parent to skip handleScroll
+        if (onScrollRestore) {
+          onScrollRestore(true);
+        }
         
-        // Restore scroll position (shouldn't be needed but just in case)
-        window.scrollTo(0, scrollPositionRef.current);
+        // Restore scroll position
+        const scrollY = scrollPositionRef.current;
+        
+        // Remove fixed positioning first
+        body.style.position = '';
+        body.style.top = '';
+        body.style.width = '';
+        
+        // Restore scroll position IMMEDIATELY using instant scroll
+        window.scrollTo({
+          top: scrollY,
+          left: 0,
+          behavior: 'instant' as ScrollBehavior
+        });
+        
+        // CRITICAL: Use requestAnimationFrame to ensure DOM has updated before re-enabling features
+        requestAnimationFrame(() => {
+          requestAnimationFrame(() => {
+            // Re-enable scroll snap and smooth scrolling after 2 RAFs (ensures all layout is complete)
+            html.classList.remove('no-scroll-snap');
+            html.style.scrollBehavior = '';
+            
+            // END scroll restoration - notify parent to resume handleScroll
+            if (onScrollRestore) {
+              onScrollRestore(false);
+            }
+          });
+        });
       };
     }
-  }, [mobileMenuOpen]);
+  }, [mobileMenuOpen, onScrollRestore]);
 
   // Notify parent about menu state change
   useEffect(() => {
