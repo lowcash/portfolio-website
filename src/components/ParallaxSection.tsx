@@ -11,11 +11,11 @@ export function ParallaxSection({ children, id, className, style }: ParallaxSect
   return (
     <section
       id={id}
-      className={className}
+      className={`${className} min-h-screen supports-[min-height:100dvh]:min-h-[100dvh]`}
       style={{
         ...style,
         scrollSnapAlign: 'start',
-        // Note: scroll-snap-stop removed for better iOS Safari compatibility
+        scrollSnapStop: 'always', // Force snap to stop at section start
       }}
     >
       {children}
