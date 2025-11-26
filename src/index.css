@@ -2181,7 +2181,9 @@ html {
   scroll-snap-type: y mandatory;
   scroll-behavior: smooth;
   overscroll-behavior: none;
+  -webkit-overflow-scrolling: touch;
   background-color: #030712;
+  height: 100%;
   scroll-padding-top: 0;
   overflow-x: hidden;
 }

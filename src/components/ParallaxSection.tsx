@@ -15,7 +15,7 @@ export function ParallaxSection({ children, id, className, style }: ParallaxSect
       style={{
         ...style,
         scrollSnapAlign: 'start',
-        scrollSnapStop: 'always', // Force snap stop on each section
+        // Note: scroll-snap-stop removed for better iOS Safari compatibility
       }}
     >
       {children}

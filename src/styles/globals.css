@@ -354,6 +354,8 @@ html {
   scroll-behavior: smooth;
   background-color: #030712; /* Dark background - prevents white flash on overscroll */
   overscroll-behavior: none; /* Prevents bounce effect on mobile */
+  -webkit-overflow-scrolling: touch; /* iOS momentum scrolling */
+  height: 100%; /* iOS Safari fix */
 }
 
 /* Disable scroll snap when mobile menu is open */
