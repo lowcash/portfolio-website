@@ -105,7 +105,6 @@
     --color-fuchsia-400: oklch(.74 .238 322.16);
     --color-pink-400: oklch(.718 .202 349.761);
     --color-pink-500: oklch(.656 .241 354.308);
-    --color-rose-400: oklch(.712 .194 13.428);
     --color-gray-300: oklch(.872 .01 258.338);
     --color-gray-400: oklch(.707 .022 261.325);
     --color-gray-500: oklch(.551 .027 264.364);
@@ -1589,10 +1588,6 @@
     color: var(--color-red-400);
   }
 
-  .text-rose-400 {
-    color: var(--color-rose-400);
-  }
-
   .text-teal-400 {
     color: var(--color-teal-400);
   }
@@ -2183,7 +2178,7 @@ html {
   font-size: var(--font-size);
   -ms-overflow-style: none;
   scrollbar-width: none;
-  scroll-snap-type: y proximity;
+  scroll-snap-type: y mandatory;
   scroll-behavior: smooth;
   overscroll-behavior: none;
   background-color: #030712;

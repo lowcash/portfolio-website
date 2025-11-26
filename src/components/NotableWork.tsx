@@ -1,4 +1,4 @@
-import { Eye, Glasses, TrendingUp, ExternalLink, Heart } from 'lucide-react';
+import { Eye, Glasses, TrendingUp, ExternalLink, Heart, Globe } from 'lucide-react';
 import { SectionWrapper } from './shared/SectionWrapper';
 import { SectionHeader } from './shared/SectionHeader';
 import { Card } from './shared/Card';
@@ -36,14 +36,16 @@ export function NotableWork() {
       iconColor: 'text-pink-400'
     },
     {
-      icon: Heart,
-      title: 'Massage Therapy Website',
-      period: 'Family Project',
-      description: 'Full-stack website for my mom\'s massage therapy practice with appointment management system. Built with modern Next.js features including server actions for real-time updates.',
-      tech: ['Next.js', 'Server Actions', 'TypeScript'],
-      link: 'https://pohlazenipoteleadusi.cz',
-      linkText: 'Visit Live Site',
-      iconColor: 'text-rose-400'
+      icon: Globe,
+      title: 'Professional Web Development',
+      period: 'Client Projects',
+      description: 'Crafted modern, responsive websites for small businesses with focus on performance, accessibility, and beautiful design. From massage therapy to luxury yachting services.',
+      tech: ['Next.js', 'Server Actions', 'TypeScript', 'Responsive Design'],
+      multipleLinks: [
+        { url: 'https://pohlazenipoteleadusi.cz', text: 'Massage Therapy Site' },
+        { url: 'https://pinkladyyachtingservices.com', text: 'Yachting Services Site' }
+      ],
+      iconColor: 'text-emerald-400'
     }
   ];
 
@@ -82,6 +84,22 @@ export function NotableWork() {
                 <ExternalLink className="w-4 h-4" />
                 <span>{project.linkText || 'Watch Demo Video'}</span>
               </a>
+            )}
+            {project.multipleLinks && (
+              <div className="flex flex-col gap-2">
+                {project.multipleLinks.map((link, linkIndex) => (
+                  <a
+                    key={linkIndex}
+                    href={link.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group inline-flex items-center gap-2 text-sm section-link"
+                  >
+                    <ExternalLink className="w-4 h-4" />
+                    <span>{link.text}</span>
+                  </a>
+                ))}
+              </div>
             )}
           </Card>
         ))}

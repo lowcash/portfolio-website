@@ -24,6 +24,7 @@ export function SectionWrapper({
     <section 
       id={id}
       className={`min-h-screen flex items-center justify-center py-20 px-6 md:px-8 relative ${className}`}
+      style={{ scrollSnapAlign: 'start' }}
     >
       <div 
         ref={sectionReveal.ref}
