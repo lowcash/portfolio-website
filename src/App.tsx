@@ -131,7 +131,7 @@ export default function App() {
       {/* ANIMATED BACKGROUND - čistě od scroll pozice */}
       <AnimatedBackground />
       
-      <div className="text-white" style={{ background: 'transparent' }} role="document">
+      <div className="relative z-10 text-white" style={{ background: 'transparent' }} role="document">
         {/* Main content - semantic HTML */}
         <main id="main-content" role="main">
           {/* All sections - CSS scroll-snap (no fade effect) */}

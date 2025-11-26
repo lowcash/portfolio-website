@@ -19,6 +19,23 @@ function lerp(a: number, b: number, t: number): number {
   return a + (b - a) * t;
 }
 
+// Configuration for all background orbs
+const ORB_CONFIGS = [
+  // Center & Main
+  { id: 1, position: "top-1/2 left-1/2", size: 800, duration: 45, filter: "blur(120px) brightness(var(--orb-brightness, 1))", opacity: 0.4 },
+  
+  // Corners - Spread out
+  { id: 2, position: "top-0 left-0", size: 600, duration: 38, filter: "blur(100px) brightness(var(--orb-brightness, 1)) hue-rotate(-90deg) saturate(1.5)", opacity: 0.35 },
+  { id: 3, position: "bottom-0 right-0", size: 650, duration: 42, filter: "blur(110px) brightness(var(--orb-brightness, 1)) hue-rotate(90deg) saturate(1.5)", opacity: 0.38 },
+  { id: 4, position: "top-0 right-0", size: 500, duration: 40, filter: "blur(90px) brightness(var(--orb-brightness, 1)) hue-rotate(-60deg) saturate(1.5)", opacity: 0.32 },
+  { id: 5, position: "bottom-0 left-0", size: 550, duration: 36, filter: "blur(95px) brightness(var(--orb-brightness, 1)) hue-rotate(60deg) saturate(1.5)", opacity: 0.34 },
+  
+  // Mid-sections - Filling gaps
+  { id: 6, position: "top-1/2 left-0", size: 700, duration: 44, filter: "blur(115px) brightness(var(--orb-brightness, 1)) hue-rotate(-120deg) saturate(1.5)", opacity: 0.36 },
+  { id: 7, position: "top-1/2 right-0", size: 600, duration: 50, filter: "blur(105px) brightness(var(--orb-brightness, 1)) hue-rotate(120deg) saturate(1.5)", opacity: 0.35 },
+  { id: 8, position: "bottom-1/4 right-1/3", size: 550, duration: 46, filter: "blur(100px) brightness(var(--orb-brightness, 1)) hue-rotate(-90deg) saturate(1.5)", opacity: 0.32 },
+];
+
 export function AnimatedBackground() {
   const rafRef = useRef<number>();
   const targetScrollPercent = useRef(0);
@@ -106,105 +123,24 @@ export function AnimatedBackground() {
   };
 
   return (
-    <div className="fixed inset-0 overflow-hidden pointer-events-none" style={{ backgroundColor: '#030712', zIndex: -1 }}>
+    <div className="fixed inset-0 overflow-hidden pointer-events-none" style={{ backgroundColor: '#030712', zIndex: 0 }}>
       {/* ============ ANIMATED ORBS ============ */}
       {/* Orbs use CSS variables for color, so no re-renders needed */}
       
-      {/* Orb 1: Center */}
-      <div
-        className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 orb-1"
-        style={{
-          ...baseOrbStyle,
-          width: '800px', height: '800px',
-          filter: 'blur(120px) brightness(1.0)',
-          opacity: 0.25,
-          animationDuration: '45s',
-        }}
-      />
-      
-      {/* Orb 2: Top Left - Cool Shift */}
-      <div
-        className="absolute top-1/4 left-1/4 -translate-x-1/2 -translate-y-1/2 orb-2"
-        style={{
-          ...baseOrbStyle,
-          width: '600px', height: '600px',
-          filter: 'blur(100px) brightness(1.0) hue-rotate(-90deg) saturate(1.5)',
-          opacity: 0.2,
-          animationDuration: '38s',
-        }}
-      />
-      
-      {/* Orb 3: Bottom Right - Warm Shift */}
-      <div
-        className="absolute top-3/4 right-1/4 -translate-x-1/2 -translate-y-1/2 orb-3"
-        style={{
-          ...baseOrbStyle,
-          width: '650px', height: '650px',
-          filter: 'blur(110px) brightness(1.0) hue-rotate(90deg) saturate(1.5)',
-          opacity: 0.22,
-          animationDuration: '42s',
-        }}
-      />
-      
-      {/* Orb 4: Top Right - Vibrant */}
-      <div
-        className="absolute top-1/3 right-1/3 -translate-x-1/2 -translate-y-1/2 orb-4"
-        style={{
-          ...baseOrbStyle,
-          width: '500px', height: '500px',
-          filter: 'blur(90px) brightness(1.0) hue-rotate(-60deg) saturate(1.5)',
-          opacity: 0.18,
-          animationDuration: '40s',
-        }}
-      />
-      
-      {/* Orb 5: Bottom Left */}
-      <div
-        className="absolute bottom-1/4 left-1/3 -translate-x-1/2 -translate-y-1/2 orb-5"
-        style={{
-          ...baseOrbStyle,
-          width: '550px', height: '550px',
-          filter: 'blur(95px) brightness(1.0) hue-rotate(60deg) saturate(1.5)',
-          opacity: 0.19,
-          animationDuration: '36s',
-        }}
-      />
-      
-      {/* Orb 6: Extreme Cool */}
-      <div
-        className="absolute top-2/3 left-2/3 -translate-x-1/2 -translate-y-1/2 orb-6"
-        style={{
-          ...baseOrbStyle,
-          width: '700px', height: '700px',
-          filter: 'blur(115px) brightness(1.0) hue-rotate(-120deg) saturate(1.5)',
-          opacity: 0.21,
-          animationDuration: '44s',
-        }}
-      />
-      
-      {/* Orb 7: Extreme Warm */}
-      <div
-        className="absolute top-1/2 right-1/2 -translate-x-1/2 -translate-y-1/2 orb-7"
-        style={{
-          ...baseOrbStyle,
-          width: '600px', height: '600px',
-          filter: 'blur(105px) brightness(1.0) hue-rotate(120deg) saturate(1.5)',
-          opacity: 0.2,
-          animationDuration: '50s',
-        }}
-      />
-      
-      {/* Orb 8: Accent */}
-      <div
-        className="absolute bottom-1/3 right-2/3 -translate-x-1/2 -translate-y-1/2 orb-8"
-        style={{
-          ...baseOrbStyle,
-          width: '550px', height: '550px',
-          filter: 'blur(100px) brightness(1.0) hue-rotate(-90deg) saturate(1.5)',
-          opacity: 0.18,
-          animationDuration: '46s',
-        }}
-      />
+      {ORB_CONFIGS.map((orb) => (
+        <div
+          key={orb.id}
+          className={`absolute ${orb.position} -translate-x-1/2 -translate-y-1/2 orb-${orb.id}`}
+          style={{
+            ...baseOrbStyle,
+            width: `${orb.size}px`,
+            height: `${orb.size}px`,
+            filter: orb.filter,
+            opacity: orb.opacity,
+            animationDuration: `calc(${orb.duration}s / var(--animation-speed, 1))`,
+          }}
+        />
+      ))}
       
       {/* Dark overlay */}
       <div className="absolute inset-0 bg-gradient-to-b from-gray-950/70 via-gray-950/50 to-gray-950/70" />

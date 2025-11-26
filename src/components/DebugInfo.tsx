@@ -229,13 +229,23 @@ export function DebugInfo({ onVisibilityChange }: DebugInfoProps = {}) {
     };
   }, []);
 
-  // Click outside to close
+  // Click outside to close tooltip on mobile
   useEffect(() => {
-    if (!isVisible) return;
+    if (!tooltip) return;
 
-    // REMOVED - no longer close on click outside
-    // User must click the X button to close
-  }, [isVisible]);
+    const handleClickOutside = () => {
+      setTooltip(null);
+    };
+
+    // Add listener to the panel content wrapper to catch clicks outside the grid
+    // We need to attach this to the window or a high-level element, but since we stopPropagation on the items,
+    // clicking anywhere else should close it.
+    window.addEventListener('click', handleClickOutside);
+
+    return () => {
+      window.removeEventListener('click', handleClickOutside);
+    };
+  }, [tooltip]);
 
   // Drag & drop handlers
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -822,19 +832,22 @@ export function DebugInfo({ onVisibilityChange }: DebugInfoProps = {}) {
                     }
                     setTooltip(null);
                   }}
-                  onClick={() => {
+                  onClick={(e) => {
                     // Mobile: click to toggle tooltip
+                    // Stop propagation to prevent closing when clicking the item itself
+                    e.stopPropagation();
+                    
                     if (tooltip?.achievement.id === achievement.id) {
-                      setTooltip(null);
+                      // If clicking the same one, keep it open (don't close)
+                      // Or toggle if you prefer: setTooltip(null);
+                      // User requested: "nechat jeho tooltip zobrazený" -> keep it open
                     } else {
                       setTooltip({ achievement, show: true });
-                      // Auto-hide after 3 seconds on mobile
+                      // Clear any existing timeout
                       if (tooltipTimeoutRef.current) {
                         clearTimeout(tooltipTimeoutRef.current);
                       }
-                      tooltipTimeoutRef.current = setTimeout(() => {
-                        setTooltip(null);
-                      }, 3000);
+                      // NO auto-hide on mobile as per request ("nechat zobrazený")
                     }
                   }}
                 >
@@ -847,7 +860,9 @@ export function DebugInfo({ onVisibilityChange }: DebugInfoProps = {}) {
                 <div 
                   className="absolute -top-2 left-1/2 -translate-x-1/2 -translate-y-full z-10 pointer-events-none"
                   style={{
-                    animation: 'fadeIn 0.2s ease-out'
+                    animation: 'fadeIn 0.2s ease-out',
+                    width: 'max-content',
+                    maxWidth: '240px'
                   }}
                 >
                   <div 

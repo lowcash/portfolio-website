@@ -58,6 +58,11 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+  
+  /* Default Orb Colors (Purple) to prevent flash of invisible orbs */
+  --orb-r: 147;
+  --orb-g: 51;
+  --orb-b: 234;
 }
 
 .dark {
@@ -647,10 +652,13 @@ body {
 .orb-7 { animation: orb-float-1 50s ease-in-out infinite reverse; }
 .orb-8 { animation: orb-float-2 46s ease-in-out infinite reverse; }
 
-/* Mobile performance - disable heavy animations */
+/* Mobile performance - use lighter animations instead of disabling */
 @media (max-width: 768px) {
-  .orb-1, .orb-2, .orb-3, .orb-4, .orb-5, .orb-6, .orb-7, .orb-8 {
-    animation: none;
+  .orb-1, .orb-3, .orb-5, .orb-7 {
+    animation: orb-float-mobile-1 15s ease-in-out infinite;
+  }
+  .orb-2, .orb-4, .orb-6, .orb-8 {
+    animation: orb-float-mobile-2 18s ease-in-out infinite;
   }
 }
 
