@@ -10,7 +10,6 @@ import { Contact } from './components/Contact';
 import { ScrollProgress } from './components/ScrollProgress';
 import { ScrollToTop } from './components/ScrollToTop';
 import { ScrollNavigation } from './components/ScrollNavigation';
-import { MetaTags } from './components/MetaTags';
 import { GoogleAnalytics } from './components/GoogleAnalytics';
 import { AnimatedBackground } from './components/AnimatedBackground';
 import { ParallaxSection } from './components/ParallaxSection';
@@ -181,7 +180,6 @@ export default function App() {
 
   return (
     <>
-      <MetaTags />
       <GoogleAnalytics />
       <EasterEggs />
       
