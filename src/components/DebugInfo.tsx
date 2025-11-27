@@ -807,29 +807,38 @@ export function DebugInfo({ onVisibilityChange }: DebugInfoProps = {}) {
                         : 'border-gray-700 bg-gray-800/30 grayscale opacity-30'
                     }`}
                     onMouseEnter={() => {
-                      // Desktop: hover to show tooltip
-                      setTooltip({ achievement, show: true });
+                      // Desktop: hover to show tooltip (ignore on mobile to prevent double-tap issues)
+                      if (!isMobile) {
+                        setTooltip({ achievement, show: true });
+                      }
                     }}
                     onMouseLeave={() => {
                       // Desktop: hide tooltip on mouse leave
-                      if (tooltipTimeoutRef.current) {
-                        clearTimeout(tooltipTimeoutRef.current);
-                      }
-                      setTooltip(null);
-                    }}
-                    onClick={() => {
-                      // Mobile: click to toggle tooltip
-                      if (tooltip?.achievement.id === achievement.id) {
-                        setTooltip(null);
-                      } else {
-                        setTooltip({ achievement, show: true });
-                        // Auto-hide after 3 seconds on mobile
+                      if (!isMobile) {
                         if (tooltipTimeoutRef.current) {
                           clearTimeout(tooltipTimeoutRef.current);
                         }
-                        tooltipTimeoutRef.current = setTimeout(() => {
+                        setTooltip(null);
+                      }
+                    }}
+                    onClick={(e) => {
+                      // Mobile: click to toggle tooltip
+                      // Prevent default to avoid ghost clicks
+                      if (isMobile) {
+                        e.stopPropagation();
+                        
+                        if (tooltip?.achievement.id === achievement.id) {
                           setTooltip(null);
-                        }, 3000);
+                        } else {
+                          setTooltip({ achievement, show: true });
+                          // Auto-hide after 3 seconds on mobile
+                          if (tooltipTimeoutRef.current) {
+                            clearTimeout(tooltipTimeoutRef.current);
+                          }
+                          tooltipTimeoutRef.current = setTimeout(() => {
+                            setTooltip(null);
+                          }, 3000);
+                        }
                       }
                     }}
                   >
