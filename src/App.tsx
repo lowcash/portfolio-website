@@ -15,10 +15,10 @@ import { ParallaxSection } from './components/ParallaxSection';
 import { DebugInfo } from './components/DebugInfo';
 import { EasterEggs } from './components/EasterEggs';
 import { ScrollProgress } from './components/ScrollProgress';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useMemo } from 'react';
 
 export default function App() {
-  const sections = [
+  const sections = useMemo(() => [
     { Component: Hero, name: 'Hey There', id: 'hero' },
     { Component: WhoIAm, name: 'Who I Am', id: 'who-i-am' },
     { Component: TechJourney, name: 'Tech Stack', id: 'tech-journey' },
@@ -28,7 +28,7 @@ export default function App() {
     { Component: BeyondCode, name: 'Beyond Code', id: 'beyond-code' },
     { Component: WhatsNext, name: "What's Next", id: 'whats-next' },
     { Component: Contact, name: "Let's Connect", id: 'contact' },
-  ];
+  ], []);
 
   const [currentSection, setCurrentSection] = useState(0);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
@@ -70,7 +70,6 @@ export default function App() {
         return;
       }
       
-      const scrollTop = window.scrollY;
       const windowHeight = window.innerHeight;
       const viewportMiddle = windowHeight / 2;
       
@@ -131,7 +130,7 @@ export default function App() {
       {/* ANIMATED BACKGROUND - čistě od scroll pozice */}
       <AnimatedBackground />
       
-      <div className="relative z-10 text-white" style={{ background: 'transparent' }} role="document">
+      <div className="text-white" style={{ background: 'transparent' }} role="document">
         {/* Main content - semantic HTML */}
         <main id="main-content" role="main">
           {/* All sections - CSS scroll-snap (no fade effect) */}
@@ -164,7 +163,7 @@ export default function App() {
         />
         
         <DebugInfo onVisibilityChange={setIsDevConsoleOpen} />
-        <ScrollProgress currentSection={currentSection} totalSections={sections.length} />
+        <ScrollProgress />
       </div>
     </>
   );

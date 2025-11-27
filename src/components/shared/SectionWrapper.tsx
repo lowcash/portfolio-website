@@ -18,7 +18,7 @@ export function SectionWrapper({
   className = '',
   containerClassName = 'max-w-6xl'
 }: SectionWrapperProps) {
-  const sectionReveal = useSimpleScrollReveal();
+  const { revealRef, style } = useSimpleScrollReveal();
 
   return (
     <section 
@@ -27,8 +27,8 @@ export function SectionWrapper({
       style={{ scrollSnapAlign: 'start' }}
     >
       <div 
-        ref={sectionReveal.ref}
-        style={sectionReveal.style}
+        ref={revealRef}
+        style={style}
         className={`${containerClassName} mx-auto w-full`}
       >
         {children}

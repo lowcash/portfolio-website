@@ -1,4 +1,4 @@
-import { Eye, Glasses, TrendingUp, ExternalLink, Heart, Globe } from 'lucide-react';
+import { Eye, Glasses, TrendingUp, ExternalLink, Globe, type LucideIcon } from 'lucide-react';
 import { SectionWrapper } from './shared/SectionWrapper';
 import { SectionHeader } from './shared/SectionHeader';
 import { Card } from './shared/Card';
@@ -6,10 +6,22 @@ import { TechTag } from './shared/TechTag';
 import { useStaggerFadeIn } from '../hooks/useStaggerFadeIn';
 import { SECTION_STYLES } from '../lib/section-config';
 
+interface Project {
+  icon: LucideIcon;
+  title: string;
+  period: string;
+  description: string;
+  tech: string[];
+  link?: string;
+  linkText?: string;
+  iconColor: string;
+  multipleLinks?: { url: string; text: string }[];
+}
+
 export function NotableWork() {
   const { ref: cardsRef, getItemStyle } = useStaggerFadeIn(4);
 
-  const projects = [
+  const projects: Project[] = [
     {
       icon: Eye,
       title: 'Collaborative AR System',

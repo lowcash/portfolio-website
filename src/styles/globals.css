@@ -7,15 +7,55 @@
     background: radial-gradient(circle at center, var(--tw-gradient-stops));
   }
   
+  /* Fluid orb animations */
+  @keyframes orb-float-1 {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33% { transform: translate(15px, -10px) scale(1.05); }
+    66% { transform: translate(-10px, 15px) scale(0.95); }
+  }
+  
+  @keyframes orb-float-2 {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33% { transform: translate(-12px, 18px) scale(0.98); }
+    66% { transform: translate(20px, -8px) scale(1.02); }
+  }
+  
+  @keyframes orb-float-3 {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33% { transform: translate(10px, 15px) scale(1.03); }
+    66% { transform: translate(-15px, -12px) scale(0.97); }
+  }
+  
+  @keyframes orb-float-4 {
+    0%, 100% { transform: translate(0, 0) scale(1); }
+    33% { transform: translate(-18px, -10px) scale(0.96); }
+    66% { transform: translate(12px, 20px) scale(1.04); }
+  }
+  
+  @keyframes orb-float-center {
+    0%, 100% { transform: translate(-50%, -50%) scale(1); }
+    50% { transform: translate(-50%, -50%) scale(1.1); }
+  }
+  
+  @keyframes orb-float-x {
+    0%, 100% { transform: translateX(-50%) translateY(0); }
+    50% { transform: translateX(-50%) translateY(-20px); }
+  }
+  
+  @keyframes orb-float-y {
+    0%, 100% { transform: translateY(-50%) translateX(0); }
+    50% { transform: translateY(-50%) translateX(15px); }
+  }
+  
   /* Mobile-friendly lighter animations */
   @keyframes orb-float-mobile-1 {
     0%, 100% { transform: translateX(-50%) translateY(0); }
-    50% { transform: translateX(-50%) translateY(-30px); }
+    50% { transform: translateX(-50%) translateY(-30px); } /* INCREASED from -10px */
   }
   
   @keyframes orb-float-mobile-2 {
     0%, 100% { transform: translateX(-50%) translateY(0) scale(1); }
-    50% { transform: translateX(-50%) translateY(25px) scale(1.05); }
+    50% { transform: translateX(-50%) translateY(25px) scale(1.05); } /* INCREASED from 8px and scale 1.02 */
   }
 }
 
@@ -58,11 +98,6 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
-  
-  /* Default Orb Colors (Purple) to prevent flash of invisible orbs */
-  --orb-r: 147;
-  --orb-g: 51;
-  --orb-b: 234;
 }
 
 .dark {
@@ -318,14 +353,13 @@ html {
   scroll-padding-top: 0;
   background-color: #030712; /* Dark background - prevents white flash on overscroll */
   overscroll-behavior: none; /* Prevents bounce effect on mobile */
-  height: 100dvh; /* iOS Safari fix - dynamic viewport height */
-  scroll-behavior: smooth; /* Enable native smooth scrolling */
+  height: 100%; /* iOS Safari fix */
+  /* NOTE: scroll-behavior removed - causes iOS Safari conflicts with scroll-snap */
 }
 
 /* Disable scroll snap when mobile menu is open */
 html.no-scroll-snap {
   scroll-snap-type: none !important;
-  overflow: hidden;
 }
 
 /* HIDE SCROLLBAR - minimalistický look */
@@ -652,13 +686,10 @@ body {
 .orb-7 { animation: orb-float-1 50s ease-in-out infinite reverse; }
 .orb-8 { animation: orb-float-2 46s ease-in-out infinite reverse; }
 
-/* Mobile performance - use lighter animations instead of disabling */
+/* Mobile performance - disable heavy animations */
 @media (max-width: 768px) {
-  .orb-1, .orb-3, .orb-5, .orb-7 {
-    animation: orb-float-mobile-1 15s ease-in-out infinite;
-  }
-  .orb-2, .orb-4, .orb-6, .orb-8 {
-    animation: orb-float-mobile-2 18s ease-in-out infinite;
+  .orb-1, .orb-2, .orb-3, .orb-4, .orb-5, .orb-6, .orb-7, .orb-8 {
+    animation: none;
   }
 }
 

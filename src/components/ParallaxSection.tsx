@@ -1,22 +1,23 @@
 import { ReactNode } from 'react';
 
-interface ParallaxSectionProps {
+interface ParallaxSectionProps extends React.HTMLAttributes<HTMLElement> {
   children: ReactNode;
   id: string;
   className?: string;
   style?: React.CSSProperties;
 }
 
-export function ParallaxSection({ children, id, className, style }: ParallaxSectionProps) {
+export function ParallaxSection({ children, id, className, style, ...props }: ParallaxSectionProps) {
   return (
     <section
       id={id}
-      className={`${className} min-h-screen supports-[min-height:100dvh]:min-h-[100dvh]`}
+      className={className}
       style={{
         ...style,
         scrollSnapAlign: 'start',
-        scrollSnapStop: 'always', // Force snap to stop at section start
+        // Note: scroll-snap-stop removed for better iOS Safari compatibility
       }}
+      {...props}
     >
       {children}
     </section>

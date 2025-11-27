@@ -1,35 +1,11 @@
-import { useEffect, useRef, useState } from 'react';
+import { useRef } from 'react';
 
-export function useStaggerFadeIn(itemCount: number, options = {}) {
+export function useStaggerFadeIn(_itemCount: number) {
   const ref = useRef<HTMLDivElement>(null);
-  const [isVisible, setIsVisible] = useState(true); // Always visible - no animations
-
-  // Vypnuto - žádné animace
-  // useEffect(() => {
-  //   const element = ref.current;
-  //   if (!element) return;
-
-  //   const observer = new IntersectionObserver(
-  //     ([entry]) => {
-  //       setIsVisible(entry.isIntersecting);
-  //     },
-  //     {
-  //       threshold: 0.1,
-  //       ...options,
-  //     }
-  //   );
-
-  //   observer.observe(element);
-
-  //   return () => {
-  //     if (element) {
-  //       observer.unobserve(element);
-  //     }
-  //   };
-  // }, []);
+  const isVisible = true; // Always visible - no animations
 
   // Žádné animace - vše je viditelné
-  const getItemStyle = (index: number) => ({
+  const getItemStyle = (_index: number) => ({
     opacity: 1,
     transform: 'translateY(0)',
     // Žádné transitions

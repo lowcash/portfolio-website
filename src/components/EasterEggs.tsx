@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
-import { Trophy, Zap, Target, Timer, MousePointer, Copy, Calendar, Sparkles } from 'lucide-react';
+import { Trophy } from 'lucide-react';
 
 /**
  * Easter Eggs System with Achievements
@@ -157,12 +157,10 @@ export function EasterEggs() {
   const [particles, setParticles] = useState<Array<{ id: number; x: number; y: number }>>([]);
   const [aprilFoolsMode, setAprilFoolsMode] = useState(false);
   
-  const idleTimerRef = useRef<NodeJS.Timeout>();
+  const idleTimerRef = useRef<NodeJS.Timeout | null>(null);
   const clickTimesRef = useRef<number[]>([]);
   const konamiIndexRef = useRef(0);
   const userHasInteractedRef = useRef(false); // Track if user has actually interacted
-  const swipeStartRef = useRef<{ x: number; y: number } | null>(null);
-  const swipeSequenceRef = useRef<string[]>([]);
 
   // SHOW ACHIEVEMENT LIST ON PAGE LOAD (only after dev console opened)
   useEffect(() => {
@@ -180,7 +178,7 @@ export function EasterEggs() {
       );
       console.log(''); // Empty line
       
-      ACHIEVEMENTS.forEach((achievement, index) => {
+      ACHIEVEMENTS.forEach((achievement, _index) => {
         const unlocked = achievements.find(a => a.id === achievement.id)?.unlocked;
         console.log(
           `%c${unlocked ? '✅' : '🔒'} ${achievement.icon} ${achievement.name}`,
@@ -355,7 +353,7 @@ export function EasterEggs() {
 
     const resetIdleTimer = () => {
       setIdleCursor(false);
-      clearTimeout(idleTimerRef.current);
+      if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
       
       // Only start timer if user has interacted
       if (userHasInteractedRef.current) {
@@ -384,7 +382,7 @@ export function EasterEggs() {
     return () => {
       interactionEvents.forEach(event => window.removeEventListener(event, markUserInteraction));
       [...interactionEvents, ...idleEvents].forEach(event => window.removeEventListener(event, resetIdleTimer));
-      clearTimeout(idleTimerRef.current);
+      if (idleTimerRef.current) clearTimeout(idleTimerRef.current);
     };
   }, []);
 
@@ -549,9 +547,13 @@ export function EasterEggs() {
 
       const { x = 0, y = 0, z = 0 } = acc;
       
-      const deltaX = Math.abs(x - lastX);
-      const deltaY = Math.abs(y - lastY);
-      const deltaZ = Math.abs(z - lastZ);
+      const safeX = x ?? 0;
+      const safeY = y ?? 0;
+      const safeZ = z ?? 0;
+      
+      const deltaX = Math.abs(safeX - lastX);
+      const deltaY = Math.abs(safeY - lastY);
+      const deltaZ = Math.abs(safeZ - lastZ);
       
       const totalDelta = deltaX + deltaY + deltaZ;
       
@@ -579,9 +581,9 @@ export function EasterEggs() {
         }
       }
       
-      lastX = x;
-      lastY = y;
-      lastZ = z;
+      lastX = safeX;
+      lastY = safeY;
+      lastZ = safeZ;
     };
 
     // DESKTOP ALTERNATIVE: Rapid mouse movement

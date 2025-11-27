@@ -14,7 +14,6 @@ export function ScrollNavigation({ currentSection, totalSections, sectionNames, 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [dragStartY, setDragStartY] = useState<number | null>(null);
   const [dragCurrentY, setDragCurrentY] = useState<number | null>(null);
-  const [isDragging, setIsDragging] = useState(false);
   const drawerRef = useRef<HTMLDivElement>(null);
   const scrollPositionRef = useRef(0);
 
@@ -26,6 +25,8 @@ export function ScrollNavigation({ currentSection, totalSections, sectionNames, 
   const handleMobileClick = (index: number) => {
     // First close the menu (this will re-enable scroll)
     setMobileMenuOpen(false);
+    setDragStartY(null);
+    setDragCurrentY(null);
     
     // Then navigate after a small delay to allow menu to close
     setTimeout(() => {
@@ -36,7 +37,6 @@ export function ScrollNavigation({ currentSection, totalSections, sectionNames, 
   // Swipe to close functionality
   const handleTouchStart = (e: React.TouchEvent) => {
     setDragStartY(e.touches[0].clientY);
-    setIsDragging(false);
   };
 
   const handleTouchMove = (e: React.TouchEvent) => {
@@ -48,9 +48,6 @@ export function ScrollNavigation({ currentSection, totalSections, sectionNames, 
     // Only allow dragging down
     if (diff > 0) {
       setDragCurrentY(currentY);
-      if (diff > 5) { // 5px threshold before considering it a drag
-        setIsDragging(true);
-      }
     }
   };
 
@@ -58,7 +55,6 @@ export function ScrollNavigation({ currentSection, totalSections, sectionNames, 
     if (dragStartY === null || dragCurrentY === null) {
       setDragStartY(null);
       setDragCurrentY(null);
-      setIsDragging(false);
       return;
     }
 
@@ -71,14 +67,11 @@ export function ScrollNavigation({ currentSection, totalSections, sectionNames, 
     
     setDragStartY(null);
     setDragCurrentY(null);
-    // Reset isDragging after a small delay to allow click prevention
-    setTimeout(() => setIsDragging(false), 10);
   };
 
   // Mouse events for desktop testing
   const handleMouseDown = (e: React.MouseEvent) => {
     setDragStartY(e.clientY);
-    setIsDragging(false);
   };
 
   // Handle mouse move and up on document level
@@ -94,9 +87,6 @@ export function ScrollNavigation({ currentSection, totalSections, sectionNames, 
       // Only allow dragging down
       if (diff > 0) {
         setDragCurrentY(currentY);
-        if (diff > 5) { // 5px threshold before considering it a drag
-          setIsDragging(true);
-        }
       }
     };
 
@@ -114,7 +104,6 @@ export function ScrollNavigation({ currentSection, totalSections, sectionNames, 
       // Reset all drag state
       setDragStartY(null);
       setDragCurrentY(null);
-      setIsDragging(false);
     };
 
     document.addEventListener('mousemove', handleMouseMove);
@@ -132,14 +121,6 @@ export function ScrollNavigation({ currentSection, totalSections, sectionNames, 
     const diff = dragCurrentY - dragStartY;
     return diff > 0 ? diff : 0;
   };
-
-  // Reset drag state when menu closes
-  useEffect(() => {
-    if (!mobileMenuOpen) {
-      setDragStartY(null);
-      setDragCurrentY(null);
-    }
-  }, [mobileMenuOpen]);
 
   // Prevent body scroll when menu is open - PROPER SOLUTION
   useEffect(() => {
