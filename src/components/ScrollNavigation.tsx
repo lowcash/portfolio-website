@@ -23,15 +23,25 @@ export function ScrollNavigation({ currentSection, totalSections, sectionNames, 
   }));
 
   const handleMobileClick = (index: number) => {
-    // First close the menu (this will re-enable scroll)
+    // Pause scroll detection immediately to prevent race condition
+    if (onScrollRestore) {
+      onScrollRestore(true);
+    }
+    
+    // Close the menu
     setMobileMenuOpen(false);
     setDragStartY(null);
     setDragCurrentY(null);
     
-    // Then navigate after a small delay to allow menu to close
+    // Navigate immediately (no delay to prevent detection issues)
+    onSectionClick(index);
+    
+    // Resume scroll detection after scroll completes (400ms for instant scroll)
     setTimeout(() => {
-      onSectionClick(index);
-    }, 100);
+      if (onScrollRestore) {
+        onScrollRestore(false);
+      }
+    }, 400);
   };
 
   // Swipe to close functionality
@@ -164,16 +174,14 @@ export function ScrollNavigation({ currentSection, totalSections, sectionNames, 
         
         // CRITICAL: Use requestAnimationFrame to ensure DOM has updated before re-enabling features
         requestAnimationFrame(() => {
-          requestAnimationFrame(() => {
-            // Re-enable scroll snap and smooth scrolling after 2 RAFs (ensures all layout is complete)
-            html.classList.remove('no-scroll-snap');
-            html.style.scrollBehavior = '';
-            
-            // END scroll restoration - notify parent to resume handleScroll
-            if (onScrollRestore) {
-              onScrollRestore(false);
-            }
-          });
+          // Re-enable scroll snap and smooth scrolling after 1 RAF
+          html.classList.remove('no-scroll-snap');
+          html.style.scrollBehavior = '';
+          
+          // END scroll restoration - notify parent to resume handleScroll
+          if (onScrollRestore) {
+            onScrollRestore(false);
+          }
         });
       };
     }
