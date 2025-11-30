@@ -45,6 +45,10 @@ export function NotableWork() {
       period: 'Current',
       description: 'Building an experimental trading system using machine learning and reinforcement learning with bio-inspired algorithms. Exploring technical analysis, pattern recognition, and adaptive strategies.',
       tech: ['Python', 'Machine Learning', 'XGBoost', 'Reinforcement Learning'],
+      multipleLinks: [
+        { url: 'https://github.com/lowcash/QuantWise-Demo', text: 'GitHub (Public Demo)' },
+        { url: 'https://github.com/lowcash/QuantWise', text: 'GitHub (Private)' }
+      ],
       iconColor: 'text-pink-400'
     },
     {
