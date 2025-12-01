@@ -227,11 +227,7 @@ export function EasterEggs() {
     // CHECK: Only unlock achievements if dev console has been opened at least once
     const devConsoleOpened = localStorage.getItem('dev_console_opened') === 'true';
     if (!devConsoleOpened) {
-      console.log(
-        '%c🔒 Achievement system locked. Open dev console (Press D) to enable achievements!',
-        'color: #6b7280; font-size: 10px; font-style: italic;'
-      );
-      return; // Don't unlock if dev console hasn't been opened
+      return; // Silent - don't spoil the easter egg
     }
     
     setAchievements(prev => {

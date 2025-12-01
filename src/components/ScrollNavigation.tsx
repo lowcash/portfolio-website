@@ -36,12 +36,12 @@ export function ScrollNavigation({ currentSection, totalSections, sectionNames, 
     // Navigate immediately (no delay to prevent detection issues)
     onSectionClick(index);
     
-    // Resume scroll detection after scroll completes (400ms for instant scroll)
+    // Resume scroll detection after scroll completes (600ms for smooth scroll)
     setTimeout(() => {
       if (onScrollRestore) {
         onScrollRestore(false);
       }
-    }, 400);
+    }, 600);
   };
 
   // Swipe to close functionality
