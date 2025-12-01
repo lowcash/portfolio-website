@@ -1,8 +1,8 @@
 import { Rocket, TrendingUp, Target } from 'lucide-react';
-import { SectionWrapper } from './shared/SectionWrapper';
-import { SectionHeader } from './shared/SectionHeader';
-import { useStaggerFadeIn } from '../hooks/useStaggerFadeIn';
-import { SECTION_STYLES } from '../lib/section-config';
+import { SectionWrapper } from '../shared/SectionWrapper';
+import { SectionHeader } from '../shared/SectionHeader';
+import { useStaggerFadeIn } from '../../hooks/useStaggerFadeIn';
+import { SECTION_STYLES } from '../../lib/section-config';
 
 export function WhatsNext() {
   const { ref: cardsRef, getItemStyle } = useStaggerFadeIn(3);

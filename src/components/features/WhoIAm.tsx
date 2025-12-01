@@ -1,9 +1,9 @@
 import { Brain, Sparkles, Zap } from 'lucide-react';
-import { SectionWrapper } from './shared/SectionWrapper';
-import { SectionHeader } from './shared/SectionHeader';
-import { Card } from './shared/Card';
-import { useStaggerFadeIn } from '../hooks/useStaggerFadeIn';
-import { SECTION_STYLES } from '../lib/section-config';
+import { SectionWrapper } from '../shared/SectionWrapper';
+import { SectionHeader } from '../shared/SectionHeader';
+import { Card } from '../shared/Card';
+import { useStaggerFadeIn } from '../../hooks/useStaggerFadeIn';
+import { SECTION_STYLES } from '../../lib/section-config';
 
 export function WhoIAm() {
   const { ref: cardsRef, getItemStyle } = useStaggerFadeIn(3);

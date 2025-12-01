@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
-import { ORB_COLORS } from '../lib/section-config';
-import { ANIMATION_CONFIG, SECTION_COUNT } from '../lib/constants';
+import { ORB_COLORS } from '../../lib/section-config';
+import { ANIMATION_CONFIG, SECTION_COUNT } from '../../lib/constants';
 
 /**
  * Generate color breakpoints dynamically based on section count

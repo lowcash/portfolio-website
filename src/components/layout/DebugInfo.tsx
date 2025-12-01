@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from 'react';
 import { Terminal, Trophy } from 'lucide-react';
-import type { Achievement } from './EasterEggs';
+import type { Achievement } from '../features/EasterEggs';
 
 /**
  * Debug component - Easter egg for developers

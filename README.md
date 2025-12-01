@@ -1,5 +1,4 @@
-
-  # Personal Presentation Website
+# Personal Presentation Website
 
 A modern, interactive developer portfolio featuring scroll-based navigation, parallax effects, and a hidden achievement system.
 

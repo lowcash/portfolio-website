@@ -1,6 +1,6 @@
 import { ChevronDown } from 'lucide-react';
-import { SectionWrapper } from './shared/SectionWrapper';
-import { SECTION_STYLES } from '../lib/section-config';
+import { SectionWrapper } from '../shared/SectionWrapper';
+import { SECTION_STYLES } from '../../lib/section-config';
 
 export function Hero() {
   const { gradient, glowColors } = SECTION_STYLES.hero;
