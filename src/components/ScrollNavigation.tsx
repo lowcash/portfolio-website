@@ -28,6 +28,12 @@ export function ScrollNavigation({ currentSection, totalSections, sectionNames, 
       onScrollRestore(true);
     }
     
+    // CRITICAL: Blur the active element (button) BEFORE hiding the menu
+    // This prevents "Blocked aria-hidden on an element because its descendant retained focus" error
+    if (document.activeElement instanceof HTMLElement) {
+      document.activeElement.blur();
+    }
+    
     // Close the menu
     setMobileMenuOpen(false);
     setDragStartY(null);
