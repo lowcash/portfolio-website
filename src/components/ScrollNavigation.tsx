@@ -271,7 +271,7 @@ export function ScrollNavigation({ currentSection, totalSections, sectionNames, 
         className={`md:hidden fixed inset-0 z-[55] transition-all duration-300 ${
           mobileMenuOpen ? 'pointer-events-auto' : 'pointer-events-none'
         }`}
-        inert={!mobileMenuOpen}
+        aria-hidden={!mobileMenuOpen}
       >
         {/* Backdrop */}
         <div 

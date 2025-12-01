@@ -110,15 +110,15 @@ export default function App() {
       const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
       
       if (isIOS) {
-        // iOS: Use window.scrollTo with instant behavior to avoid competing animations
+        // iOS: Use window.scrollTo with smooth behavior
         const elementPosition = element.getBoundingClientRect().top + window.pageYOffset;
         window.scrollTo({
           top: elementPosition,
-          behavior: 'instant' as ScrollBehavior
+          behavior: 'smooth'
         });
       } else {
-        // Other browsers: Use scrollIntoView with instant behavior
-        element.scrollIntoView({ behavior: 'instant', block: 'start' });
+        // Other browsers: Use scrollIntoView with smooth behavior
+        element.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
     }
   };
