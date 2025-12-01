@@ -164,15 +164,13 @@ export function ScrollNavigation({ currentSection, totalSections, sectionNames, 
         body.style.top = '';
         body.style.width = '';
         
-        // ONLY restore scroll position if we are NOT navigating to a new section
-        // If we are navigating, the scrollToSection function will handle the position
-        if (!isNavigatingRef.current) {
-          window.scrollTo({
-            top: scrollY,
-            left: 0,
-            behavior: 'instant' as ScrollBehavior
-          });
-        }
+        // ALWAYS restore scroll position immediately to prevent jumping to top (0)
+        // This ensures we start the navigation from the correct place
+        window.scrollTo({
+          top: scrollY,
+          left: 0,
+          behavior: 'instant' as ScrollBehavior
+        });
         
         // CRITICAL: Use requestAnimationFrame to ensure DOM has updated before re-enabling features
         requestAnimationFrame(() => {
