@@ -762,13 +762,19 @@ export function EasterEggs() {
   return (
     <>
       {/* Achievement Popup */}
+      {/* Achievement Popup - slide in from right with particles */}
       {showAchievement && (
-        <div 
-          className="fixed top-24 right-8 z-[100] animate-in slide-in-from-right duration-500"
-          style={{
-            animation: 'slideInRight 0.5s ease-out, slideOutRight 0.5s ease-in 3.5s forwards'
-          }}
-        >
+        <>
+          {/* Backdrop overlay for better readability on busy backgrounds */}
+          <div className="fixed inset-0 z-[99] bg-black/40 backdrop-blur-sm pointer-events-none animate-fadeIn" />
+          
+          <div
+            className="fixed top-4 right-4 z-[100] bg-black/90 border border-purple-500/50 rounded-xl p-4 shadow-2xl max-w-xs animate-slideIn backdrop-blur-xl"
+            style={{
+              animation: 'slideInRight 0.5s ease-out forwards',
+              boxShadow: '0 0 50px rgba(139, 92, 246, 0.6), 0 0 100px rgba(139, 92, 246, 0.3)'
+            }}
+          >
           <div className="bg-gradient-to-r from-purple-500/20 to-pink-500/20 backdrop-blur-xl border-2 border-purple-500/50 rounded-lg p-4 shadow-2xl min-w-[300px]">
             <div className="flex items-start gap-3">
               <div className="text-3xl">{showAchievement.icon}</div>
@@ -783,6 +789,7 @@ export function EasterEggs() {
             </div>
           </div>
         </div>
+        </>
       )}
 
       {/* Particle Effects */}

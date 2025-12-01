@@ -16,6 +16,7 @@ export function ScrollNavigation({ currentSection, totalSections, sectionNames, 
   const [dragCurrentY, setDragCurrentY] = useState<number | null>(null);
   const drawerRef = useRef<HTMLDivElement>(null);
   const scrollPositionRef = useRef(0);
+  const isNavigatingRef = useRef(false);
 
   const sections = Array.from({ length: totalSections }, (_, i) => ({
     id: i,
@@ -23,31 +24,23 @@ export function ScrollNavigation({ currentSection, totalSections, sectionNames, 
   }));
 
   const handleMobileClick = (index: number) => {
-    // Pause scroll detection immediately to prevent race condition
-    if (onScrollRestore) {
-      onScrollRestore(true);
-    }
-    
-    // CRITICAL: Blur the active element (button) BEFORE hiding the menu
-    // This prevents "Blocked aria-hidden on an element because its descendant retained focus" error
-    if (document.activeElement instanceof HTMLElement) {
-      document.activeElement.blur();
-    }
+    // Signal that we are navigating to a new section
+    isNavigatingRef.current = true;
     
     // Close the menu
     setMobileMenuOpen(false);
     setDragStartY(null);
     setDragCurrentY(null);
     
-    // Navigate immediately (no delay to prevent detection issues)
-    onSectionClick(index);
-    
-    // Resume scroll detection after scroll completes (600ms for smooth scroll)
+    // Navigate after a short delay to allow the menu close cleanup to finish
+    // but WITHOUT restoring the old scroll position
     setTimeout(() => {
-      if (onScrollRestore) {
-        onScrollRestore(false);
-      }
-    }, 600);
+      onSectionClick(index);
+      // Reset navigation flag after navigation is initiated
+      setTimeout(() => {
+        isNavigatingRef.current = false;
+      }, 100);
+    }, 50);
   };
 
   // Swipe to close functionality
@@ -171,12 +164,15 @@ export function ScrollNavigation({ currentSection, totalSections, sectionNames, 
         body.style.top = '';
         body.style.width = '';
         
-        // Restore scroll position IMMEDIATELY using instant scroll
-        window.scrollTo({
-          top: scrollY,
-          left: 0,
-          behavior: 'instant' as ScrollBehavior
-        });
+        // ONLY restore scroll position if we are NOT navigating to a new section
+        // If we are navigating, the scrollToSection function will handle the position
+        if (!isNavigatingRef.current) {
+          window.scrollTo({
+            top: scrollY,
+            left: 0,
+            behavior: 'instant' as ScrollBehavior
+          });
+        }
         
         // CRITICAL: Use requestAnimationFrame to ensure DOM has updated before re-enabling features
         requestAnimationFrame(() => {
