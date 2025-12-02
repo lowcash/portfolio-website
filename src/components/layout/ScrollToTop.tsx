@@ -21,6 +21,7 @@ export function ScrollToTop({ currentSection, onGoToFirst }: ScrollToTopProps) {
       className={`fixed bottom-8 right-8 z-50 transition-all duration-300 cursor-pointer ${
         isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10 pointer-events-none'
       }`}
+      style={{ marginBottom: 'env(safe-area-inset-bottom)' }}
       aria-label="Scroll to top of page"
       aria-hidden={!isVisible}
     >

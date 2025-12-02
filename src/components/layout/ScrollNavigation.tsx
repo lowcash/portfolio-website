@@ -184,6 +184,13 @@ export function ScrollNavigation({ currentSection, totalSections, sectionNames, 
           }
         });
       };
+    } else {
+      // Safety cleanup to ensure no styles are stuck if component re-renders or state changes unexpectedly
+      body.style.position = '';
+      body.style.top = '';
+      body.style.width = '';
+      html.classList.remove('no-scroll-snap');
+      html.style.scrollBehavior = '';
     }
   }, [mobileMenuOpen, onScrollRestore]);
 
