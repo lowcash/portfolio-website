@@ -428,7 +428,7 @@ export function DebugInfo({ onVisibilityChange }: DebugInfoProps = {}) {
             >
               {/* Header - Fixed at top */}
               <div 
-                className="px-4 py-3 flex items-center justify-between border-b-2 flex-shrink-0"
+                className="px-4 py-3 flex items-center justify-between border-b-2 shrink-0"
                 style={{ 
                   borderColor: `rgb(${orbR}, ${orbG}, ${orbB})`,
                   background: `rgba(${orbR}, ${orbG}, ${orbB}, 0.15)`

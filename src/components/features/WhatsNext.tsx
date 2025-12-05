@@ -44,8 +44,8 @@ export function WhatsNext() {
             style={getItemStyle(index) as React.CSSProperties}
           >
             <div className="flex items-start gap-4">
-              <item.icon className={`w-10 h-10 ${item.iconColor} flex-shrink-0`} />
-              <div className="flex-grow">
+              <item.icon className={`w-10 h-10 ${item.iconColor} shrink-0`} />
+              <div className="grow">
                 <h3 className="text-2xl mb-1 text-white">{item.title}</h3>
                 <p className="text-gray-400">{item.description}</p>
               </div>

@@ -24,23 +24,27 @@ export function ScrollNavigation({ currentSection, totalSections, sectionNames, 
   }));
 
   const handleMobileClick = (index: number) => {
+    // If clicking the active section, just close the menu
+    if (index === currentSection) {
+      setMobileMenuOpen(false);
+      return;
+    }
+
     // Signal that we are navigating to a new section
     isNavigatingRef.current = true;
     
-    // Close the menu
+    // Close the menu immediately
     setMobileMenuOpen(false);
     setDragStartY(null);
     setDragCurrentY(null);
     
-    // Navigate after a short delay to allow the menu close cleanup to finish
-    // but WITHOUT restoring the old scroll position
+    // Navigate immediately - browser handles the rest
+    onSectionClick(index);
+      
+    // Reset navigation flag after a reasonable delay for scroll to complete
     setTimeout(() => {
-      onSectionClick(index);
-      // Reset navigation flag after navigation is initiated
-      setTimeout(() => {
-        isNavigatingRef.current = false;
-      }, 100);
-    }, 50);
+      isNavigatingRef.current = false;
+    }, 1500); // Increased to 1.5s to be safe
   };
 
   // Swipe to close functionality
@@ -164,13 +168,14 @@ export function ScrollNavigation({ currentSection, totalSections, sectionNames, 
         body.style.top = '';
         body.style.width = '';
         
-        // ALWAYS restore scroll position immediately to prevent jumping to top (0)
-        // This ensures we start the navigation from the correct place
-        window.scrollTo({
-          top: scrollY,
-          left: 0,
-          behavior: 'instant' as ScrollBehavior
-        });
+        // Only restore scroll position if we are NOT navigating to a new section
+        if (!isNavigatingRef.current) {
+          window.scrollTo({
+            top: scrollY,
+            left: 0,
+            behavior: 'instant' as ScrollBehavior
+          });
+        }
         
         // CRITICAL: Use requestAnimationFrame to ensure DOM has updated before re-enabling features
         requestAnimationFrame(() => {
@@ -227,7 +232,7 @@ export function ScrollNavigation({ currentSection, totalSections, sectionNames, 
               {/* Dot - CSS CLASSES pro barvu */}
               <div 
                 className={`rounded-full transition-all duration-300 ${
-                  currentSection === section.id ? 'scroll-nav-dot-active w-3 h-3' : 'scroll-nav-dot-inactive w-2 h-2'
+                  currentSection === section.id ? 'bg-white w-3 h-3' : 'bg-white/30 w-2 h-2 hover:bg-white/50'
                 }`}
                 aria-hidden="true"
               />
@@ -339,21 +344,21 @@ export function ScrollNavigation({ currentSection, totalSections, sectionNames, 
                     {/* Active state - same glow effect as hamburger/scroll-to-top */}
                     {isActive && (
                       <>
-                        {/* Shimmer glow layer - outer glow - STRONGER */}
+                        {/* Shimmer glow layer - outer glow - REDUCED INTENSITY */}
                         <div 
                           className="absolute inset-0 pointer-events-none rounded-xl animate-glow-shimmer -z-10" 
                           style={{
-                            boxShadow: '0 0 60px rgba(var(--orb-r), var(--orb-g), var(--orb-b), 0.8), 0 0 100px rgba(var(--orb-r), var(--orb-g), var(--orb-b), 0.4)',
+                            boxShadow: '0 0 15px rgba(var(--orb-r), var(--orb-g), var(--orb-b), 0.3), 0 0 30px rgba(var(--orb-r), var(--orb-g), var(--orb-b), 0.1)',
                             transition: 'box-shadow 0.3s ease-out'
                           }}
                         />
                         
-                        {/* Inner background with blur - MORE COLOR */}
+                        {/* Inner background with blur - REDUCED OPACITY */}
                         <div 
                           className="absolute inset-0 rounded-xl bg-black/40 backdrop-blur-sm -z-10"
                           style={{
-                            boxShadow: 'inset 0 2px 20px rgba(0,0,0,0.5), inset 0 0 60px rgba(var(--orb-r), var(--orb-g), var(--orb-b), 0.25)',
-                            backgroundColor: `rgba(var(--orb-r), var(--orb-g), var(--orb-b), 0.15)`,
+                            boxShadow: 'inset 0 2px 20px rgba(0,0,0,0.5), inset 0 0 30px rgba(var(--orb-r), var(--orb-g), var(--orb-b), 0.1)',
+                            backgroundColor: `rgba(var(--orb-r), var(--orb-g), var(--orb-b), 0.05)`,
                             transition: 'all 0.3s ease-out'
                           }}
                         />

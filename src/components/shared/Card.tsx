@@ -32,8 +32,8 @@ export function Card({
       style={style}
     >
       <div className="flex items-start gap-4 mb-4">
-        {Icon && <Icon className={`w-10 h-10 ${iconColor} flex-shrink-0`} />}
-        <div className="flex-grow">
+        {Icon && <Icon className={`w-10 h-10 ${iconColor} shrink-0`} />}
+        <div className="grow">
           <h3 className="text-xl mb-1 text-white">{title}</h3>
           {subtitle && <span className="text-sm text-gray-500">{subtitle}</span>}
         </div>

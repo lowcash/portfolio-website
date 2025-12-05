@@ -9,13 +9,28 @@ export function ScrollToTop({ currentSection, onGoToFirst }: ScrollToTopProps) {
   // Show button when not on first section
   const isVisible = currentSection > 0;
 
+  const handleScrollToTop = () => {
+    // Temporarily disable scroll snap to prevent fighting
+    const html = document.documentElement;
+    html.classList.add('no-scroll-snap');
+    html.style.scrollBehavior = 'auto';
+
+    onGoToFirst();
+
+    // Re-enable after scroll
+    setTimeout(() => {
+      html.classList.remove('no-scroll-snap');
+      html.style.scrollBehavior = '';
+    }, 1000);
+  };
+
   return (
     <button
-      onClick={onGoToFirst}
+      onClick={handleScrollToTop}
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
-          onGoToFirst();
+          handleScrollToTop();
         }
       }}
       className={`fixed bottom-8 right-8 z-50 transition-all duration-300 cursor-pointer ${

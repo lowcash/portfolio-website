@@ -106,6 +106,11 @@ export default function App() {
     const sectionId = sections[index].id;
     const element = document.getElementById(sectionId);
     if (element) {
+      // Disable scroll snap temporarily to prevent fighting
+      const html = document.documentElement;
+      html.classList.add('no-scroll-snap');
+      html.style.scrollBehavior = 'auto';
+      
       // iOS Safari fallback - use window.scrollTo for better compatibility
       const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
       
@@ -120,6 +125,13 @@ export default function App() {
         // Other browsers: Use scrollIntoView with smooth behavior
         element.scrollIntoView({ behavior: 'smooth', block: 'start' });
       }
+
+      // Re-enable scroll snap after animation
+      // 1000ms is usually enough for smooth scroll to complete
+      setTimeout(() => {
+        html.classList.remove('no-scroll-snap');
+        html.style.scrollBehavior = '';
+      }, 1000);
     }
   };
 
@@ -139,7 +151,7 @@ export default function App() {
             <ParallaxSection
               key={id}
               id={id}
-              className="min-h-screen"
+              className="min-h-screen snap-start"
               // Accessibility: section landmarks
               role={index === 0 ? 'banner' : 'region'}
               aria-label={sections[index].name}
