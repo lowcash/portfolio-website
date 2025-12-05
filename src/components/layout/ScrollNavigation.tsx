@@ -232,7 +232,7 @@ export function ScrollNavigation({ currentSection, totalSections, sectionNames, 
               {/* Dot - CSS CLASSES pro barvu */}
               <div 
                 className={`rounded-full transition-all duration-300 ${
-                  currentSection === section.id ? 'bg-white w-3 h-3' : 'bg-white/30 w-2 h-2 hover:bg-white/50'
+                  currentSection === section.id ? 'w-3 h-3 scroll-nav-dot-active' : 'w-2 h-2 scroll-nav-dot-inactive hover:bg-white/50'
                 }`}
                 aria-hidden="true"
               />

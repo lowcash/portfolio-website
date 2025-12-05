@@ -16,7 +16,7 @@ import { DebugInfo } from './components/layout/DebugInfo';
 import { EasterEggs } from './components/features/EasterEggs';
 import { ScrollProgress } from './components/layout/ScrollProgress';
 import { useEffect, useState, useMemo } from 'react';
-import { LazyMotion, domAnimation } from 'framer-motion';
+import { LazyMotion, domAnimation } from 'motion/react';
 
 export default function App() {
   const sections = useMemo(() => [
