@@ -61,7 +61,7 @@ export function Contact() {
                 className="flex items-center gap-3 px-6 py-4 rounded-2xl transition-all duration-500"
                 style={getItemStyle(index) as React.CSSProperties}
               >
-                <social.icon className="w-6 h-6 text-purple-400 flex-shrink-0 transition-all duration-500 group-hover:text-pink-400" aria-hidden="true" />
+                <social.icon className="w-6 h-6 text-purple-400 shrink-0 transition-all duration-500 group-hover:text-pink-400" aria-hidden="true" />
                 <div className="text-left">
                   <div className="text-xs text-gray-500 transition-colors duration-500 group-hover:text-gray-400">{social.label}</div>
                   <div className="text-sm text-gray-300 transition-colors duration-500 group-hover:text-white">{social.username}</div>

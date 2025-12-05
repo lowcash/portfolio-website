@@ -414,7 +414,7 @@ export function AnimatedBackground() {
       />
       
       {/* Dark overlay pro kontrast a depth */}
-      <div className="absolute inset-0 bg-gradient-to-b from-gray-950/70 via-gray-950/50 to-gray-950/70 pointer-events-none" />
+      <div className="absolute inset-0 bg-linear-to-b from-gray-950/70 via-gray-950/50 to-gray-950/70 pointer-events-none" />
       
       {/* VIGNETTE EFFECT - controllable via easter egg */}
       <div 

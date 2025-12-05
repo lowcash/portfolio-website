@@ -253,7 +253,7 @@ export function ScrollNavigation({ currentSection, totalSections, sectionNames, 
             setMobileMenuOpen(!mobileMenuOpen);
           }
         }}
-        className="md:hidden fixed top-6 right-6 z-[60] transition-all duration-300 hover:scale-105"
+        className="md:hidden fixed top-6 right-6 z-60 transition-all duration-300 hover:scale-105"
         aria-label={mobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
         aria-expanded={mobileMenuOpen}
         aria-controls="mobile-navigation-menu"
@@ -275,7 +275,7 @@ export function ScrollNavigation({ currentSection, totalSections, sectionNames, 
 
       {/* MOBILE - Slide-in menu panel */}
       <div 
-        className={`md:hidden fixed inset-0 z-[55] transition-all duration-300 ${
+        className={`md:hidden fixed inset-0 z-55 transition-all duration-300 ${
           mobileMenuOpen ? 'pointer-events-auto' : 'pointer-events-none'
         }`}
         aria-hidden={!mobileMenuOpen}

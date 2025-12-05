@@ -765,7 +765,7 @@ export function EasterEggs() {
       {/* Achievement Popup - slide in from right with particles */}
       {showAchievement && (
         <div
-          className="fixed top-4 right-4 z-[100] bg-black/60 border border-purple-500/50 rounded-xl p-4 shadow-2xl max-w-xs backdrop-blur-xl"
+          className="fixed top-4 right-4 z-100 bg-black/60 border border-purple-500/50 rounded-xl p-4 shadow-2xl max-w-xs backdrop-blur-xl"
           style={{
             animation: 'slideInRight 0.5s ease-out forwards',
             boxShadow: '0 0 50px rgba(139, 92, 246, 0.4), 0 0 100px rgba(139, 92, 246, 0.2)'
@@ -789,7 +789,7 @@ export function EasterEggs() {
       {particles.map(particle => (
         <div
           key={particle.id}
-          className="fixed pointer-events-none z-[90]"
+          className="fixed pointer-events-none z-90"
           style={{
             left: particle.x,
             top: particle.y,
