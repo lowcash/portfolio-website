@@ -9,7 +9,6 @@ import { WhatsNext } from './components/features/WhatsNext';
 import { Contact } from './components/features/Contact';
 import { ScrollToTop } from './components/layout/ScrollToTop';
 import { ScrollNavigation } from './components/layout/ScrollNavigation';
-import { GoogleAnalytics } from './components/shared/GoogleAnalytics';
 import { AnimatedBackground } from './components/shared/AnimatedBackground';
 import { ParallaxSection } from './components/shared/ParallaxSection';
 import { DebugInfo } from './components/layout/DebugInfo';
@@ -125,7 +124,6 @@ export default function App() {
 
   return (
     <LazyMotion features={domAnimation}>
-      <GoogleAnalytics />
       <EasterEggs />
       
       {/* ANIMATED BACKGROUND - čistě od scroll pozice */}

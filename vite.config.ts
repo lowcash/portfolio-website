@@ -1,10 +1,20 @@
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react-swc';
+import path from 'path';
 
-  import { defineConfig } from 'vite';
-  import react from '@vitejs/plugin-react-swc';
-  import path from 'path';
-
-  export default defineConfig({
-    plugins: [react()],
+export default defineConfig(() => {
+  const gaTrackingId = process.env.VITE_GA_TRACKING_ID || '';
+  
+  return {
+    plugins: [
+      react(),
+      {
+        name: 'html-transform',
+        transformIndexHtml(html) {
+          return html.replace(/%VITE_GA_TRACKING_ID%/g, gaTrackingId);
+        },
+      },
+    ],
     resolve: {
       extensions: ['.js', '.jsx', '.ts', '.tsx', '.json'],
       alias: {
@@ -58,4 +68,5 @@
       open: false,
       host: '0.0.0.0',
     },
-  });
+  };
+});
