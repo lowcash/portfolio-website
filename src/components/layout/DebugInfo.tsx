@@ -378,7 +378,7 @@ export function DebugInfo({ onVisibilityChange }: DebugInfoProps = {}) {
   if (!isVisible) {
     return (
       <div 
-        className="fixed z-[100] bottom-4 left-4 opacity-20 hover:opacity-100 transition-opacity cursor-pointer touch-none"
+        className="fixed z-100 bottom-4 left-4 opacity-20 hover:opacity-100 transition-opacity cursor-pointer touch-none"
         onClick={() => {
           setIsVisible(true);
           // Mark dev console as opened (enables achievement system)
@@ -415,7 +415,7 @@ export function DebugInfo({ onVisibilityChange }: DebugInfoProps = {}) {
     <>
       {/* Mobile: Fullscreen modal with backdrop */}
       {isMobile && (
-        <div className="fixed inset-0 z-[70] bg-black/80 backdrop-blur-sm animate-in fade-in duration-300">
+        <div className="fixed inset-0 z-70 bg-black/80 backdrop-blur-sm animate-in fade-in duration-300">
           <div className="h-full w-full flex flex-col">
             {/* Cyber/retro styled panel - MOBILE fullscreen with scroll */}
             <div 
@@ -428,7 +428,7 @@ export function DebugInfo({ onVisibilityChange }: DebugInfoProps = {}) {
             >
               {/* Header - Fixed at top */}
               <div 
-                className="px-4 py-3 flex items-center justify-between border-b-2 flex-shrink-0"
+                className="px-4 py-3 flex items-center justify-between border-b-2 shrink-0"
                 style={{ 
                   borderColor: `rgb(${orbR}, ${orbG}, ${orbB})`,
                   background: `rgba(${orbR}, ${orbG}, ${orbB}, 0.15)`
@@ -461,7 +461,7 @@ export function DebugInfo({ onVisibilityChange }: DebugInfoProps = {}) {
       {!isMobile && (
         <div 
           ref={panelRef}
-          className={`fixed z-[70] font-mono text-xs transition-all ${
+          className={`fixed z-70 font-mono text-xs transition-all ${
             isDragging ? 'cursor-grabbing' : 'cursor-grab'
           }`}
           onMouseDown={handleMouseDown}
@@ -891,7 +891,7 @@ export function DebugInfo({ onVisibilityChange }: DebugInfoProps = {}) {
                     
                     return (
                       <div 
-                        className={`absolute z-[9999] pointer-events-none ${
+                        className={`absolute z-9999 pointer-events-none ${
                           showBelow 
                             ? 'top-full mt-2' 
                             : '-top-2 -translate-y-full'

@@ -2230,7 +2230,7 @@ html {
   font-size: var(--font-size);
   -ms-overflow-style: none;
   scrollbar-width: none;
-  scroll-snap-type: y mandatory;
+  scroll-snap-type: y proximity;
   overscroll-behavior: none;
   background-color: #030712;
   height: 100%;

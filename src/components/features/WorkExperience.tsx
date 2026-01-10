@@ -43,8 +43,8 @@ export function WorkExperience() {
             style={getItemStyle(index) as React.CSSProperties}
           >
             <div className="flex items-start gap-4 mb-4">
-              <exp.icon className={`w-10 h-10 ${exp.iconColor} flex-shrink-0`} />
-              <div className="flex-grow">
+              <exp.icon className={`w-10 h-10 ${exp.iconColor} shrink-0`} />
+              <div className="grow">
                 <h3 className="text-xl mb-1 text-white">{exp.title}</h3>
                 <span className="text-sm text-gray-500">{exp.period}</span>
               </div>

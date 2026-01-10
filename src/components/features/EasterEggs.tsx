@@ -765,7 +765,7 @@ export function EasterEggs() {
       {/* Achievement Popup - slide in from right with particles */}
       {showAchievement && (
         <div
-          className="fixed top-4 right-4 z-100 border border-purple-500/50 rounded-xl p-4 shadow-2xl max-w-xs backdrop-blur-md"
+          className="fixed top-4 right-4 z-50 border border-purple-500/50 rounded-xl p-4 shadow-2xl max-w-xs backdrop-blur-md"
           style={{
             right: '2rem',
             top: '2rem',

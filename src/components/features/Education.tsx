@@ -42,8 +42,8 @@ export function Education() {
             style={getItemStyle(index) as React.CSSProperties}
           >
             <div className="flex items-start gap-4 mb-4">
-              <GraduationCap className={`w-10 h-10 ${edu.iconColor} flex-shrink-0`} />
-              <div className="flex-grow">
+              <GraduationCap className={`w-10 h-10 ${edu.iconColor} shrink-0`} />
+              <div className="grow">
                 <h3 className="text-xl mb-1 text-white">{edu.degree}</h3>
                 <p className="text-lg text-gray-300 mb-1">{edu.field}</p>
                 <span className="text-sm text-gray-500">{edu.institution} | {edu.years}</span>
