@@ -259,7 +259,8 @@ export function ScrollNavigation({ currentSection, totalSections, sectionNames, 
                 setMobileMenuOpen(!mobileMenuOpen);
               }
             }}
-            className="pointer-events-auto absolute top-6 right-0 transition-all duration-300 hover:scale-105"
+            className="pointer-events-auto absolute top-6 transition-all duration-300 hover:scale-105"
+            style={{ right: '1rem' }}
             aria-label={mobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
             aria-expanded={mobileMenuOpen}
             aria-controls="mobile-navigation-menu"

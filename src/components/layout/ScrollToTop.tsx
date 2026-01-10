@@ -20,10 +20,13 @@ export function ScrollToTop({ currentSection, onGoToFirst }: ScrollToTopProps) {
               onGoToFirst();
             }
           }}
-          className={`pointer-events-auto absolute bottom-8 right-0 transition-all duration-300 cursor-pointer ${
+          className={`pointer-events-auto absolute bottom-8 transition-all duration-300 cursor-pointer ${
             isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10 pointer-events-none'
           }`}
-          style={{ marginBottom: 'env(safe-area-inset-bottom)' }}
+          style={{ 
+            marginBottom: 'env(safe-area-inset-bottom)',
+            right: typeof window !== 'undefined' && window.innerWidth >= 768 ? '-1.5rem' : '1rem'
+          }}
           aria-label="Scroll to top of page"
           aria-hidden={!isVisible}
         >
