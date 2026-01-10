@@ -204,11 +204,13 @@ export function ScrollNavigation({ currentSection, totalSections, sectionNames, 
   return (
     <>
       {/* DESKTOP - Right side vertical dots */}
-      <nav 
-        className="hidden md:block fixed right-8 top-1/2 -translate-y-1/2 z-50"
-        aria-label="Page navigation"
-        role="navigation"
-      >
+      <div className="hidden md:block fixed top-1/2 -translate-y-1/2 left-0 right-0 z-50 pointer-events-none">
+        <div className="relative mx-auto px-6 md:px-8 max-w-6xl h-0">
+          <nav 
+            className="pointer-events-auto absolute right-0 top-0"
+            aria-label="Page navigation"
+            role="navigation"
+          >
         <div className="flex flex-col gap-4">
           {sections.map((section) => (
             <button
@@ -243,21 +245,25 @@ export function ScrollNavigation({ currentSection, totalSections, sectionNames, 
           ))}
         </div>
       </nav>
+        </div>
+      </div>
 
       {/* MOBILE - Hamburger button (top-right) with dynamic glow */}
-      <button
-        onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter' || e.key === ' ') {
-            e.preventDefault();
-            setMobileMenuOpen(!mobileMenuOpen);
-          }
-        }}
-        className="md:hidden fixed top-6 right-6 z-60 transition-all duration-300 hover:scale-105"
-        aria-label={mobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
-        aria-expanded={mobileMenuOpen}
-        aria-controls="mobile-navigation-menu"
-      >
+      <div className="md:hidden fixed top-0 left-0 right-0 z-60 pointer-events-none">
+        <div className="relative mx-auto px-6 max-w-6xl h-0">
+          <button
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                setMobileMenuOpen(!mobileMenuOpen);
+              }
+            }}
+            className="pointer-events-auto absolute top-6 right-0 transition-all duration-300 hover:scale-105"
+            aria-label={mobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
+            aria-expanded={mobileMenuOpen}
+            aria-controls="mobile-navigation-menu"
+          >
         <div className="relative group">
           {/* Shimmer glow layer - same as scroll-to-top */}
           <div className="absolute inset-0 pointer-events-none rounded-xl animate-glow-shimmer -z-10 scroll-to-top-glow" aria-hidden="true" />
@@ -272,10 +278,12 @@ export function ScrollNavigation({ currentSection, totalSections, sectionNames, 
           </div>
         </div>
       </button>
+        </div>
+      </div>
 
       {/* MOBILE - Slide-in menu panel */}
       <div 
-        className={`md:hidden fixed inset-0 z-55 transition-all duration-300 ${
+        className={`md:hidden fixed inset-0 z-50 transition-all duration-300 ${
           mobileMenuOpen ? 'pointer-events-auto' : 'pointer-events-none'
         }`}
         aria-hidden={!mobileMenuOpen}
