@@ -11,11 +11,9 @@ export function ParallaxSection({ children, id, className, style, ...props }: Pa
   return (
     <section
       id={id}
-      className={className}
+      className={`${className || ''} scroll-snap-section`.trim()}
       style={{
         ...style,
-        scrollSnapAlign: 'start',
-        // Note: scroll-snap-stop removed for better iOS Safari compatibility
       }}
       {...props}
     >

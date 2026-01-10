@@ -860,11 +860,11 @@
     flex: 1;
   }
 
-  .flex-shrink-0 {
+  .shrink-0 {
     flex-shrink: 0;
   }
 
-  .flex-grow {
+  .grow {
     flex-grow: 1;
   }
 
@@ -1211,7 +1211,7 @@
     }
   }
 
-  .bg-gradient-to-b {
+  .bg-linear-to-b {
     --tw-gradient-position: to bottom in oklab;
     background-image: linear-gradient(var(--tw-gradient-stops));
   }
@@ -2230,7 +2230,7 @@ html {
   font-size: var(--font-size);
   -ms-overflow-style: none;
   scrollbar-width: none;
-  scroll-snap-type: y mandatory;
+  scroll-snap-type: y proximity;
   overscroll-behavior: none;
   background-color: #030712;
   height: 100%;
@@ -2240,6 +2240,22 @@ html {
 
 html.no-scroll-snap {
   scroll-snap-type: none !important;
+}
+
+/* Scroll snap alignment for sections - desktop only */
+.scroll-snap-section {
+  scroll-snap-align: start;
+}
+
+/* Disable scroll snap on mobile to prevent jumping and allow free scrolling */
+@media (width <= 768px) {
+  html {
+    scroll-snap-type: none;
+  }
+  
+  .scroll-snap-section {
+    scroll-snap-align: none;
+  }
 }
 
 html::-webkit-scrollbar {
