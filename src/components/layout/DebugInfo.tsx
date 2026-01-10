@@ -377,36 +377,40 @@ export function DebugInfo({ onVisibilityChange }: DebugInfoProps = {}) {
 
   if (!isVisible) {
     return (
-      <div 
-        className="fixed z-100 bottom-4 left-4 opacity-20 hover:opacity-100 transition-opacity cursor-pointer touch-none"
-        onClick={() => {
-          setIsVisible(true);
-          // Mark dev console as opened (enables achievement system)
-          localStorage.setItem('dev_console_opened', 'true');
-          console.log(
-            '%c🎮 Achievement system activated!',
-            'color: #10b981; font-size: 12px; font-weight: bold;'
-          );
-        }}
-        onTouchEnd={(e) => {
-          e.preventDefault();
-          setIsVisible(true);
-          localStorage.setItem('dev_console_opened', 'true');
-          console.log(
-            '%c🎮 Achievement system activated!',
-            'color: #10b981; font-size: 12px; font-weight: bold;'
-          );
-        }}
-        title="Tap to open dev console (or press 'D' on desktop)"
-        aria-label="Toggle debug console"
-        style={{
-          // iOS safe area
-          paddingBottom: 'env(safe-area-inset-bottom)',
-          paddingLeft: 'env(safe-area-inset-left)',
-        }}
-      >
-        {/* Just the icon, no background - more subtle */}
-        <Terminal className="w-6 h-6 text-gray-400" aria-hidden="true" />
+      <div className="fixed bottom-0 left-0 right-0 z-100 pointer-events-none">
+        <div className="relative mx-auto px-6 md:px-8 max-w-6xl h-0">
+          <button 
+            className="pointer-events-auto absolute bottom-4 left-0 opacity-20 hover:opacity-100 transition-opacity cursor-pointer touch-none"
+            onClick={() => {
+              setIsVisible(true);
+              // Mark dev console as opened (enables achievement system)
+              localStorage.setItem('dev_console_opened', 'true');
+              console.log(
+                '%c🎮 Achievement system activated!',
+                'color: #10b981; font-size: 12px; font-weight: bold;'
+              );
+            }}
+            onTouchEnd={(e) => {
+              e.preventDefault();
+              setIsVisible(true);
+              localStorage.setItem('dev_console_opened', 'true');
+              console.log(
+                '%c🎮 Achievement system activated!',
+                'color: #10b981; font-size: 12px; font-weight: bold;'
+              );
+            }}
+            title="Tap to open dev console (or press 'D' on desktop)"
+            aria-label="Toggle debug console"
+            style={{
+              // iOS safe area
+              paddingBottom: 'env(safe-area-inset-bottom)',
+              paddingLeft: 'env(safe-area-inset-left)',
+            }}
+          >
+            {/* Just the icon, no background - more subtle */}
+            <Terminal className="w-6 h-6 text-gray-400" aria-hidden="true" />
+          </button>
+        </div>
       </div>
     );
   }
@@ -459,20 +463,22 @@ export function DebugInfo({ onVisibilityChange }: DebugInfoProps = {}) {
 
       {/* Desktop: Draggable panel */}
       {!isMobile && (
-        <div 
-          ref={panelRef}
-          className={`fixed z-70 font-mono text-xs transition-all ${
-            isDragging ? 'cursor-grabbing' : 'cursor-grab'
-          }`}
-          onMouseDown={handleMouseDown}
-          role="region"
-          aria-label="Developer debug console"
-          style={{ 
-            left: `${position.x}px`,
-            top: `${position.y}px`,
-            transform: `scale(${scale})`
-          }}
-        >
+        <div className="fixed top-0 left-0 right-0 z-70 pointer-events-none">
+          <div className="relative mx-auto px-6 md:px-8 max-w-6xl h-0">
+            <div 
+              ref={panelRef}
+              className={`pointer-events-auto absolute font-mono text-xs transition-all ${
+                isDragging ? 'cursor-grabbing' : 'cursor-grab'
+              }`}
+              onMouseDown={handleMouseDown}
+              role="region"
+              aria-label="Developer debug console"
+              style={{ 
+                left: `${position.x}px`,
+                top: `${position.y}px`,
+                transform: `scale(${scale})`
+              }}
+            >
           {/* Cyber/retro styled panel */}
           <div 
             className="relative border-2 rounded-lg overflow-visible backdrop-blur-xl"
@@ -508,7 +514,8 @@ export function DebugInfo({ onVisibilityChange }: DebugInfoProps = {}) {
               {renderConsoleContent()}
             </div>
           </div>
-        </div>
+            </div>
+          </div>
       )}
     </>
   );
