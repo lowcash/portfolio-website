@@ -1,5 +1,7 @@
 import { Menu, X } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
+import { NavDot } from '../ui/nav-dot';
+import { DrawerNavItem } from '../ui/drawer-nav-item';
 
 interface ScrollNavigationProps {
   currentSection: number;
@@ -213,35 +215,12 @@ export function ScrollNavigation({ currentSection, totalSections, sectionNames, 
           >
         <div className="flex flex-col gap-4">
           {sections.map((section) => (
-            <button
+            <NavDot
               key={section.id}
+              isActive={currentSection === section.id}
+              label={section.label}
               onClick={() => onSectionClick(section.id)}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  e.preventDefault();
-                  onSectionClick(section.id);
-                }
-              }}
-              className="group relative cursor-pointer flex items-center justify-center w-3 h-3"
-              aria-label={`Navigate to ${section.label}`}
-              aria-current={currentSection === section.id ? 'true' : 'false'}
-            >
-              {/* Dot - CSS CLASSES pro barvu */}
-              <div 
-                className={`rounded-full transition-all duration-300 ${
-                  currentSection === section.id ? 'scroll-nav-dot-active w-3 h-3' : 'scroll-nav-dot-inactive w-2 h-2'
-                }`}
-                aria-hidden="true"
-              />
-              
-              {/* Tooltip on hover - minimalist */}
-              <div 
-                className="absolute right-6 top-1/2 -translate-y-1/2 bg-black/90 backdrop-blur-sm rounded px-2 py-1 text-xs text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none"
-                aria-hidden="true"
-              >
-                {section.label}
-              </div>
-            </button>
+            />
           ))}
         </div>
       </nav>
@@ -329,63 +308,14 @@ export function ScrollNavigation({ currentSection, totalSections, sectionNames, 
           {/* Menu items */}
           <div className="px-6 pb-8 pt-4">
             <div className="space-y-2">
-              {sections.map((section) => {
-                const isActive = currentSection === section.id;
-                
-                return (
-                  <button
-                    key={section.id}
-                    onClick={() => handleMobileClick(section.id)}
-                    className={`w-full text-left px-4 py-4 rounded-xl transition-all duration-300 relative ${
-                      isActive 
-                        ? 'text-white' // White text for active
-                        : 'bg-white/5 text-gray-300 hover:bg-white/10'
-                    }`}
-                    style={{
-                      minHeight: '56px', // Apple HIG minimum touch target
-                    }}
-                  >
-                    {/* Active state - same glow effect as hamburger/scroll-to-top */}
-                    {isActive && (
-                      <>
-                        {/* Shimmer glow layer - outer glow - STRONGER */}
-                        <div 
-                          className="absolute inset-0 pointer-events-none rounded-xl animate-glow-shimmer -z-10" 
-                          style={{
-                            boxShadow: '0 0 60px rgba(var(--orb-r), var(--orb-g), var(--orb-b), 0.8), 0 0 100px rgba(var(--orb-r), var(--orb-g), var(--orb-b), 0.4)',
-                            transition: 'box-shadow 0.3s ease-out'
-                          }}
-                        />
-                        
-                        {/* Inner background with blur - MORE COLOR */}
-                        <div 
-                          className="absolute inset-0 rounded-xl bg-black/40 backdrop-blur-sm -z-10"
-                          style={{
-                            boxShadow: 'inset 0 2px 20px rgba(0,0,0,0.5), inset 0 0 60px rgba(var(--orb-r), var(--orb-g), var(--orb-b), 0.25)',
-                            backgroundColor: `rgba(var(--orb-r), var(--orb-g), var(--orb-b), 0.15)`,
-                            transition: 'all 0.3s ease-out'
-                          }}
-                        />
-                      </>
-                    )}
-                    
-                    <div className="flex items-center justify-between relative z-10">
-                      <span className="text-base">
-                        {section.label}
-                      </span>
-                      {isActive && (
-                        <div 
-                          className="w-2 h-2 rounded-full animate-pulse opacity-80"
-                          style={{
-                            backgroundColor: 'rgb(var(--orb-r), var(--orb-g), var(--orb-b))',
-                            transition: 'background-color 0.3s ease-out'
-                          }}
-                        />
-                      )}
-                    </div>
-                  </button>
-                );
-              })}
+              {sections.map((section) => (
+                <DrawerNavItem
+                  key={section.id}
+                  isActive={currentSection === section.id}
+                  label={section.label}
+                  onClick={() => handleMobileClick(section.id)}
+                />
+              ))}
             </div>
           </div>
         </nav>

@@ -1,3 +1,4 @@
+// style-boundary-ignore-file: dynamic orbR/orbG/orbB RGB values computed from React state — inline styles are unavoidable here
 import { useEffect, useState, useRef } from 'react';
 import { Terminal, Trophy } from 'lucide-react';
 import type { Achievement } from '../features/EasterEggs';

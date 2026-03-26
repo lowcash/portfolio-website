@@ -1,3 +1,4 @@
+// style-boundary-ignore-file: orb animation uses JS-computed inline styles (size, position, filter, duration) — cannot be expressed as static Tailwind classes
 import { useEffect, useState, useRef } from 'react';
 import { ORB_COLORS } from '../../lib/section-config';
 import { ANIMATION_CONFIG, SECTION_COUNT } from '../../lib/constants';

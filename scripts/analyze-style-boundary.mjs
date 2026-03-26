@@ -1,4 +1,5 @@
 import fs from 'node:fs/promises'
+import { readFileSync } from 'node:fs'
 import path from 'node:path'
 import { execFileSync } from 'node:child_process'
 
@@ -15,6 +16,7 @@ const ENFORCE_ONLY_NEW = CHANGED_MODE && STRICT_MODE
 const IGNORE_PARTS = new Set(['node_modules', 'build', 'dist', 'test-results', 'playwright-report'])
 
 const ATTRIBUTE_REGEX = /\b(className|style)\s*=\s*[{"']/g
+const FILE_IGNORE_DIRECTIVE = 'style-boundary-ignore-file'
 
 function isUiFile(filePath) {
   return filePath.startsWith(UI_DIR + path.sep)
@@ -96,6 +98,12 @@ function analyzeContent(filePath, content) {
     return []
   }
 
+  // File-level escape hatch: add "// style-boundary-ignore-file" near the top of a file
+  // to suppress all violations. Use only for justified exceptions (e.g. dynamic runtime styles).
+  if (content.slice(0, 400).includes(FILE_IGNORE_DIRECTIVE)) {
+    return []
+  }
+
   const matches = [...content.matchAll(ATTRIBUTE_REGEX)]
 
   return matches.map((match) => ({
@@ -148,6 +156,17 @@ async function collectIncrementalViolations(files) {
         currentFile = path.join(ROOT_DIR, currentFilePath)
         if (TARGET_EXTENSIONS.has(path.extname(currentFile))) {
           filesWithDiff.add(currentFile)
+          // Respect file-level escape hatch: null out currentFile to skip violation collection
+          try {
+            const head = readFileSync(currentFile, { encoding: 'utf8' }).slice(0, 400)
+            if (head.includes(FILE_IGNORE_DIRECTIVE)) {
+              currentFile = null
+            }
+          } catch {
+            currentFile = null
+          }
+        } else {
+          currentFile = null
         }
         continue
       }
