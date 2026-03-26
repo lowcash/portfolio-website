@@ -106,6 +106,16 @@ export function DebugInfo({ onVisibilityChange }: DebugInfoProps = {}) {
   // Apply settings to CSS custom properties
   useEffect(() => {
     const root = document.documentElement;
+    const settingsPayload = {
+      orbBrightness,
+      animationSpeed,
+      colorVariation: colorVariation / 100,
+      orbSize,
+      orbBlur,
+      orbOpacity,
+      positionVariation,
+    };
+
     root.style.setProperty('--orb-brightness', String(orbBrightness));
     root.style.setProperty('--animation-speed', String(animationSpeed));
     root.style.setProperty('--color-variation', String(colorVariation / 100)); // normalize to 0-1
@@ -120,6 +130,7 @@ export function DebugInfo({ onVisibilityChange }: DebugInfoProps = {}) {
     localStorage.setItem('orb_blur', String(orbBlur));
     localStorage.setItem('orb_opacity', String(orbOpacity));
     localStorage.setItem('position_variation', String(positionVariation));
+    window.dispatchEvent(new CustomEvent('orb-settings-change', { detail: settingsPayload }));
   }, [orbBrightness, animationSpeed, colorVariation, orbSize, orbBlur, orbOpacity, positionVariation]);
 
   // Toggle visibility with "D" key
@@ -183,6 +194,10 @@ export function DebugInfo({ onVisibilityChange }: DebugInfoProps = {}) {
 
   // Track scroll and orb colors
   useEffect(() => {
+    if (!isVisible) {
+      return;
+    }
+
     let lastTime = performance.now();
     let frameCount = 0;
 
@@ -222,7 +237,7 @@ export function DebugInfo({ onVisibilityChange }: DebugInfoProps = {}) {
       window.removeEventListener('scroll', handleScroll);
       clearInterval(fpsInterval);
     };
-  }, []);
+  }, [isVisible]);
 
   // Listen for achievement updates
   useEffect(() => {

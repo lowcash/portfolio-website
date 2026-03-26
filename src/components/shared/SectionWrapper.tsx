@@ -21,8 +21,8 @@ export function SectionWrapper({
   const { revealRef, style } = useSimpleScrollReveal();
 
   return (
-    <section 
-      id={id}
+    <div
+      data-section={id}
       className={`min-h-screen flex items-center justify-center py-20 px-6 md:px-8 relative ${className}`}
       style={{ scrollSnapAlign: 'start' }}
     >
@@ -33,6 +33,6 @@ export function SectionWrapper({
       >
         {children}
       </div>
-    </section>
+    </div>
   );
 }

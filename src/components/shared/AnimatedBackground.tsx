@@ -2,6 +2,16 @@ import { useEffect, useState, useRef } from 'react';
 import { ORB_COLORS } from '../../lib/section-config';
 import { ANIMATION_CONFIG, SECTION_COUNT } from '../../lib/constants';
 
+type OrbSettings = {
+  orbBrightness: number;
+  animationSpeed: number;
+  colorVariation: number;
+  orbSize: number;
+  orbBlur: number;
+  orbOpacity: number;
+  positionVariation: number;
+};
+
 /**
  * Generate color breakpoints dynamically based on section count
  * Each section gets equal percentage space (100% / 9 sections = ~11.11% each)
@@ -93,6 +103,14 @@ export function AnimatedBackground() {
   const [targetScrollPercent, setTargetScrollPercent] = useState(0);
   const [smoothScrollPercent, setSmoothScrollPercent] = useState(0);
   const rafRef = useRef<number | null>(null);
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false);
+  const lastCssValuesRef = useRef<{
+    scrollProgress: string;
+    scrollPercent: string;
+    orbR: string;
+    orbG: string;
+    orbB: string;
+  } | null>(null);
   
   // Easter egg settings from CSS custom properties
   const [orbBrightness, setOrbBrightness] = useState(0.5); // Hidden, controlled by opacity
@@ -117,17 +135,31 @@ export function AnimatedBackground() {
     return () => window.removeEventListener('resize', updateSize);
   }, []);
 
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+    const updatePreference = () => {
+      setPrefersReducedMotion(mediaQuery.matches);
+    };
+
+    updatePreference();
+    mediaQuery.addEventListener('change', updatePreference);
+
+    return () => mediaQuery.removeEventListener('change', updatePreference);
+  }, []);
+
   // Read settings from CSS custom properties
   useEffect(() => {
-    const checkSettings = () => {
-      const root = document.documentElement;
-      const brightness = parseFloat(root.style.getPropertyValue('--orb-brightness') || '0.5');
-      const speed = parseFloat(root.style.getPropertyValue('--animation-speed') || '3.0');
-      const variation = parseFloat(root.style.getPropertyValue('--color-variation') || '0.4');
-      const size = parseFloat(root.style.getPropertyValue('--orb-size') || '1.2');
-      const blur = parseFloat(root.style.getPropertyValue('--orb-blur') || '1.0');
-      const opacity = parseFloat(root.style.getPropertyValue('--orb-opacity') || '1.4');
-      const posVar = parseFloat(root.style.getPropertyValue('--position-variation') || '1.0');
+    const applySettings = (settings: OrbSettings) => {
+      const {
+        orbBrightness: brightness,
+        animationSpeed: speed,
+        colorVariation: variation,
+        orbSize: size,
+        orbBlur: blur,
+        orbOpacity: opacity,
+        positionVariation: posVar,
+      } = settings;
+
       setOrbBrightness(brightness);
       setAnimationSpeed(speed);
       setColorVariation(variation);
@@ -136,11 +168,52 @@ export function AnimatedBackground() {
       setOrbOpacity(opacity);
       setPositionVariation(posVar);
     };
+
+    const readSettingsFromCss = (): OrbSettings => {
+      const rootStyles = getComputedStyle(document.documentElement);
+
+      return {
+        orbBrightness: parseFloat(rootStyles.getPropertyValue('--orb-brightness') || '0.5'),
+        animationSpeed: parseFloat(rootStyles.getPropertyValue('--animation-speed') || '3.0'),
+        colorVariation: parseFloat(rootStyles.getPropertyValue('--color-variation') || '0.4'),
+        orbSize: parseFloat(rootStyles.getPropertyValue('--orb-size') || '1.2'),
+        orbBlur: parseFloat(rootStyles.getPropertyValue('--orb-blur') || '1.0'),
+        orbOpacity: parseFloat(rootStyles.getPropertyValue('--orb-opacity') || '1.4'),
+        positionVariation: parseFloat(rootStyles.getPropertyValue('--position-variation') || '1.0'),
+      };
+    };
+
+    const handleSettingsEvent = (event: Event) => {
+      const customEvent = event as CustomEvent<OrbSettings>;
+      if (customEvent.detail) {
+        applySettings(customEvent.detail);
+      }
+    };
+
+    const handleStorage = (event: StorageEvent) => {
+      const trackedKeys = new Set([
+        'orb_brightness',
+        'animation_speed',
+        'color_variation',
+        'orb_size',
+        'orb_blur',
+        'orb_opacity',
+        'position_variation',
+      ]);
+
+      if (!event.key || trackedKeys.has(event.key)) {
+        applySettings(readSettingsFromCss());
+      }
+    };
     
-    checkSettings();
-    // Check periodically for easter egg changes
-    const interval = setInterval(checkSettings, 100);
-    return () => clearInterval(interval);
+    applySettings(readSettingsFromCss());
+    window.addEventListener('orb-settings-change', handleSettingsEvent as EventListener);
+    window.addEventListener('storage', handleStorage);
+
+    return () => {
+      window.removeEventListener('orb-settings-change', handleSettingsEvent as EventListener);
+      window.removeEventListener('storage', handleStorage);
+    };
   }, []);
 
   // RAW SCROLL TRACKING - set target (SKIP when mobile menu is open to prevent progress bar jumping to 0)
@@ -171,7 +244,17 @@ export function AnimatedBackground() {
 
   // SMOOTH INTERPOLATION - RAF loop
   useEffect(() => {
+    if (prefersReducedMotion) {
+      setSmoothScrollPercent(targetScrollPercent);
+      return;
+    }
+
     const animate = () => {
+      if (document.visibilityState !== 'visible') {
+        rafRef.current = null;
+        return;
+      }
+
       setSmoothScrollPercent(prev => {
         const diff = targetScrollPercent - prev;
         
@@ -185,15 +268,24 @@ export function AnimatedBackground() {
       
       rafRef.current = requestAnimationFrame(animate);
     };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible' && rafRef.current === null) {
+        rafRef.current = requestAnimationFrame(animate);
+      }
+    };
     
     rafRef.current = requestAnimationFrame(animate);
+    document.addEventListener('visibilitychange', handleVisibilityChange);
     
     return () => {
       if (rafRef.current) {
         cancelAnimationFrame(rafRef.current);
       }
+      rafRef.current = null;
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
     };
-  }, [targetScrollPercent]);
+  }, [prefersReducedMotion, targetScrollPercent]);
 
   // Calculate segment (0 to SECTION_COUNT-2, so 0-7 for 9 sections)
   const percentPerSegment = 100 / (SECTION_COUNT - 1); // ~12.5% per segment
@@ -221,15 +313,38 @@ export function AnimatedBackground() {
   // Nastavit CSS custom properties
   useEffect(() => {
     const root = document.documentElement;
+    const roundedPercent = Math.round(smoothScrollPercent * 20) / 20;
+    const progressValue = String(roundedPercent / 100);
+    const percentValue = String(roundedPercent);
+    const rValue = String(interpolatedR);
+    const gValue = String(interpolatedG);
+    const bValue = String(interpolatedB);
+    const previous = lastCssValuesRef.current;
+    const nextValues = {
+      scrollProgress: progressValue,
+      scrollPercent: percentValue,
+      orbR: rValue,
+      orbG: gValue,
+      orbB: bValue,
+    };
     
-    // Globální progress (0-1) - SMOOTH VERSION
-    root.style.setProperty('--scroll-progress', String(smoothScrollPercent / 100));
-    root.style.setProperty('--scroll-percent', String(smoothScrollPercent));
+    if (previous?.scrollProgress !== nextValues.scrollProgress) {
+      root.style.setProperty('--scroll-progress', nextValues.scrollProgress);
+    }
+    if (previous?.scrollPercent !== nextValues.scrollPercent) {
+      root.style.setProperty('--scroll-percent', nextValues.scrollPercent);
+    }
+    if (previous?.orbR !== nextValues.orbR) {
+      root.style.setProperty('--orb-r', nextValues.orbR);
+    }
+    if (previous?.orbG !== nextValues.orbG) {
+      root.style.setProperty('--orb-g', nextValues.orbG);
+    }
+    if (previous?.orbB !== nextValues.orbB) {
+      root.style.setProperty('--orb-b', nextValues.orbB);
+    }
     
-    // Interpolované RGB hodnoty
-    root.style.setProperty('--orb-r', String(interpolatedR));
-    root.style.setProperty('--orb-g', String(interpolatedG));
-    root.style.setProperty('--orb-b', String(interpolatedB));
+    lastCssValuesRef.current = nextValues;
   }, [smoothScrollPercent, interpolatedR, interpolatedG, interpolatedB]);
   
   const orbColor = `rgb(${interpolatedR}, ${interpolatedG}, ${interpolatedB})`;
@@ -255,6 +370,25 @@ export function AnimatedBackground() {
   
   // On mobile, scale down orb sizes to fit viewport
   const mobileSizeMultiplier = isMobile ? 0.4 : 1.0; // Mobile: 40% size
+
+  const getOrbMotionStyle = (blurValue: number, durationSeconds: number) => {
+    if (prefersReducedMotion) {
+      return {
+        animation: 'none',
+        filter: 'none',
+        willChange: 'auto',
+      };
+    }
+
+    const effectiveBlur = isMobile ? blurValue * orbBlur * 0.35 : blurValue * orbBlur;
+    const effectiveBrightness = isMobile ? Math.min(orbBrightness, 0.75) : orbBrightness;
+
+    return {
+      filter: `blur(${effectiveBlur}px) brightness(${effectiveBrightness})`,
+      animationDuration: `${durationSeconds / animationSpeed}s`,
+      willChange: isMobile ? 'auto' : 'transform',
+    };
+  };
   
   const getPosition = (baseTop: number, baseLeft: number, seed: number) => {
     // On mobile, use different base positions - spread them around the center
@@ -304,10 +438,8 @@ export function AnimatedBackground() {
           width: `${800 * orbSize * mobileSizeMultiplier}px`,
           height: `${800 * orbSize * mobileSizeMultiplier}px`,
           background: `radial-gradient(circle, ${orbColor} 0%, transparent 70%)`,
-          filter: `blur(${120 * orbBlur}px) brightness(${orbBrightness})`,
           opacity: 0.25 * orbOpacity,
-          willChange: 'transform',
-          animationDuration: `${45 / animationSpeed}s`,
+          ...getOrbMotionStyle(120, 45),
         }}
       />
       
@@ -319,10 +451,8 @@ export function AnimatedBackground() {
           width: `${600 * orbSize * mobileSizeMultiplier}px`,
           height: `${600 * orbSize * mobileSizeMultiplier}px`,
           background: `radial-gradient(circle, ${orbColor1} 0%, transparent 70%)`,
-          filter: `blur(${100 * orbBlur}px) brightness(${orbBrightness})`,
           opacity: 0.2 * orbOpacity,
-          willChange: 'transform',
-          animationDuration: `${38 / animationSpeed}s`,
+          ...getOrbMotionStyle(100, 38),
         }}
       />
       
@@ -333,10 +463,8 @@ export function AnimatedBackground() {
           width: `${650 * orbSize * mobileSizeMultiplier}px`,
           height: `${650 * orbSize * mobileSizeMultiplier}px`,
           background: `radial-gradient(circle, ${orbColor2} 0%, transparent 70%)`,
-          filter: `blur(${110 * orbBlur}px) brightness(${orbBrightness})`,
           opacity: 0.22 * orbOpacity,
-          willChange: 'transform',
-          animationDuration: `${42 / animationSpeed}s`,
+          ...getOrbMotionStyle(110, 42),
         }}
       />
       
@@ -348,10 +476,8 @@ export function AnimatedBackground() {
           width: `${500 * orbSize * mobileSizeMultiplier}px`,
           height: `${500 * orbSize * mobileSizeMultiplier}px`,
           background: `radial-gradient(circle, ${orbColor3} 0%, transparent 70%)`,
-          filter: `blur(${90 * orbBlur}px) brightness(${orbBrightness})`,
           opacity: 0.18 * orbOpacity,
-          willChange: 'transform',
-          animationDuration: `${40 / animationSpeed}s`,
+          ...getOrbMotionStyle(90, 40),
         }}
       />
       
@@ -362,10 +488,8 @@ export function AnimatedBackground() {
           width: `${550 * orbSize * mobileSizeMultiplier}px`,
           height: `${550 * orbSize * mobileSizeMultiplier}px`,
           background: `radial-gradient(circle, ${orbColor4} 0%, transparent 70%)`,
-          filter: `blur(${95 * orbBlur}px) brightness(${orbBrightness})`,
           opacity: 0.19 * orbOpacity,
-          willChange: 'transform',
-          animationDuration: `${36 / animationSpeed}s`,
+          ...getOrbMotionStyle(95, 36),
         }}
       />
       
@@ -377,10 +501,8 @@ export function AnimatedBackground() {
           width: `${700 * orbSize * mobileSizeMultiplier}px`,
           height: `${700 * orbSize * mobileSizeMultiplier}px`,
           background: `radial-gradient(circle, ${orbColor5} 0%, transparent 70%)`,
-          filter: `blur(${115 * orbBlur}px) brightness(${orbBrightness})`,
           opacity: 0.21 * orbOpacity,
-          willChange: 'transform',
-          animationDuration: `${44 / animationSpeed}s`,
+          ...getOrbMotionStyle(115, 44),
         }}
       />
       
@@ -391,10 +513,8 @@ export function AnimatedBackground() {
           width: `${600 * orbSize * mobileSizeMultiplier}px`,
           height: `${600 * orbSize * mobileSizeMultiplier}px`,
           background: `radial-gradient(circle, ${orbColor6} 0%, transparent 70%)`,
-          filter: `blur(${105 * orbBlur}px) brightness(${orbBrightness})`,
           opacity: 0.2 * orbOpacity,
-          willChange: 'transform',
-          animationDuration: `${50 / animationSpeed}s`,
+          ...getOrbMotionStyle(105, 50),
         }}
       />
       
@@ -406,10 +526,8 @@ export function AnimatedBackground() {
           width: `${550 * orbSize * mobileSizeMultiplier}px`,
           height: `${550 * orbSize * mobileSizeMultiplier}px`,
           background: `radial-gradient(circle, ${orbColor1} 0%, transparent 70%)`,
-          filter: `blur(${100 * orbBlur}px) brightness(${orbBrightness})`,
           opacity: 0.18 * orbOpacity,
-          willChange: 'transform',
-          animationDuration: `${46 / animationSpeed}s`,
+          ...getOrbMotionStyle(100, 46),
         }}
       />
       

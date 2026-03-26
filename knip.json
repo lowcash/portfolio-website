@@ -1,0 +1,22 @@
+{
+  "$schema": "https://unpkg.com/knip@6/schema.json",
+  "entry": [
+    "src/main.tsx",
+    "vite.config.ts",
+    "eslint.config.js",
+    "playwright.config.ts",
+    "scripts/run-lighthouse.mjs",
+    "scripts/analyze-style-boundary.mjs"
+  ],
+  "project": [
+    "src/**/*.{ts,tsx}",
+    "tests/**/*.{ts,tsx}",
+    "scripts/**/*.mjs"
+  ],
+  "ignore": [
+    "build/**",
+    "dist/**",
+    "test-results/**",
+    "playwright-report/**"
+  ]
+}

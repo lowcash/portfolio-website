@@ -15,7 +15,6 @@ import { DebugInfo } from './components/layout/DebugInfo';
 import { EasterEggs } from './components/features/EasterEggs';
 import { ScrollProgress } from './components/layout/ScrollProgress';
 import { useEffect, useState, useMemo } from 'react';
-import { LazyMotion, domAnimation } from 'framer-motion';
 
 export default function App() {
   const sections = useMemo(() => [
@@ -64,12 +63,9 @@ export default function App() {
 
   // Simple scroll tracking - which section is in view (DISABLED when mobile menu is open)
   useEffect(() => {
-    const handleScroll = () => {
-      // SKIP if mobile menu is open OR if we're restoring scroll - prevents jumping
-      if (isMobileMenuOpen || isRestoringScroll) {
-        return;
-      }
-      
+    let frameId: number | null = null;
+
+    const updateCurrentSection = () => {
       const windowHeight = window.innerHeight;
       const viewportMiddle = windowHeight / 2;
       
@@ -96,9 +92,31 @@ export default function App() {
       setCurrentSection(closestIndex);
     };
 
-    handleScroll(); // Initial
+    const handleScroll = () => {
+      // SKIP if mobile menu is open OR if we're restoring scroll - prevents jumping
+      if (isMobileMenuOpen || isRestoringScroll) {
+        return;
+      }
+
+      if (frameId !== null) {
+        return;
+      }
+
+      frameId = requestAnimationFrame(() => {
+        updateCurrentSection();
+        frameId = null;
+      });
+    };
+
+    updateCurrentSection(); // Initial
     window.addEventListener('scroll', handleScroll, { passive: true });
-    return () => window.removeEventListener('scroll', handleScroll);
+
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      if (frameId !== null) {
+        cancelAnimationFrame(frameId);
+      }
+    };
   }, [sections, isMobileMenuOpen, isRestoringScroll]);
 
   const scrollToSection = (index: number) => {
@@ -123,12 +141,12 @@ export default function App() {
   };
 
   return (
-    <LazyMotion features={domAnimation}>
+    <>
       <EasterEggs />
-      
+
       {/* ANIMATED BACKGROUND - čistě od scroll pozice */}
       <AnimatedBackground />
-      
+
       <div className="text-white" style={{ background: 'transparent' }} role="document">
         {/* Main content - semantic HTML */}
         <main id="main-content" role="main">
@@ -146,12 +164,12 @@ export default function App() {
             </ParallaxSection>
           ))}
         </main>
-        
-        <ScrollToTop 
+
+        <ScrollToTop
           currentSection={currentSection}
           onGoToFirst={() => scrollToSection(0)}
         />
-        
+
         <ScrollNavigation
           currentSection={currentSection}
           totalSections={sections.length}
@@ -160,10 +178,10 @@ export default function App() {
           onMenuStateChange={setIsMobileMenuOpen}
           onScrollRestore={setIsRestoringScroll}
         />
-        
+
         <DebugInfo onVisibilityChange={setIsDevConsoleOpen} />
         <ScrollProgress />
       </div>
-    </LazyMotion>
+    </>
   );
 }

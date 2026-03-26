@@ -23,5 +23,3 @@ export const ANIMATION_CONFIG = {
 
 export const SECTION_COUNT = 9; // Total number of sections in the app
 
-export const SITE_URL = 'https://lowcash.dev';
-
