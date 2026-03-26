@@ -206,24 +206,24 @@ export function ScrollNavigation({ currentSection, totalSections, sectionNames, 
   return (
     <>
       {/* DESKTOP - Right side vertical dots */}
-      <div className="hidden md:block fixed top-1/2 -translate-y-1/2 left-0 right-0 z-50 pointer-events-none">
-        <div className="relative mx-auto px-6 md:px-8 max-w-6xl h-0">
-          <nav 
-            className="pointer-events-auto absolute right-0 top-0"
+      <div className="hidden md:block fixed top-1/2 left-0 right-0 z-50 pointer-events-none">
+        <div className="relative mx-auto w-full max-w-6xl px-6 md:px-8 h-0">
+          <nav
+            className="pointer-events-auto absolute right-2 md:right-3 top-0 -translate-y-1/2"
             aria-label="Page navigation"
             role="navigation"
           >
-        <div className="flex flex-col gap-4">
-          {sections.map((section) => (
-            <NavDot
-              key={section.id}
-              isActive={currentSection === section.id}
-              label={section.label}
-              onClick={() => onSectionClick(section.id)}
-            />
-          ))}
-        </div>
-      </nav>
+            <div className="flex flex-col gap-4">
+              {sections.map((section) => (
+                <NavDot
+                  key={section.id}
+                  isActive={currentSection === section.id}
+                  label={section.label}
+                  onClick={() => onSectionClick(section.id)}
+                />
+              ))}
+            </div>
+          </nav>
         </div>
       </div>
 

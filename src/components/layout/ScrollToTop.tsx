@@ -10,8 +10,8 @@ export function ScrollToTop({ currentSection, onGoToFirst }: ScrollToTopProps) {
   const isVisible = currentSection > 0;
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-50 pointer-events-none">
-      <div className="relative mx-auto px-6 md:px-8 max-w-6xl h-0">
+    <div className="fixed inset-x-0 bottom-0 z-50 pointer-events-none">
+      <div className="relative mx-auto w-full max-w-6xl px-6 md:px-8">
         <button
           onClick={onGoToFirst}
           onKeyDown={(e) => {
@@ -20,12 +20,11 @@ export function ScrollToTop({ currentSection, onGoToFirst }: ScrollToTopProps) {
               onGoToFirst();
             }
           }}
-          className={`pointer-events-auto absolute bottom-8 transition-all duration-300 cursor-pointer ${
+          className={`pointer-events-auto absolute bottom-8 right-2 md:right-3 transition-all duration-300 cursor-pointer ${
             isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10 pointer-events-none'
           }`}
           style={{ 
-            marginBottom: 'env(safe-area-inset-bottom)',
-            right: typeof window !== 'undefined' && window.innerWidth >= 768 ? '-1.5rem' : '1rem'
+            marginBottom: 'env(safe-area-inset-bottom)'
           }}
           aria-label="Scroll to top of page"
           aria-hidden={!isVisible}

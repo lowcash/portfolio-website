@@ -11,7 +11,7 @@ export default defineConfig(() => {
       {
         name: 'html-transform',
         transformIndexHtml(html) {
-          return html.replace(/%VITE_GA_TRACKING_ID%/g, gaTrackingId);
+          return html.replace(/__GA_TRACKING_ID__/g, gaTrackingId);
         },
       },
     ],
