@@ -32,6 +32,8 @@ const TEXT_SIZE_CLASS: Record<TextSize, string> = {
   lg: 'text-lg',
 }
 
+// Heading is unused but kept for consistency in the typography module
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function Heading({ children, level = 3 }: HeadingProps) {
   if (level === 1) return <h1 className={HEADING_CLASS[1]}>{children}</h1>
   if (level === 2) return <h2 className={HEADING_CLASS[2]}>{children}</h2>
