@@ -3,6 +3,7 @@ import { useState, useRef, useEffect } from 'react';
 import { NavDot } from '../ui/nav-dot';
 import { DrawerNavItem } from '../ui/drawer-nav-item';
 import { FloatingRail } from '../ui/floating-rail';
+import { MobileDrawerBackdrop } from '../ui/mobile-drawer-backdrop';
 
 interface ScrollNavigationProps {
   currentSection: number;
@@ -257,28 +258,7 @@ export function ScrollNavigation({ currentSection, totalSections, sectionNames, 
       </div>
 
       {/* MOBILE - Slide-in menu panel */}
-      <div 
-        className={`mobile-until-lg fixed inset-0 z-50 transition-all duration-300 ${
-          mobileMenuOpen ? 'pointer-events-auto' : 'pointer-events-none'
-        }`}
-        aria-hidden={!mobileMenuOpen}
-      >
-        {/* Backdrop */}
-        <div 
-          className={`absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity duration-300 ${
-            mobileMenuOpen ? 'opacity-100' : 'opacity-0'
-          }`}
-          onClick={() => setMobileMenuOpen(false)}
-        />
-
-        {/* Dedicated close hit area for reliable backdrop interactions and E2E stability */}
-        <button
-          type="button"
-          className="absolute bg-transparent"
-          style={{ top: 0, left: 0, right: 0, height: '7rem', zIndex: 2 }}
-          onClick={() => setMobileMenuOpen(false)}
-          aria-label="Close menu backdrop"
-        />
+      <MobileDrawerBackdrop isOpen={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)}>
         
         {/* Menu panel - slide from bottom with swipe support */}
         <nav 
@@ -323,7 +303,7 @@ export function ScrollNavigation({ currentSection, totalSections, sectionNames, 
             </div>
           </div>
         </nav>
-      </div>
+      </MobileDrawerBackdrop>
     </>
   );
 }
