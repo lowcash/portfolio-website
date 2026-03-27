@@ -1,8 +1,9 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
   "entry": [
-    "src/main.tsx",
-    "vite.config.ts",
+    "app/layout.tsx",
+    "app/page.tsx",
+    "next.config.mjs",
     "eslint.config.js",
     "playwright.config.ts",
     "scripts/run-lighthouse.mjs",

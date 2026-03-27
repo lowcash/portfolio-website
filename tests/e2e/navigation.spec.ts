@@ -34,6 +34,19 @@ test.describe('Desktop navigation baseline', () => {
     ).toHaveAttribute('aria-current', 'true')
   })
 
+  test('navigation order keeps Work Experience before Academic Journey', async ({ page }) => {
+    const workExpButton = page.getByRole('button', { name: 'Navigate to Work Experience' })
+    const educationButton = page.getByRole('button', { name: 'Navigate to Academic Journey' })
+
+    await expect(workExpButton).toBeVisible()
+    await expect(educationButton).toBeVisible()
+
+    const workExpY = await workExpButton.evaluate((el) => el.getBoundingClientRect().top)
+    const educationY = await educationButton.evaluate((el) => el.getBoundingClientRect().top)
+
+    expect(workExpY).toBeLessThan(educationY)
+  })
+
   test('scroll-to-top appears after leaving hero and returns page to top', async ({ page }) => {
     await page.locator('#contact').scrollIntoViewIfNeeded()
     await page.waitForTimeout(900)

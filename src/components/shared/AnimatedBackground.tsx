@@ -246,7 +246,6 @@ export function AnimatedBackground() {
   // SMOOTH INTERPOLATION - RAF loop
   useEffect(() => {
     if (prefersReducedMotion) {
-      setSmoothScrollPercent(targetScrollPercent);
       return;
     }
 
@@ -289,17 +288,18 @@ export function AnimatedBackground() {
   }, [prefersReducedMotion, targetScrollPercent]);
 
   // Calculate segment (0 to SECTION_COUNT-2, so 0-7 for 9 sections)
+  const effectiveScrollPercent = prefersReducedMotion ? targetScrollPercent : smoothScrollPercent;
   const percentPerSegment = 100 / (SECTION_COUNT - 1); // ~12.5% per segment
   const segmentIndex = Math.min(
     SECTION_COUNT - 2, 
-    Math.floor(smoothScrollPercent / percentPerSegment)
+    Math.floor(effectiveScrollPercent / percentPerSegment)
   );
   
   // Local progress within current segment (0-1)
   const segmentStart = segmentIndex * percentPerSegment;
   const segmentProgress = Math.min(
     1, 
-    Math.max(0, (smoothScrollPercent - segmentStart) / percentPerSegment)
+    Math.max(0, (effectiveScrollPercent - segmentStart) / percentPerSegment)
   );
   
   // Barvy pro aktuální segment
@@ -314,7 +314,7 @@ export function AnimatedBackground() {
   // Nastavit CSS custom properties
   useEffect(() => {
     const root = document.documentElement;
-    const roundedPercent = Math.round(smoothScrollPercent * 20) / 20;
+    const roundedPercent = Math.round(effectiveScrollPercent * 20) / 20;
     const progressValue = String(roundedPercent / 100);
     const percentValue = String(roundedPercent);
     const rValue = String(interpolatedR);
@@ -346,7 +346,7 @@ export function AnimatedBackground() {
     }
     
     lastCssValuesRef.current = nextValues;
-  }, [smoothScrollPercent, interpolatedR, interpolatedG, interpolatedB]);
+  }, [effectiveScrollPercent, interpolatedR, interpolatedG, interpolatedB]);
   
   const orbColor = `rgb(${interpolatedR}, ${interpolatedG}, ${interpolatedB})`;
   

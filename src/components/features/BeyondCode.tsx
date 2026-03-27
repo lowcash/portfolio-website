@@ -3,12 +3,10 @@ import { SectionWrapper } from '../shared/SectionWrapper';
 import { SectionHeader } from '../shared/SectionHeader';
 import { Card } from '../shared/Card';
 import { TechTag } from '../shared/TechTag';
-import { useStaggerFadeIn } from '../../hooks/useStaggerFadeIn';
 import { SECTION_STYLES } from '../../lib/section-config';
 import { siteContent } from '../../lib/content';
 
 export function BeyondCode() {
-  const { ref: cardsRef, getItemStyle } = useStaggerFadeIn(4);
 
   const content = siteContent.beyondCode;
   const iconMap = {
@@ -26,7 +24,7 @@ export function BeyondCode() {
         {...SECTION_STYLES.beyondCode}
       />
 
-      <div ref={cardsRef} className="grid md:grid-cols-2 gap-3">
+      <div className="grid md:grid-cols-2 gap-3">
         {content.items.map((interest, index) => (
           <Card
             key={index}
@@ -34,7 +32,7 @@ export function BeyondCode() {
             iconColor={interest.iconColor}
             title={interest.title}
             description={interest.description}
-            style={getItemStyle(index) as React.CSSProperties}
+           
             className="h-full"
           >
             <div className="flex flex-wrap gap-2 mb-4">

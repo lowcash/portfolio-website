@@ -3,7 +3,6 @@ import { SectionWrapper } from '../shared/SectionWrapper';
 import { SectionHeader } from '../shared/SectionHeader';
 import { Card } from '../shared/Card';
 import { TechTag } from '../shared/TechTag';
-import { useStaggerFadeIn } from '../../hooks/useStaggerFadeIn';
 import { SECTION_STYLES } from '../../lib/section-config';
 import { siteContent, type TechJourneyIconKey } from '../../lib/content';
 
@@ -16,7 +15,6 @@ const iconMap: Record<TechJourneyIconKey, LucideIcon> = {
 };
 
 export function TechJourney() {
-  const { ref: cardsRef, getItemStyle } = useStaggerFadeIn(5);
   const { title, subtitle, items } = siteContent.techJourney;
 
   return (
@@ -27,7 +25,7 @@ export function TechJourney() {
         {...SECTION_STYLES.techJourney}
       />
 
-      <div ref={cardsRef} className="grid md:grid-cols-2 gap-3">
+      <div className="grid md:grid-cols-2 gap-3">
         {items.map((skillGroup, index) => {
           const Icon = iconMap[skillGroup.icon];
           return (
@@ -37,7 +35,7 @@ export function TechJourney() {
               iconColor={skillGroup.iconColor}
               title={skillGroup.category}
               description={skillGroup.description}
-              style={getItemStyle(index) as React.CSSProperties}
+             
               className="h-full"
             >
               <div className="flex flex-wrap gap-2">

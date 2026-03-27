@@ -1,5 +1,4 @@
 import { ReactNode } from 'react';
-import { useSimpleScrollReveal } from '../../hooks/useSimpleScrollReveal';
 
 interface SectionWrapperProps {
   id: string;
@@ -18,19 +17,13 @@ export function SectionWrapper({
   className = '',
   containerClassName = 'max-w-4xl'
 }: SectionWrapperProps) {
-  const { revealRef, style } = useSimpleScrollReveal();
-
   return (
     <div
       data-section={id}
       className={`section-wrapper-safe-rail min-h-screen flex items-center justify-center py-20 relative ${className}`}
       style={{ scrollSnapAlign: 'start' }}
     >
-      <div 
-        ref={revealRef}
-        style={style}
-        className={`${containerClassName} mx-auto w-full`}
-      >
+      <div className={`${containerClassName} mx-auto w-full`}>
         {children}
       </div>
     </div>

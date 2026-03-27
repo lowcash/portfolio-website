@@ -134,7 +134,11 @@ const ACHIEVEMENTS: Achievement[] = [
 ];
 
 export function EasterEggs() {
+  const canUseStorage = typeof window !== 'undefined';
   const [achievements, setAchievements] = useState<Achievement[]>(() => {
+    if (!canUseStorage) {
+      return ACHIEVEMENTS;
+    }
     try {
       const saved = localStorage.getItem('achievements');
       if (saved) {
@@ -164,6 +168,9 @@ export function EasterEggs() {
 
   // SHOW ACHIEVEMENT LIST ON PAGE LOAD (only after dev console opened)
   useEffect(() => {
+    if (!canUseStorage) {
+      return;
+    }
     const devConsoleOpened = localStorage.getItem('dev_console_opened') === 'true';
     
     if (devConsoleOpened) {
@@ -196,17 +203,20 @@ export function EasterEggs() {
         'color: #6b7280; font-size: 10px; font-style: italic;'
       );
     }
-  }, [achievements]);
+  }, [achievements, canUseStorage]);
 
   // Save achievements to localStorage
   useEffect(() => {
+    if (!canUseStorage) {
+      return;
+    }
     localStorage.setItem('achievements', JSON.stringify(achievements));
     
     // Broadcast to DebugInfo component
     window.dispatchEvent(new CustomEvent('achievements-updated', { 
       detail: { achievements } 
     }));
-  }, [achievements]);
+  }, [achievements, canUseStorage]);
 
   // Listen for achievements reset event
   useEffect(() => {
@@ -224,6 +234,9 @@ export function EasterEggs() {
 
   // Unlock achievement helper
   const unlockAchievement = (id: string) => {
+    if (!canUseStorage) {
+      return;
+    }
     // CHECK: Only unlock achievements if dev console has been opened at least once
     const devConsoleOpened = localStorage.getItem('dev_console_opened') === 'true';
     if (!devConsoleOpened) {
@@ -743,6 +756,9 @@ export function EasterEggs() {
 
   // 14. REPEAT VISITOR (3+ visits)
   useEffect(() => {
+    if (!canUseStorage) {
+      return;
+    }
     const visitCount = localStorage.getItem('visit_count');
     const count = visitCount ? parseInt(visitCount, 10) : 0;
     
@@ -757,7 +773,7 @@ export function EasterEggs() {
     
     // Increment visit count
     localStorage.setItem('visit_count', String(count + 1));
-  }, []);
+  }, [canUseStorage]);
 
   return (
     <>

@@ -1,12 +1,10 @@
 import { Github, Linkedin, Send } from 'lucide-react';
 import { SectionWrapper } from '../shared/SectionWrapper';
 import { SectionHeader } from '../shared/SectionHeader';
-import { useStaggerFadeIn } from '../../hooks/useStaggerFadeIn';
 import { SECTION_STYLES } from '../../lib/section-config';
 import { siteContent } from '../../lib/content';
 
 export function Contact() {
-  const { ref: socialsRef, getItemStyle } = useStaggerFadeIn(3);
 
   const content = siteContent.contact;
   const iconMap = {
@@ -31,7 +29,7 @@ export function Contact() {
         </p>
 
         {/* SOCIALS - WITH HOVER EFFECTS AND STAGGER */}
-        <div ref={socialsRef} className="flex flex-wrap justify-center gap-3 mb-16">
+        <div className="flex flex-wrap justify-center gap-3 mb-16">
           {content.socials.map((social, index) => {
             const Icon = iconMap[social.icon];
 
@@ -42,13 +40,13 @@ export function Contact() {
               target="_blank"
               rel="noopener noreferrer"
               className="relative group"
-              style={getItemStyle(index)}
+             
               aria-label={`Connect with me on ${social.label}: ${social.username}`}
             >
               {/* Link card */}
               <div
                 className="flex items-center gap-3 px-6 py-4 rounded-2xl transition-all duration-500"
-                style={getItemStyle(index) as React.CSSProperties}
+               
               >
                 <Icon className="w-6 h-6 text-purple-400 shrink-0 transition-all duration-500 group-hover:text-pink-400" aria-hidden="true" />
                 <div className="text-left">

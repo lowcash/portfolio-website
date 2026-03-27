@@ -32,6 +32,7 @@ interface DebugInfoProps {
 }
 
 export function DebugInfo({ onVisibilityChange }: DebugInfoProps = {}) {
+  const canUseStorage = typeof window !== 'undefined';
   const [isVisible, setIsVisible] = useState(false);
   const [scrollPercent, setScrollPercent] = useState(0);
   const [orbR, setOrbR] = useState(0);
@@ -41,6 +42,7 @@ export function DebugInfo({ onVisibilityChange }: DebugInfoProps = {}) {
   
   // Achievements state
   const [achievements, setAchievements] = useState<Achievement[]>(() => {
+    if (!canUseStorage) return [];
     const saved = localStorage.getItem('achievements');
     return saved ? JSON.parse(saved) : [];
   });
@@ -59,7 +61,7 @@ export function DebugInfo({ onVisibilityChange }: DebugInfoProps = {}) {
 
   // Persistent position - TOP LEFT with padding (desktop default)
   const [position, setPosition] = useState(() => {
-    if (typeof window === 'undefined') return { x: 20, y: 20 }; // Top-left with 20px padding
+    if (!canUseStorage || typeof window === 'undefined') return { x: 20, y: 20 }; // Top-left with 20px padding
     const saved = localStorage.getItem('debug_position');
     if (saved) {
       const parsed = JSON.parse(saved);
@@ -76,31 +78,38 @@ export function DebugInfo({ onVisibilityChange }: DebugInfoProps = {}) {
 
   // Persistent scale - DEFAULT 125% (1.0 = 125%, 0.8 = 100%)
   const [scale, setScale] = useState(() => {
-    if (typeof window === 'undefined') return 1.0; // 125% default
+    if (!canUseStorage || typeof window === 'undefined') return 1.0; // 125% default
     const saved = localStorage.getItem('debug_scale');
     return saved ? parseFloat(saved) : 1.0;
   });
   
   // Easter egg settings
   const [orbBrightness, setOrbBrightness] = useState(() => {
+    if (!canUseStorage) return 0.5;
     return parseFloat(localStorage.getItem('orb_brightness') || '0.5');
   });
   const [animationSpeed, setAnimationSpeed] = useState(() => {
+    if (!canUseStorage) return 3.0;
     return parseFloat(localStorage.getItem('animation_speed') || '3.0');
   });
   const [colorVariation, setColorVariation] = useState(() => {
+    if (!canUseStorage) return 40;
     return parseFloat(localStorage.getItem('color_variation') || '40');
   });
   const [orbSize, setOrbSize] = useState(() => {
+    if (!canUseStorage) return 1.2;
     return parseFloat(localStorage.getItem('orb_size') || '1.2');
   });
   const [orbBlur, setOrbBlur] = useState(() => {
+    if (!canUseStorage) return 1.0;
     return parseFloat(localStorage.getItem('orb_blur') || '1.0');
   });
   const [orbOpacity, setOrbOpacity] = useState(() => {
+    if (!canUseStorage) return 2.0;
     return parseFloat(localStorage.getItem('orb_opacity') || '2.0'); // 200% default
   });
   const [positionVariation, setPositionVariation] = useState(() => {
+    if (!canUseStorage) return 1.0;
     return parseFloat(localStorage.getItem('position_variation') || '1.0');
   });
   

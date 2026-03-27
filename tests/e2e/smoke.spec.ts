@@ -5,8 +5,8 @@ const SECTION_IDS = [
   'who-i-am',
   'tech-journey',
   'notable-work',
-  'education',
   'work-experience',
+  'education',
   'beyond-code',
   'whats-next',
   'contact',
@@ -55,5 +55,14 @@ test.describe('Portfolio smoke baseline', () => {
 
     await page.keyboard.press('d')
     await expect(page.getByRole('region', { name: 'Developer debug console' })).not.toBeVisible()
+  })
+
+  test('includes canonical and person schema metadata', async ({ page }) => {
+    await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', 'https://lowcash.dev')
+    await expect(page.locator('script[type="application/ld+json"]')).toHaveCount(1)
+    const schemaContent = await page
+      .locator('script[type="application/ld+json"]')
+      .evaluate((el) => el.textContent ?? '')
+    expect(schemaContent).toContain('"@type":"Person"')
   })
 })

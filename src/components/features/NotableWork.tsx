@@ -3,7 +3,6 @@ import { SectionWrapper } from '../shared/SectionWrapper';
 import { SectionHeader } from '../shared/SectionHeader';
 import { Card } from '../shared/Card';
 import { TechTag } from '../shared/TechTag';
-import { useStaggerFadeIn } from '../../hooks/useStaggerFadeIn';
 import { SECTION_STYLES } from '../../lib/section-config';
 import { siteContent, type NotableWorkIconKey } from '../../lib/content';
 
@@ -15,7 +14,6 @@ const iconMap: Record<NotableWorkIconKey, LucideIcon> = {
 };
 
 export function NotableWork() {
-  const { ref: cardsRef, getItemStyle } = useStaggerFadeIn(4);
   const { title, subtitle, projects } = siteContent.notableWork;
 
   return (
@@ -26,7 +24,7 @@ export function NotableWork() {
         {...SECTION_STYLES.notableWork}
       />
 
-      <div ref={cardsRef} className="grid md:grid-cols-2 gap-3">
+      <div className="grid md:grid-cols-2 gap-3">
         {projects.map((project, index) => {
           const Icon = iconMap[project.icon];
           return (
@@ -37,7 +35,7 @@ export function NotableWork() {
               title={project.title}
               subtitle={project.period}
               description={project.description}
-              style={getItemStyle(index) as React.CSSProperties}
+             
               className="h-full"
             >
               <div className="flex flex-wrap gap-2 mb-4">

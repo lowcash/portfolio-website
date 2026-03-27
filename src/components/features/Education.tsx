@@ -1,12 +1,10 @@
 import { GraduationCap } from 'lucide-react';
 import { SectionWrapper } from '../shared/SectionWrapper';
 import { SectionHeader } from '../shared/SectionHeader';
-import { useStaggerFadeIn } from '../../hooks/useStaggerFadeIn';
 import { SECTION_STYLES } from '../../lib/section-config';
 import { siteContent } from '../../lib/content';
 
 export function Education() {
-  const { ref: cardsRef, getItemStyle } = useStaggerFadeIn(2);
   const { title, subtitle, degrees } = siteContent.education;
 
   return (
@@ -17,12 +15,12 @@ export function Education() {
         {...SECTION_STYLES.education}
       />
 
-      <div ref={cardsRef} className="space-y-3 max-w-5xl mx-auto">
+      <div className="space-y-3 max-w-5xl mx-auto">
         {degrees.map((edu, index) => (
           <div 
             key={index}
             className="rounded-2xl p-8 transition-all duration-500 flex flex-col"
-            style={getItemStyle(index) as React.CSSProperties}
+           
           >
             <div className="flex items-start gap-4 mb-4">
               <GraduationCap className={`w-10 h-10 ${edu.iconColor} shrink-0`} />

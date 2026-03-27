@@ -5,10 +5,9 @@ A modern, interactive developer portfolio featuring scroll-based navigation, par
 ## 🚀 Tech Stack
 
 - **React 18** - UI Library
-- **Vite** - Build Tool
+- **Next.js (App Router)** - SSR-first framework
 - **TypeScript** - Type Safety
 - **Tailwind CSS** - Styling
-- **Framer Motion** - Animations
 - **Lucide React** - Icons
 
 ## 📁 Project Structure
@@ -53,8 +52,8 @@ Live URL: [https://lowcash.dev](https://lowcash.dev)
 
 ## 🎨 Styling
 
-The project uses Tailwind CSS for utility-first styling, combined with Framer Motion for complex animations.
-Global styles are defined in `src/index.css`.
+The project uses Tailwind CSS for utility-first styling.
+Global styles are imported in `app/layout.tsx` from `src/index.css`.
 
 ---
 
