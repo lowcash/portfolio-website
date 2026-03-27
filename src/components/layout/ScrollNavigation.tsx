@@ -2,6 +2,7 @@ import { Menu, X } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { NavDot } from '../ui/nav-dot';
 import { DrawerNavItem } from '../ui/drawer-nav-item';
+import { FloatingRail } from '../ui/floating-rail';
 
 interface ScrollNavigationProps {
   currentSection: number;
@@ -206,29 +207,23 @@ export function ScrollNavigation({ currentSection, totalSections, sectionNames, 
   return (
     <>
       {/* DESKTOP - Right side vertical dots */}
-      <div className="hidden md:block fixed top-1/2 left-0 right-0 z-50 pointer-events-none">
-        <div className="relative mx-auto w-full max-w-6xl px-6 md:px-8 h-0">
-          <nav
-            className="pointer-events-auto absolute right-2 md:right-3 top-0 -translate-y-1/2"
-            aria-label="Page navigation"
-            role="navigation"
-          >
-            <div className="flex flex-col gap-4">
-              {sections.map((section) => (
-                <NavDot
-                  key={section.id}
-                  isActive={currentSection === section.id}
-                  label={section.label}
-                  onClick={() => onSectionClick(section.id)}
-                />
-              ))}
-            </div>
-          </nav>
-        </div>
-      </div>
+      <FloatingRail variant="center-right" desktopOnly childOffsetRightPx={22}>
+        <nav aria-label="Page navigation" role="navigation">
+          <div className="flex flex-col gap-4">
+            {sections.map((section) => (
+              <NavDot
+                key={section.id}
+                isActive={currentSection === section.id}
+                label={section.label}
+                onClick={() => onSectionClick(section.id)}
+              />
+            ))}
+          </div>
+        </nav>
+      </FloatingRail>
 
       {/* MOBILE - Hamburger button (top-right) with dynamic glow */}
-      <div className="md:hidden fixed top-0 left-0 right-0 z-60 pointer-events-none">
+      <div className="mobile-until-lg fixed top-0 left-0 right-0 z-60 pointer-events-none">
         <div className="relative mx-auto px-6 max-w-6xl h-0">
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -263,7 +258,7 @@ export function ScrollNavigation({ currentSection, totalSections, sectionNames, 
 
       {/* MOBILE - Slide-in menu panel */}
       <div 
-        className={`md:hidden fixed inset-0 z-50 transition-all duration-300 ${
+        className={`mobile-until-lg fixed inset-0 z-50 transition-all duration-300 ${
           mobileMenuOpen ? 'pointer-events-auto' : 'pointer-events-none'
         }`}
         aria-hidden={!mobileMenuOpen}
@@ -274,6 +269,14 @@ export function ScrollNavigation({ currentSection, totalSections, sectionNames, 
             mobileMenuOpen ? 'opacity-100' : 'opacity-0'
           }`}
           onClick={() => setMobileMenuOpen(false)}
+        />
+
+        {/* Dedicated close hit area for reliable backdrop interactions and E2E stability */}
+        <button
+          type="button"
+          className="absolute bg-transparent"
+          style={{ top: 0, left: 0, right: 0, height: '7rem', zIndex: 2 }}
+          onClick={() => setMobileMenuOpen(false)}
           aria-label="Close menu backdrop"
         />
         
@@ -282,7 +285,7 @@ export function ScrollNavigation({ currentSection, totalSections, sectionNames, 
           id="mobile-navigation-menu"
           ref={drawerRef}
           className={`absolute bottom-0 left-0 right-0 bg-black/95 backdrop-blur-xl rounded-t-3xl transition-all duration-300 touch-pan-y ${
-            mobileMenuOpen ? 'translate-y-0' : 'translate-y-full'
+            mobileMenuOpen ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0'
           }`}
           aria-label="Mobile navigation"
           role="navigation"
@@ -291,7 +294,8 @@ export function ScrollNavigation({ currentSection, totalSections, sectionNames, 
             transform: mobileMenuOpen 
               ? `translateY(${getDragOffset()}px)` 
               : 'translateY(100%)',
-            transition: dragStartY !== null ? 'none' : 'transform 0.3s ease-out'
+            transition: dragStartY !== null ? 'none' : 'transform 0.3s ease-out, opacity 0.3s ease-out',
+            visibility: mobileMenuOpen ? 'visible' : 'hidden',
           }}
         >
           {/* Handle bar - visual hint for swipe - THIS is the drag area */}

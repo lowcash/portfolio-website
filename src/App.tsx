@@ -15,19 +15,22 @@ import { DebugInfo } from './components/layout/DebugInfo';
 import { EasterEggs } from './components/features/EasterEggs';
 import { ScrollProgress } from './components/layout/ScrollProgress';
 import { useEffect, useState, useMemo } from 'react';
+import { siteContent } from './lib/content';
 
 export default function App() {
+  const sectionMeta = siteContent.navigation.sections;
+
   const sections = useMemo(() => [
-    { Component: Hero, name: 'Hey There', id: 'hero' },
-    { Component: WhoIAm, name: 'Who I Am', id: 'who-i-am' },
-    { Component: TechJourney, name: 'Tech Stack', id: 'tech-journey' },
-    { Component: NotableWork, name: 'Notable Work', id: 'notable-work' },
-    { Component: Education, name: 'Academic Journey', id: 'education' },
-    { Component: WorkExperience, name: 'Work Experience', id: 'work-experience' },
-    { Component: BeyondCode, name: 'Beyond Code', id: 'beyond-code' },
-    { Component: WhatsNext, name: "What's Next", id: 'whats-next' },
-    { Component: Contact, name: "Let's Connect", id: 'contact' },
-  ], []);
+    { Component: Hero, ...sectionMeta[0] },
+    { Component: WhoIAm, ...sectionMeta[1] },
+    { Component: TechJourney, ...sectionMeta[2] },
+    { Component: NotableWork, ...sectionMeta[3] },
+    { Component: Education, ...sectionMeta[4] },
+    { Component: WorkExperience, ...sectionMeta[5] },
+    { Component: BeyondCode, ...sectionMeta[6] },
+    { Component: WhatsNext, ...sectionMeta[7] },
+    { Component: Contact, ...sectionMeta[8] },
+  ], [sectionMeta]);
 
   const [currentSection, setCurrentSection] = useState(0);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);

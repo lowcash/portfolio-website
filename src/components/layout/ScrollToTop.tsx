@@ -1,4 +1,5 @@
 import { ChevronUp } from 'lucide-react';
+import { FloatingRail } from '../ui/floating-rail';
 
 interface ScrollToTopProps {
   currentSection: number;
@@ -10,8 +11,7 @@ export function ScrollToTop({ currentSection, onGoToFirst }: ScrollToTopProps) {
   const isVisible = currentSection > 0;
 
   return (
-    <div className="fixed inset-x-0 bottom-0 z-50 pointer-events-none">
-      <div className="relative mx-auto w-full max-w-6xl px-6 md:px-8">
+    <FloatingRail variant="bottom-right">
         <button
           onClick={onGoToFirst}
           onKeyDown={(e) => {
@@ -20,10 +20,10 @@ export function ScrollToTop({ currentSection, onGoToFirst }: ScrollToTopProps) {
               onGoToFirst();
             }
           }}
-          className={`pointer-events-auto absolute bottom-8 right-2 md:right-3 transition-all duration-300 cursor-pointer ${
+          className={`pointer-events-auto transition-all duration-300 cursor-pointer ${
             isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10 pointer-events-none'
           }`}
-          style={{ 
+          style={{
             marginBottom: 'env(safe-area-inset-bottom)'
           }}
           aria-label="Scroll to top of page"
@@ -39,7 +39,6 @@ export function ScrollToTop({ currentSection, onGoToFirst }: ScrollToTopProps) {
             </div>
           </div>
         </button>
-      </div>
-    </div>
+    </FloatingRail>
   );
 }

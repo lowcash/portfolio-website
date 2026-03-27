@@ -16,14 +16,14 @@ export function SectionWrapper({
   id, 
   children, 
   className = '',
-  containerClassName = 'max-w-6xl'
+  containerClassName = 'max-w-4xl'
 }: SectionWrapperProps) {
   const { revealRef, style } = useSimpleScrollReveal();
 
   return (
     <div
       data-section={id}
-      className={`min-h-screen flex items-center justify-center py-20 px-6 md:px-8 relative ${className}`}
+      className={`section-wrapper-safe-rail min-h-screen flex items-center justify-center py-20 relative ${className}`}
       style={{ scrollSnapAlign: 'start' }}
     >
       <div 

@@ -5,56 +5,32 @@ import { Card } from '../shared/Card';
 import { TechTag } from '../shared/TechTag';
 import { useStaggerFadeIn } from '../../hooks/useStaggerFadeIn';
 import { SECTION_STYLES } from '../../lib/section-config';
+import { siteContent } from '../../lib/content';
 
 export function BeyondCode() {
   const { ref: cardsRef, getItemStyle } = useStaggerFadeIn(4);
 
-  const interests = [
-    {
-      icon: Music2,
-      title: 'Music Production',
-      description: 'As DJ Lowcash, I explore electronic music production and live DJ sets. From house to techno, music is where creativity meets technical precision - just like coding.',
-      tags: ['Electronic Music', 'DJing', 'Live Performance'],
-      link: 'https://youtube.com/@ltdlowcash?si=WTPwh27LfNIW1Q_K',
-      linkText: 'Check out my mixes',
-      iconColor: 'text-lime-400'
-    },
-    {
-      icon: Plane,
-      title: 'Digital Nomad Life',
-      description: 'Embracing location independence and exploring the world while building software. Remote work enables experiencing different cultures and perspectives.',
-      tags: ['Remote Work', 'Travel', 'Cultural Exploration'],
-      iconColor: 'text-green-400'
-    },
-    {
-      icon: BookOpen,
-      title: 'Audiobooks & Hiking',
-      description: 'Combining long hikes with audiobooks - learning while moving. Nature provides clarity, books provide knowledge, together they create space for thinking.',
-      tags: ['Continuous Learning', 'Nature', 'Deep Thinking'],
-      iconColor: 'text-emerald-400'
-    },
-    {
-      icon: TrendingUp,
-      title: 'Biohacking & Optimization',
-      description: 'Exploring how to optimize physical and mental performance through data-driven experimentation. From sleep tracking to nutrition, I approach health like debugging code.',
-      tags: ['Sleep Optimization', 'Nutrition', 'Performance Tracking'],
-      iconColor: 'text-teal-400'
-    }
-  ];
+  const content = siteContent.beyondCode;
+  const iconMap = {
+    music2: Music2,
+    plane: Plane,
+    bookOpen: BookOpen,
+    trendingUp: TrendingUp,
+  } as const;
 
   return (
     <SectionWrapper id="beyond-code">
       <SectionHeader
-        title="Beyond Code"
-        subtitle="Life is more than just programming - here's what else drives me"
+        title={content.title}
+        subtitle={content.subtitle}
         {...SECTION_STYLES.beyondCode}
       />
 
       <div ref={cardsRef} className="grid md:grid-cols-2 gap-3">
-        {interests.map((interest, index) => (
+        {content.items.map((interest, index) => (
           <Card
             key={index}
-            icon={interest.icon}
+            icon={iconMap[interest.icon]}
             iconColor={interest.iconColor}
             title={interest.title}
             description={interest.description}
@@ -66,7 +42,7 @@ export function BeyondCode() {
                 <TechTag key={tagIndex}>{tag}</TechTag>
               ))}
             </div>
-            {interest.link && (
+            {'link' in interest && 'linkText' in interest && interest.link && interest.linkText && (
               <a
                 href={interest.link}
                 target="_blank"
