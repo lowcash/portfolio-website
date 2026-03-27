@@ -1,30 +1,28 @@
-import { Music2, Plane, BookOpen, TrendingUp, ExternalLink } from 'lucide-react';
-import { SectionWrapper } from '../shared/SectionWrapper';
-import { SectionHeader } from '../shared/SectionHeader';
-import { Card } from '../shared/Card';
-import { TechTag } from '../shared/TechTag';
-import { SECTION_STYLES } from '../../lib/section-config';
-import { siteContent } from '../../lib/content';
+import { BookOpen, Music2, Plane, TrendingUp } from 'lucide-react'
+import { SectionHeader } from '@/components/ui/section-header'
+import { Card } from '@/components/ui/card'
+import { FeatureGrid } from '@/components/ui/feature-grid'
+import { SectionLink } from '@/components/ui/section-link'
+import { SectionWrapper } from '@/components/ui/section-wrapper'
+import { TagList } from '@/components/ui/tag-list'
+import { TechTag } from '@/components/ui/tech-tag'
+import { siteContent } from '@/lib/content'
+import { SECTION_STYLES } from '@/lib/section-config'
 
 export function BeyondCode() {
-
-  const content = siteContent.beyondCode;
+  const content = siteContent.beyondCode
   const iconMap = {
     music2: Music2,
     plane: Plane,
     bookOpen: BookOpen,
     trendingUp: TrendingUp,
-  } as const;
+  } as const
 
   return (
-    <SectionWrapper id="beyond-code">
-      <SectionHeader
-        title={content.title}
-        subtitle={content.subtitle}
-        {...SECTION_STYLES.beyondCode}
-      />
+    <SectionWrapper id='beyond-code'>
+      <SectionHeader title={content.title} subtitle={content.subtitle} {...SECTION_STYLES.beyondCode} />
 
-      <div className="grid md:grid-cols-2 gap-3">
+      <FeatureGrid>
         {content.items.map((interest, index) => (
           <Card
             key={index}
@@ -32,28 +30,19 @@ export function BeyondCode() {
             iconColor={interest.iconColor}
             title={interest.title}
             description={interest.description}
-           
-            className="h-full"
+            fullHeight
           >
-            <div className="flex flex-wrap gap-2 mb-4">
+            <TagList>
               {interest.tags.map((tag, tagIndex) => (
                 <TechTag key={tagIndex}>{tag}</TechTag>
               ))}
-            </div>
+            </TagList>
             {'link' in interest && 'linkText' in interest && interest.link && interest.linkText && (
-              <a
-                href={interest.link}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="group inline-flex items-center gap-2 text-sm section-link"
-              >
-                <ExternalLink className="w-4 h-4" />
-                <span>{interest.linkText}</span>
-              </a>
+              <SectionLink href={interest.link}>{interest.linkText}</SectionLink>
             )}
           </Card>
         ))}
-      </div>
+      </FeatureGrid>
     </SectionWrapper>
-  );
+  )
 }

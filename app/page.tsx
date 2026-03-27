@@ -26,13 +26,13 @@ const sections = [
 export default function HomePage() {
   return (
     <>
-      <div className="text-white" style={{ background: 'transparent' }} role="document">
-        <main id="main-content" role="main">
+      <div className='text-white' style={{ background: 'transparent' }} role='document'>
+        <main id='main-content' role='main'>
           {sections.map(({ id, name, Component }, index) => (
             <ParallaxSection
               key={id}
               id={id}
-              className="min-h-screen"
+              className='min-h-screen'
               role={index === 0 ? 'banner' : 'region'}
               aria-label={name}
             >

@@ -26,12 +26,14 @@ src/
 ## 🛠️ Development
 
 ### Setup
+
 ```bash
 npm install
 npm run dev
 ```
 
 ### Build
+
 ```bash
 npm run build
 npm run preview
@@ -59,4 +61,3 @@ Global styles are imported in `app/layout.tsx` from `src/index.css`.
 
 **Author**: Lowcash
 **License**: MIT
-  

@@ -29,9 +29,10 @@ test.describe('Desktop navigation baseline', () => {
     await page.locator('#work-experience').scrollIntoViewIfNeeded()
     await page.waitForTimeout(700)
 
-    await expect(
-      page.getByRole('button', { name: 'Navigate to Work Experience' })
-    ).toHaveAttribute('aria-current', 'true')
+    await expect(page.getByRole('button', { name: 'Navigate to Work Experience' })).toHaveAttribute(
+      'aria-current',
+      'true',
+    )
   })
 
   test('navigation order keeps Work Experience before Academic Journey', async ({ page }) => {
@@ -55,9 +56,7 @@ test.describe('Desktop navigation baseline', () => {
     await expect(scrollToTop).toBeVisible()
 
     await scrollToTop.click()
-    await expect
-      .poll(() => page.evaluate(() => window.scrollY), { timeout: 5000 })
-      .toBeLessThan(120)
+    await expect.poll(() => page.evaluate(() => window.scrollY), { timeout: 5000 }).toBeLessThan(120)
     await expect(page.locator('#hero')).toBeInViewport({ ratio: 0.2 })
   })
 })

@@ -1,7 +1,7 @@
 interface MobileDrawerBackdropProps {
-  isOpen: boolean;
-  onClose: () => void;
-  children: React.ReactNode;
+  isOpen: boolean
+  onClose: () => void
+  children: React.ReactNode
 }
 
 export function MobileDrawerBackdrop({ isOpen, onClose, children }: MobileDrawerBackdropProps) {
@@ -22,14 +22,14 @@ export function MobileDrawerBackdrop({ isOpen, onClose, children }: MobileDrawer
 
       {/* Dedicated close hit area for reliable backdrop interactions and E2E stability */}
       <button
-        type="button"
-        className="absolute bg-transparent"
+        type='button'
+        className='absolute bg-transparent'
         style={{ top: 0, left: 0, right: 0, height: '7rem', zIndex: 2 }}
         onClick={onClose}
-        aria-label="Close menu backdrop"
+        aria-label='Close menu backdrop'
       />
 
       {children}
     </div>
-  );
+  )
 }

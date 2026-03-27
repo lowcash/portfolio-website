@@ -1,10 +1,10 @@
-export type WhatsNextIconKey = 'rocket' | 'trendingUp' | 'target';
-export type IconTone = 'yellow' | 'amber' | 'cyan' | 'emerald';
-export type ContactIconKey = 'github' | 'linkedin' | 'send';
-export type BeyondCodeIconKey = 'music2' | 'plane' | 'bookOpen' | 'trendingUp';
-export type WhoIAmIconKey = 'zap' | 'sparkles' | 'brain';
-export type TechJourneyIconKey = 'code' | 'database' | 'box' | 'cpu' | 'globe';
-export type NotableWorkIconKey = 'eye' | 'glasses' | 'trendingUp' | 'globe';
+export type WhatsNextIconKey = 'rocket' | 'trendingUp' | 'target'
+export type IconTone = 'yellow' | 'amber' | 'cyan' | 'emerald'
+export type ContactIconKey = 'github' | 'linkedin' | 'send'
+export type BeyondCodeIconKey = 'music2' | 'plane' | 'bookOpen' | 'trendingUp'
+export type WhoIAmIconKey = 'zap' | 'sparkles' | 'brain'
+export type TechJourneyIconKey = 'code' | 'database' | 'box' | 'cpu' | 'globe'
+export type NotableWorkIconKey = 'eye' | 'glasses' | 'trendingUp' | 'globe'
 
 export const siteContent = {
   navigation: {
@@ -102,8 +102,7 @@ export const siteContent = {
       {
         icon: 'zap' as WhoIAmIconKey,
         title: 'Fullstack Development',
-        description:
-          'TypeScript, React, Next.js, tRPC - building complete web applications from frontend to backend',
+        description: 'TypeScript, React, Next.js, tRPC - building complete web applications from frontend to backend',
         iconColor: 'text-cyan-400',
       },
       {
@@ -137,8 +136,7 @@ export const siteContent = {
         icon: 'database' as TechJourneyIconKey,
         category: 'Backend',
         items: ['Node.js', 'tRPC', 'Prisma', 'REST APIs', 'PostgreSQL'],
-        description:
-          'End-to-end type safety with tRPC, building scalable APIs and server-side logic with Prisma ORM',
+        description: 'End-to-end type safety with tRPC, building scalable APIs and server-side logic with Prisma ORM',
         iconColor: 'text-pink-400',
       },
       {
@@ -152,16 +150,14 @@ export const siteContent = {
         icon: 'cpu' as TechJourneyIconKey,
         category: 'AI & ML',
         items: ['Machine Learning', 'Computer Vision', 'XGBoost', 'Reinforcement Learning', 'Python'],
-        description:
-          'Currently building Forex ML/RL system, experienced with OpenCV and Lucas-Kanade optical flow',
+        description: 'Currently building Forex ML/RL system, experienced with OpenCV and Lucas-Kanade optical flow',
         iconColor: 'text-pink-400',
       },
       {
         icon: 'globe' as TechJourneyIconKey,
         category: 'Agentic & Design',
         items: ['AI-Assisted Workflows', 'Claude, Copilot', 'Figma', 'System Architecture'],
-        description:
-          'Leveraging AI tools to ship faster, architect better systems, and bridge design-to-code gap',
+        description: 'Leveraging AI tools to ship faster, architect better systems, and bridge design-to-code gap',
         iconColor: 'text-orange-400',
       },
     ],
@@ -287,4 +283,4 @@ export const siteContent = {
       },
     ],
   },
-} as const;
+} as const

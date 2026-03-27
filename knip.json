@@ -1,23 +1,6 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
-  "entry": [
-    "app/layout.tsx",
-    "app/page.tsx",
-    "next.config.mjs",
-    "eslint.config.js",
-    "playwright.config.ts",
-    "scripts/run-lighthouse.mjs",
-    "scripts/analyze-style-boundary.mjs"
-  ],
-  "project": [
-    "src/**/*.{ts,tsx}",
-    "tests/**/*.{ts,tsx}",
-    "scripts/**/*.mjs"
-  ],
-  "ignore": [
-    "build/**",
-    "dist/**",
-    "test-results/**",
-    "playwright-report/**"
-  ]
+  "entry": ["scripts/run-lighthouse.mjs", "scripts/analyze-style-boundary.mjs"],
+  "project": ["src/**/*.{ts,tsx}", "tests/**/*.{ts,tsx}", "scripts/**/*.mjs"],
+  "ignore": [".next/**"]
 }

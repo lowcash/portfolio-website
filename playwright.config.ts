@@ -4,10 +4,7 @@ export default defineConfig({
   testDir: './tests/e2e',
   fullyParallel: false,
   retries: 0,
-  reporter: [
-    ['list'],
-    ['html', { open: 'never', outputFolder: 'playwright-report' }],
-  ],
+  reporter: [['list'], ['html', { open: 'never', outputFolder: 'playwright-report' }]],
   outputDir: 'test-results/playwright',
   use: {
     baseURL: 'http://127.0.0.1:3001',

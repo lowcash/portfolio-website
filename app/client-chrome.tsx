@@ -26,9 +26,7 @@ export function ClientChrome({ sectionIds }: ClientChromeProps) {
     if (isDevConsoleOpen && isMobile) {
       const preventDefault = (e: TouchEvent) => {
         const target = e.target as HTMLElement
-        const isInScrollableContainer = target.closest(
-          '[role="region"][aria-label="Developer debug console"]',
-        )
+        const isInScrollableContainer = target.closest('[role="region"][aria-label="Developer debug console"]')
 
         if (!isInScrollableContainer) {
           e.preventDefault()

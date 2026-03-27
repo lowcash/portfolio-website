@@ -1,10 +1,12 @@
-import { Code, Database, Cpu, Globe, Box, type LucideIcon } from 'lucide-react';
-import { SectionWrapper } from '../shared/SectionWrapper';
-import { SectionHeader } from '../shared/SectionHeader';
-import { Card } from '../shared/Card';
-import { TechTag } from '../shared/TechTag';
-import { SECTION_STYLES } from '../../lib/section-config';
-import { siteContent, type TechJourneyIconKey } from '../../lib/content';
+import { Box, Code, Cpu, Database, Globe, type LucideIcon } from 'lucide-react'
+import { Card } from '@/components/ui/card'
+import { FeatureGrid } from '@/components/ui/feature-grid'
+import { SectionHeader } from '@/components/ui/section-header'
+import { SectionWrapper } from '@/components/ui/section-wrapper'
+import { TagList } from '@/components/ui/tag-list'
+import { TechTag } from '@/components/ui/tech-tag'
+import { siteContent, type TechJourneyIconKey } from '@/lib/content'
+import { SECTION_STYLES } from '@/lib/section-config'
 
 const iconMap: Record<TechJourneyIconKey, LucideIcon> = {
   code: Code,
@@ -12,22 +14,18 @@ const iconMap: Record<TechJourneyIconKey, LucideIcon> = {
   box: Box,
   cpu: Cpu,
   globe: Globe,
-};
+}
 
 export function TechJourney() {
-  const { title, subtitle, items } = siteContent.techJourney;
+  const { title, subtitle, items } = siteContent.techJourney
 
   return (
-    <SectionWrapper id="tech-journey">
-      <SectionHeader
-        title={title}
-        subtitle={subtitle}
-        {...SECTION_STYLES.techJourney}
-      />
+    <SectionWrapper id='tech-journey'>
+      <SectionHeader title={title} subtitle={subtitle} {...SECTION_STYLES.techJourney} />
 
-      <div className="grid md:grid-cols-2 gap-3">
+      <FeatureGrid>
         {items.map((skillGroup, index) => {
-          const Icon = iconMap[skillGroup.icon];
+          const Icon = iconMap[skillGroup.icon]
           return (
             <Card
               key={index}
@@ -35,18 +33,17 @@ export function TechJourney() {
               iconColor={skillGroup.iconColor}
               title={skillGroup.category}
               description={skillGroup.description}
-             
-              className="h-full"
+              fullHeight
             >
-              <div className="flex flex-wrap gap-2">
+              <TagList>
                 {skillGroup.items.map((item, itemIndex) => (
                   <TechTag key={itemIndex}>{item}</TechTag>
                 ))}
-              </div>
+              </TagList>
             </Card>
-          );
+          )
         })}
-      </div>
+      </FeatureGrid>
     </SectionWrapper>
-  );
+  )
 }

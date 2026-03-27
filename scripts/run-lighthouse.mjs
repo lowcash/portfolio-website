@@ -25,7 +25,7 @@ const chromeProcess = spawn(
   ],
   {
     stdio: 'ignore',
-  }
+  },
 )
 
 async function waitForDebugger(retries = 50) {
@@ -96,8 +96,8 @@ try {
         },
       },
       null,
-      2
-    )
+      2,
+    ),
   )
 } finally {
   chromeProcess.kill('SIGTERM')

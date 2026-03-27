@@ -1,7 +1,7 @@
 interface DrawerNavItemProps {
-  isActive: boolean;
-  label: string;
-  onClick: () => void;
+  isActive: boolean
+  label: string
+  onClick: () => void
 }
 
 export function DrawerNavItem({ isActive, label, onClick }: DrawerNavItemProps) {
@@ -17,7 +17,7 @@ export function DrawerNavItem({ isActive, label, onClick }: DrawerNavItemProps) 
         <>
           {/* Outer glow shimmer - same pattern as scroll-to-top / hamburger */}
           <div
-            className="absolute inset-0 pointer-events-none rounded-xl animate-glow-shimmer -z-10"
+            className='absolute inset-0 pointer-events-none rounded-xl animate-glow-shimmer -z-10'
             style={{
               boxShadow:
                 '0 0 60px rgba(var(--orb-r), var(--orb-g), var(--orb-b), 0.8), 0 0 100px rgba(var(--orb-r), var(--orb-g), var(--orb-b), 0.4)',
@@ -26,7 +26,7 @@ export function DrawerNavItem({ isActive, label, onClick }: DrawerNavItemProps) 
           />
           {/* Inner colored background */}
           <div
-            className="absolute inset-0 rounded-xl bg-black/40 backdrop-blur-sm -z-10"
+            className='absolute inset-0 rounded-xl bg-black/40 backdrop-blur-sm -z-10'
             style={{
               boxShadow:
                 'inset 0 2px 20px rgba(0,0,0,0.5), inset 0 0 60px rgba(var(--orb-r), var(--orb-g), var(--orb-b), 0.25)',
@@ -37,11 +37,11 @@ export function DrawerNavItem({ isActive, label, onClick }: DrawerNavItemProps) 
         </>
       )}
 
-      <div className="flex items-center justify-between relative z-10">
-        <span className="text-base">{label}</span>
+      <div className='flex items-center justify-between relative z-10'>
+        <span className='text-base'>{label}</span>
         {isActive && (
           <div
-            className="w-2 h-2 rounded-full animate-pulse opacity-80"
+            className='w-2 h-2 rounded-full animate-pulse opacity-80'
             style={{
               backgroundColor: 'rgb(var(--orb-r), var(--orb-g), var(--orb-b))',
               transition: 'background-color 0.3s ease-out',
@@ -50,5 +50,5 @@ export function DrawerNavItem({ isActive, label, onClick }: DrawerNavItemProps) 
         )}
       </div>
     </button>
-  );
+  )
 }

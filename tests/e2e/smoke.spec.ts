@@ -37,15 +37,15 @@ test.describe('Portfolio smoke baseline', () => {
 
     await expect(page.getByRole('link', { name: /Connect with me on GitHub/i })).toHaveAttribute(
       'href',
-      'https://github.com/Lowcash'
+      'https://github.com/Lowcash',
     )
     await expect(page.getByRole('link', { name: /Connect with me on LinkedIn/i })).toHaveAttribute(
       'href',
-      'https://linkedin.com/in/lukáš-machala-00549114a'
+      'https://linkedin.com/in/lukáš-machala-00549114a',
     )
     await expect(page.getByRole('link', { name: /Connect with me on Email/i })).toHaveAttribute(
       'href',
-      'mailto:lukas.lowcash@gmail.com'
+      'mailto:lukas.lowcash@gmail.com',
     )
   })
 

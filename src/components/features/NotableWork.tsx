@@ -1,32 +1,31 @@
-import { Eye, Glasses, TrendingUp, ExternalLink, Globe, type LucideIcon } from 'lucide-react';
-import { SectionWrapper } from '../shared/SectionWrapper';
-import { SectionHeader } from '../shared/SectionHeader';
-import { Card } from '../shared/Card';
-import { TechTag } from '../shared/TechTag';
-import { SECTION_STYLES } from '../../lib/section-config';
-import { siteContent, type NotableWorkIconKey } from '../../lib/content';
+import { Eye, Glasses, Globe, TrendingUp, type LucideIcon } from 'lucide-react'
+import { Card } from '@/components/ui/card'
+import { FeatureGrid } from '@/components/ui/feature-grid'
+import { SectionHeader } from '@/components/ui/section-header'
+import { SectionLink } from '@/components/ui/section-link'
+import { SectionWrapper } from '@/components/ui/section-wrapper'
+import { TagList } from '@/components/ui/tag-list'
+import { TechTag } from '@/components/ui/tech-tag'
+import { siteContent, type NotableWorkIconKey } from '@/lib/content'
+import { SECTION_STYLES } from '@/lib/section-config'
 
 const iconMap: Record<NotableWorkIconKey, LucideIcon> = {
   eye: Eye,
   glasses: Glasses,
   trendingUp: TrendingUp,
   globe: Globe,
-};
+}
 
 export function NotableWork() {
-  const { title, subtitle, projects } = siteContent.notableWork;
+  const { title, subtitle, projects } = siteContent.notableWork
 
   return (
-    <SectionWrapper id="notable-work">
-      <SectionHeader
-        title={title}
-        subtitle={subtitle}
-        {...SECTION_STYLES.notableWork}
-      />
+    <SectionWrapper id='notable-work'>
+      <SectionHeader title={title} subtitle={subtitle} {...SECTION_STYLES.notableWork} />
 
-      <div className="grid md:grid-cols-2 gap-3">
+      <FeatureGrid>
         {projects.map((project, index) => {
-          const Icon = iconMap[project.icon];
+          const Icon = iconMap[project.icon]
           return (
             <Card
               key={index}
@@ -35,45 +34,31 @@ export function NotableWork() {
               title={project.title}
               subtitle={project.period}
               description={project.description}
-             
-              className="h-full"
+              fullHeight
             >
-              <div className="flex flex-wrap gap-2 mb-4">
+              <TagList>
                 {project.tech.map((tech, techIndex) => (
                   <TechTag key={techIndex}>{tech}</TechTag>
                 ))}
-              </div>
+              </TagList>
               {'link' in project && project.link && (
-                <a
-                  href={project.link}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="group inline-flex items-center gap-2 text-sm section-link"
-                >
-                  <ExternalLink className="w-4 h-4" />
-                  <span>{'linkText' in project && project.linkText ? project.linkText : 'Watch Demo Video'}</span>
-                </a>
+                <SectionLink href={project.link}>
+                  {'linkText' in project && project.linkText ? project.linkText : 'Watch Demo Video'}
+                </SectionLink>
               )}
               {'multipleLinks' in project && project.multipleLinks && (
-                <div className="flex flex-col gap-2">
+                <TagList stacked>
                   {project.multipleLinks.map((link, linkIndex) => (
-                    <a
-                      key={linkIndex}
-                      href={link.url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="group inline-flex items-center gap-2 text-sm section-link"
-                    >
-                      <ExternalLink className="w-4 h-4" />
-                      <span>{link.text}</span>
-                    </a>
+                    <SectionLink key={linkIndex} href={link.url}>
+                      {link.text}
+                    </SectionLink>
                   ))}
-                </div>
+                </TagList>
               )}
             </Card>
-          );
+          )
         })}
-      </div>
+      </FeatureGrid>
     </SectionWrapper>
-  );
+  )
 }

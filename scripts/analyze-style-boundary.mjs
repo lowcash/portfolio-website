@@ -38,7 +38,7 @@ function getChangedSourceFiles() {
     const changedOutput = execFileSync(
       'git',
       ['diff', '--name-only', '--diff-filter=ACMRTUXB', BASE_REF, '--', 'src'],
-      { cwd: ROOT_DIR, encoding: 'utf8' }
+      { cwd: ROOT_DIR, encoding: 'utf8' },
     )
 
     const untrackedOutput = execFileSync('git', ['ls-files', '--others', '--exclude-standard', '--', 'src'], {
@@ -53,7 +53,7 @@ function getChangedSourceFiles() {
       .filter((filePath) => TARGET_EXTENSIONS.has(path.extname(filePath)))
   } catch (error) {
     throw new Error(
-      `Failed to read changed files from git (base=${BASE_REF}). Use --base=<ref> with a valid ref. ${String(error)}`
+      `Failed to read changed files from git (base=${BASE_REF}). Use --base=<ref> with a valid ref. ${String(error)}`,
     )
   }
 }
@@ -204,9 +204,7 @@ async function collectIncrementalViolations(files) {
       }
     }
   } catch (error) {
-    throw new Error(
-      `Failed to inspect git diff for incremental checks (base=${BASE_REF}). ${String(error)}`
-    )
+    throw new Error(`Failed to inspect git diff for incremental checks (base=${BASE_REF}). ${String(error)}`)
   }
 
   const filesWithoutDiff = files.filter((filePath) => !filesWithDiff.has(filePath))
@@ -233,9 +231,7 @@ function buildByFileMap(violations) {
 }
 
 async function main() {
-  const files = CHANGED_MODE
-    ? await keepExistingFiles(getChangedSourceFiles())
-    : await walkDirectory(SOURCE_DIR)
+  const files = CHANGED_MODE ? await keepExistingFiles(getChangedSourceFiles()) : await walkDirectory(SOURCE_DIR)
 
   const violations = []
 
@@ -244,9 +240,7 @@ async function main() {
     violations.push(...fileViolations)
   }
 
-  const violationsToEnforce = ENFORCE_ONLY_NEW
-    ? await collectIncrementalViolations(files)
-    : violations
+  const violationsToEnforce = ENFORCE_ONLY_NEW ? await collectIncrementalViolations(files) : violations
 
   const byFile = buildByFileMap(violationsToEnforce)
 
@@ -280,9 +274,12 @@ async function main() {
       .slice(0, 25)
 
     for (const item of sortedFiles) {
-      const linePreview = [...new Set(item.lines)].sort((a, b) => a - b).slice(0, 8).join(', ')
+      const linePreview = [...new Set(item.lines)]
+        .sort((a, b) => a - b)
+        .slice(0, 8)
+        .join(', ')
       console.log(
-        `${item.filePath} -> total=${item.total}, className=${item.className}, style=${item.style}, lines=[${linePreview}]`
+        `${item.filePath} -> total=${item.total}, className=${item.className}, style=${item.style}, lines=[${linePreview}]`,
       )
     }
   }

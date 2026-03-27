@@ -1,20 +1,15 @@
-import type { ReactNode } from 'react';
+import type { ReactNode } from 'react'
 
-type FloatingRailVariant = 'center-right' | 'bottom-right';
+type FloatingRailVariant = 'center-right' | 'bottom-right'
 
 interface FloatingRailProps {
-  children: ReactNode;
-  variant: FloatingRailVariant;
-  desktopOnly?: boolean;
-  childOffsetRightPx?: number;
+  children: ReactNode
+  variant: FloatingRailVariant
+  desktopOnly?: boolean
+  childOffsetRightPx?: number
 }
 
-export function FloatingRail({
-  children,
-  variant,
-  desktopOnly = false,
-  childOffsetRightPx = 0,
-}: FloatingRailProps) {
+export function FloatingRail({ children, variant, desktopOnly = false, childOffsetRightPx = 0 }: FloatingRailProps) {
   const outerStyle =
     variant === 'center-right'
       ? {
@@ -27,7 +22,7 @@ export function FloatingRail({
           left: 0,
           right: 0,
           bottom: 0,
-        };
+        }
 
   return (
     <div
@@ -35,7 +30,7 @@ export function FloatingRail({
       style={outerStyle}
     >
       <div
-        className="mx-auto w-full"
+        className='mx-auto w-full'
         style={{
           width: '100%',
           maxWidth: '72rem',
@@ -46,10 +41,10 @@ export function FloatingRail({
           justifyContent: 'flex-end',
         }}
       >
-        <div className="pointer-events-auto" style={{ marginRight: `${childOffsetRightPx}px` }}>
+        <div className='pointer-events-auto' style={{ marginRight: `${childOffsetRightPx}px` }}>
           {children}
         </div>
       </div>
     </div>
-  );
+  )
 }
