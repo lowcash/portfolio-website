@@ -1,11 +1,3 @@
-export type WhatsNextIconKey = 'rocket' | 'trendingUp' | 'target'
-export type IconTone = 'yellow' | 'amber' | 'cyan' | 'emerald'
-export type ContactIconKey = 'github' | 'linkedin' | 'send'
-export type BeyondCodeIconKey = 'music2' | 'plane' | 'bookOpen' | 'trendingUp'
-export type WhoIAmIconKey = 'zap' | 'sparkles' | 'brain'
-export type TechJourneyIconKey = 'code' | 'database' | 'box' | 'cpu' | 'globe'
-export type NotableWorkIconKey = 'eye' | 'glasses' | 'trendingUp' | 'globe'
-
 export const siteContent = {
   navigation: {
     sections: [

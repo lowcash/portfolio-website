@@ -32,7 +32,7 @@ const TEXT_SIZE_CLASS: Record<TextSize, string> = {
   lg: 'text-lg',
 }
 
-export function Heading({ children, level = 3 }: HeadingProps) {
+function Heading({ children, level = 3 }: HeadingProps) {
   if (level === 1) return <h1 className={HEADING_CLASS[1]}>{children}</h1>
   if (level === 2) return <h2 className={HEADING_CLASS[2]}>{children}</h2>
   return <h3 className={HEADING_CLASS[3]}>{children}</h3>
