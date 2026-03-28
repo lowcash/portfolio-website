@@ -1,9 +1,11 @@
+import { useEffect, useRef, useState } from 'react'
+
 import { Menu, X } from 'lucide-react'
-import { useState, useRef, useEffect } from 'react'
-import { NavDot } from './nav-dot'
+
 import { DrawerNavItem } from './drawer-nav-item'
 import { FloatingRail } from './floating-rail'
 import { MobileDrawerBackdrop } from './mobile-drawer-backdrop'
+import { NavDot } from './nav-dot'
 
 interface ScrollNavigationProps {
   currentSection: number
@@ -229,8 +231,8 @@ export function ScrollNavigation({
       </FloatingRail>
 
       {/* MOBILE - Hamburger button (top-right) with dynamic glow */}
-      <div className='mobile-until-lg fixed top-0 left-0 right-0 z-60 pointer-events-none'>
-        <div className='relative mx-auto px-6 max-w-6xl h-0'>
+      <div className='mobile-until-lg pointer-events-none fixed top-0 right-0 left-0' style={{ zIndex: 60 }}>
+        <div className='relative mx-auto h-0 max-w-6xl px-6'>
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             onKeyDown={(e) => {
@@ -245,19 +247,19 @@ export function ScrollNavigation({
             aria-expanded={mobileMenuOpen}
             aria-controls='mobile-navigation-menu'
           >
-            <div className='relative group'>
+            <div className='group relative'>
               {/* Shimmer glow layer - same as scroll-to-top */}
               <div
-                className='absolute inset-0 pointer-events-none rounded-xl animate-glow-shimmer -z-10 scroll-to-top-glow'
+                className='animate-glow-shimmer scroll-to-top-glow pointer-events-none absolute inset-0 -z-10 rounded-xl'
                 aria-hidden='true'
               />
 
               {/* Button - same styling as scroll-to-top */}
-              <div className='bg-black/40 backdrop-blur-sm rounded-xl p-3 transition-all duration-500 scroll-to-top-inner'>
+              <div className='scroll-to-top-inner rounded-xl bg-black/40 p-3 backdrop-blur-sm transition-all duration-500'>
                 {mobileMenuOpen ? (
-                  <X className='w-6 h-6 scroll-to-top-icon' aria-hidden='true' />
+                  <X className='scroll-to-top-icon h-6 w-6' aria-hidden='true' />
                 ) : (
-                  <Menu className='w-6 h-6 scroll-to-top-icon' aria-hidden='true' />
+                  <Menu className='scroll-to-top-icon h-6 w-6' aria-hidden='true' />
                 )}
               </div>
             </div>
@@ -271,7 +273,7 @@ export function ScrollNavigation({
         <nav
           id='mobile-navigation-menu'
           ref={drawerRef}
-          className={`absolute bottom-0 left-0 right-0 bg-black/95 backdrop-blur-xl rounded-t-3xl transition-all duration-300 touch-pan-y ${
+          className={`absolute right-0 bottom-0 left-0 touch-pan-y rounded-t-3xl bg-black/95 backdrop-blur-xl transition-all duration-300 ${
             mobileMenuOpen ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0'
           }`}
           aria-label='Mobile navigation'
@@ -291,11 +293,11 @@ export function ScrollNavigation({
             onTouchEnd={handleTouchEnd}
             onMouseDown={handleMouseDown}
           >
-            <div className='w-12 h-1 bg-gray-600 rounded-full' />
+            <div className='h-1 w-12 rounded-full bg-gray-600' />
           </div>
 
           {/* Menu items */}
-          <div className='px-6 pb-8 pt-4'>
+          <div className='px-6 pt-4 pb-8'>
             <div className='space-y-2'>
               {sections.map((section) => (
                 <DrawerNavItem
