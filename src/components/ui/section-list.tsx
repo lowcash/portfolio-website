@@ -1,9 +1,7 @@
-import type { ReactNode } from 'react'
-
 type SectionListWidth = '3xl' | '5xl'
 
 interface SectionListProps {
-  children: ReactNode
+  children: React.ReactNode
   width?: SectionListWidth
   centered?: boolean
 }

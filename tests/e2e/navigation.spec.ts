@@ -17,6 +17,7 @@ test.describe('Desktop navigation baseline', () => {
     test(`navigation dot for ${label} scrolls to #${id}`, async ({ page }) => {
       const navButton = page.getByRole('button', { name: `Navigate to ${label}` })
       await expect(navButton).toBeVisible()
+      await navButton.scrollIntoViewIfNeeded()
 
       await navButton.click()
       await page.waitForTimeout(900)

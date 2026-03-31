@@ -1,8 +1,6 @@
-import type { ReactNode } from 'react'
-
 interface SectionWrapperProps {
   id: string
-  children: ReactNode
+  children: React.ReactNode
   fullHeight?: boolean
   maxWidth?: '4xl' | '5xl' | '6xl'
   className?: string

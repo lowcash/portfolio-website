@@ -1,6 +1,7 @@
 {
-  "name": "personal-presentation-website",
-  "version": "1.0.1",
+  "name": "portfolio-website",
+  "version": "1.1.0",
+  "private": true,
   "type": "module",
   "dependencies": {
     "lucide-react": "^0.487.0",
@@ -12,6 +13,7 @@
     "@eslint/js": "^9.39.1",
     "@next/eslint-plugin-next": "^15.5.14",
     "@playwright/test": "^1.58.2",
+    "@trivago/prettier-plugin-sort-imports": "^6.0.2",
     "@types/node": "^20.10.0",
     "@types/react": "^19.2.7",
     "@types/react-dom": "^19.2.3",
@@ -23,6 +25,7 @@
     "lighthouse": "^12.8.2",
     "playwright": "1.58.2",
     "prettier": "^3.8.1",
+    "prettier-plugin-tailwindcss": "^0.7.2",
     "start-server-and-test": "^3.0.0",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.48.0"
@@ -45,9 +48,13 @@
     "analyze:clean-code:strict": "npm run analyze:unused:strict && npm run analyze:style-boundary:strict",
     "preview": "next start --hostname 127.0.0.1 --port 3000",
     "test:e2e": "playwright test",
+    "test:e2e:baseline": "playwright test tests/e2e/smoke.spec.ts tests/e2e/navigation.spec.ts",
+    "test:e2e:baseline:ci": "mkdir -p ./test-results && playwright test tests/e2e/smoke.spec.ts tests/e2e/navigation.spec.ts --reporter=json > ./test-results/playwright-baseline.json",
     "test:e2e:headed": "playwright test --headed",
     "test:e2e:debug": "playwright test --debug",
-    "perf:lighthouse:desktop": "start-server-and-test \"npm run dev -- --hostname 127.0.0.1 --port 3000\" http://127.0.0.1:3000 \"node ./scripts/run-lighthouse.mjs desktop\"",
-    "perf:lighthouse:mobile": "start-server-and-test \"npm run dev -- --hostname 127.0.0.1 --port 3000\" http://127.0.0.1:3000 \"node ./scripts/run-lighthouse.mjs mobile\""
+    "perf:lighthouse": "npm run perf:lighthouse:desktop && npm run perf:lighthouse:mobile",
+    "perf:lighthouse:desktop": "start-server-and-test \"npm run preview\" http://127.0.0.1:3000 \"node ./scripts/run-lighthouse.mjs desktop\"",
+    "perf:lighthouse:mobile": "start-server-and-test \"npm run preview\" http://127.0.0.1:3000 \"node ./scripts/run-lighthouse.mjs mobile\"",
+    "perf:lighthouse:baseline": "npm run build && npm run perf:lighthouse && node ./scripts/verify-lighthouse-thresholds.mjs"
   }
 }

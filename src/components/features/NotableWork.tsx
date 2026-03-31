@@ -1,4 +1,8 @@
-import { Eye, Glasses, Globe, TrendingUp, type LucideIcon } from 'lucide-react'
+import { Eye, Glasses, Globe, type LucideIcon, TrendingUp } from 'lucide-react'
+
+import { type NotableWorkIconKey, siteContent } from '@/lib/content'
+import { SECTION_STYLES } from '@/lib/section-config'
+
 import { Card } from '@/components/ui/card'
 import { FeatureGrid } from '@/components/ui/feature-grid'
 import { SectionHeader } from '@/components/ui/section-header'
@@ -6,8 +10,6 @@ import { SectionLink } from '@/components/ui/section-link'
 import { SectionWrapper } from '@/components/ui/section-wrapper'
 import { TagList } from '@/components/ui/tag-list'
 import { TechTag } from '@/components/ui/tech-tag'
-import { siteContent, type NotableWorkIconKey } from '@/lib/content'
-import { SECTION_STYLES } from '@/lib/section-config'
 
 const iconMap: Record<NotableWorkIconKey, LucideIcon> = {
   eye: Eye,

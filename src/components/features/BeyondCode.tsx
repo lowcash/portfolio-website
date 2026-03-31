@@ -1,13 +1,15 @@
 import { BookOpen, Music2, Plane, TrendingUp } from 'lucide-react'
-import { SectionHeader } from '@/components/ui/section-header'
+
+import { siteContent } from '@/lib/content'
+import { SECTION_STYLES } from '@/lib/section-config'
+
 import { Card } from '@/components/ui/card'
 import { FeatureGrid } from '@/components/ui/feature-grid'
+import { SectionHeader } from '@/components/ui/section-header'
 import { SectionLink } from '@/components/ui/section-link'
 import { SectionWrapper } from '@/components/ui/section-wrapper'
 import { TagList } from '@/components/ui/tag-list'
 import { TechTag } from '@/components/ui/tech-tag'
-import { siteContent } from '@/lib/content'
-import { SECTION_STYLES } from '@/lib/section-config'
 
 export function BeyondCode() {
   const content = siteContent.beyondCode

@@ -1,7 +1,8 @@
-import { HeroContent } from '@/components/ui/hero-content'
-import { SectionWrapper } from '@/components/ui/section-wrapper'
 import { siteContent } from '@/lib/content'
 import { SECTION_STYLES } from '@/lib/section-config'
+
+import { HeroContent } from '@/components/ui/hero-content'
+import { SectionWrapper } from '@/components/ui/section-wrapper'
 
 export function Hero() {
   const { gradient, glowColors } = SECTION_STYLES.hero

@@ -1,13 +1,15 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { siteContent } from '../src/lib/content'
-import { ScrollToTop } from '../src/components/layout/ScrollToTop'
-import { ScrollNavigation } from '../src/components/layout/ScrollNavigation'
-import { AnimatedBackground } from '../src/components/shared/AnimatedBackground'
-import { DebugInfo } from '../src/components/layout/DebugInfo'
-import { EasterEggs } from '../src/components/features/EasterEggs'
-import { ScrollProgress } from '../src/components/layout/ScrollProgress'
+
+import { siteContent } from '@/lib/content'
+
+import { DeveloperConsole } from '@/components/features/DeveloperConsole'
+import { AnimatedBackground } from '@/components/shared/AnimatedBackground'
+import { EasterEggs } from '@/components/ui/easter-eggs'
+import { ScrollNavigation } from '@/components/ui/scroll-navigation'
+import { ScrollProgress } from '@/components/ui/scroll-progress'
+import { ScrollToTop } from '@/components/ui/scroll-to-top'
 
 type ClientChromeProps = {
   sectionIds: string[]
@@ -17,31 +19,8 @@ export function ClientChrome({ sectionIds }: ClientChromeProps) {
   const sectionMeta = siteContent.navigation.sections
   const [currentSection, setCurrentSection] = useState(0)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-  const [isDevConsoleOpen, setIsDevConsoleOpen] = useState(false)
+  const [, setIsDevConsoleOpen] = useState(false)
   const [isRestoringScroll, setIsRestoringScroll] = useState(false)
-
-  useEffect(() => {
-    const isMobile = window.innerWidth < 768
-
-    if (isDevConsoleOpen && isMobile) {
-      const preventDefault = (e: TouchEvent) => {
-        const target = e.target as HTMLElement
-        const isInScrollableContainer = target.closest('[role="region"][aria-label="Developer debug console"]')
-
-        if (!isInScrollableContainer) {
-          e.preventDefault()
-        }
-      }
-
-      document.body.addEventListener('touchmove', preventDefault, { passive: false })
-      document.body.style.overflow = 'hidden'
-
-      return () => {
-        document.body.removeEventListener('touchmove', preventDefault)
-        document.body.style.overflow = ''
-      }
-    }
-  }, [isDevConsoleOpen])
 
   useEffect(() => {
     let frameId: number | null = null
@@ -115,7 +94,7 @@ export function ClientChrome({ sectionIds }: ClientChromeProps) {
       <EasterEggs />
       <AnimatedBackground />
 
-      <ScrollToTop currentSection={currentSection} onGoToFirst={() => scrollToSection(0)} />
+        <ScrollToTop currentSection={currentSection} onGoToFirst={() => scrollToSection(0)} />
 
       <ScrollNavigation
         currentSection={currentSection}
@@ -126,7 +105,7 @@ export function ClientChrome({ sectionIds }: ClientChromeProps) {
         onScrollRestore={setIsRestoringScroll}
       />
 
-      <DebugInfo onVisibilityChange={setIsDevConsoleOpen} />
+      <DeveloperConsole onVisibilityChange={setIsDevConsoleOpen} />
       <ScrollProgress />
     </>
   )

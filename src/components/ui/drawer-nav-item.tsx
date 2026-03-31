@@ -8,7 +8,7 @@ export function DrawerNavItem({ isActive, label, onClick }: DrawerNavItemProps) 
   return (
     <button
       onClick={onClick}
-      className={`w-full text-left px-4 py-4 rounded-xl transition-all duration-300 relative ${
+      className={`relative z-20 w-full rounded-xl px-4 py-4 text-left transition-all duration-300 pointer-events-auto ${
         isActive ? 'text-white' : 'bg-white/5 text-gray-300 hover:bg-white/10'
       }`}
       style={{ minHeight: '56px' }}

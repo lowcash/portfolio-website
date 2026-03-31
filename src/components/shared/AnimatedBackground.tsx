@@ -1,7 +1,8 @@
 // style-boundary-ignore-file: orb animation uses JS-computed inline styles (size, position, filter, duration) — cannot be expressed as static Tailwind classes
-import { useEffect, useState, useRef } from 'react'
-import { ORB_COLORS } from '../../lib/section-config'
-import { ANIMATION_CONFIG, SECTION_COUNT } from '../../lib/constants'
+import { useEffect, useRef, useState } from 'react'
+
+import { ANIMATION_CONFIG, SECTION_COUNT } from '@/lib/constants'
+import { ORB_COLORS } from '@/lib/section-config'
 
 type OrbSettings = {
   orbBrightness: number
@@ -27,6 +28,7 @@ const generateColorBreakpoints = () => {
 }
 
 const COLOR_BREAKPOINTS = generateColorBreakpoints()
+const TARGET_SCROLL_EPSILON = 0.05
 
 /**
  * Linear interpolation helper
@@ -117,6 +119,7 @@ function shiftHue(r: number, g: number, b: number, hueDelta: number): string {
 export function AnimatedBackground() {
   const [targetScrollPercent, setTargetScrollPercent] = useState(0)
   const [smoothScrollPercent, setSmoothScrollPercent] = useState(0)
+  const smoothScrollPercentRef = useRef(0)
   const rafRef = useRef<number | null>(null)
   const [prefersReducedMotion, setPrefersReducedMotion] = useState(false)
   const lastCssValuesRef = useRef<{
@@ -137,7 +140,10 @@ export function AnimatedBackground() {
   const [positionVariation, setPositionVariation] = useState(1.0) // 100% = default positions
 
   // Track window width for responsive vignette
-  const [isMobile, setIsMobile] = useState(false)
+  const [isMobile, setIsMobile] = useState(() => {
+    if (typeof window === 'undefined') return false
+    return window.innerWidth < 768
+  })
 
   // Update isMobile on resize
   useEffect(() => {
@@ -249,7 +255,14 @@ export function AnimatedBackground() {
       const maxScroll = docHeight - winHeight
 
       const percent = maxScroll > 0 ? (scrollTop / maxScroll) * 100 : 0
-      setTargetScrollPercent(Math.min(100, Math.max(0, percent)))
+      const nextTarget = Math.min(100, Math.max(0, percent))
+
+      setTargetScrollPercent((previous) => {
+        if (Math.abs(nextTarget - previous) < TARGET_SCROLL_EPSILON) {
+          return previous
+        }
+        return nextTarget
+      })
     }
 
     handleScroll() // Initial
@@ -269,22 +282,33 @@ export function AnimatedBackground() {
         return
       }
 
+      let shouldContinue = false
+
       setSmoothScrollPercent((prev) => {
         const diff = targetScrollPercent - prev
 
         // Pokud je rozdíl malý, snap to target
         if (Math.abs(diff) < ANIMATION_CONFIG.SMOOTH_SCROLL_SNAP_THRESHOLD) {
+          smoothScrollPercentRef.current = targetScrollPercent
           return targetScrollPercent
         }
 
-        return prev + diff * ANIMATION_CONFIG.SMOOTH_SCROLL_EASING
+        const nextValue = prev + diff * ANIMATION_CONFIG.SMOOTH_SCROLL_EASING
+        smoothScrollPercentRef.current = nextValue
+        shouldContinue = true
+        return nextValue
       })
 
-      rafRef.current = requestAnimationFrame(animate)
+      if (shouldContinue) {
+        rafRef.current = requestAnimationFrame(animate)
+      } else {
+        rafRef.current = null
+      }
     }
 
     const handleVisibilityChange = () => {
-      if (document.visibilityState === 'visible' && rafRef.current === null) {
+      const diff = Math.abs(targetScrollPercent - smoothScrollPercentRef.current)
+      if (document.visibilityState === 'visible' && rafRef.current === null && diff > 0) {
         rafRef.current = requestAnimationFrame(animate)
       }
     }
@@ -369,16 +393,16 @@ export function AnimatedBackground() {
 
   // Fixed minimal vignette style (no longer controllable)
   const vignetteStyle = isMobile
-    ? 'radial-gradient(circle at center, transparent 0%, transparent 40%, rgba(3, 7, 18, 0.15) 70%, rgba(3, 7, 18, 0.3) 100%)'
+    ? 'radial-gradient(circle at center, transparent 0%, transparent 44%, rgba(3, 7, 18, 0.1) 70%, rgba(3, 7, 18, 0.2) 100%)'
     : 'radial-gradient(circle at center, transparent 0%, transparent 40%, rgba(3, 7, 18, 0.2) 70%, rgba(3, 7, 18, 0.5) 100%)'
 
   // Position variation - randomize positions based on slider
-  // On mobile, disable position variation entirely to keep orbs visible
-  const maxVariation = isMobile ? 0 : 30 // Mobile: NO variation, Desktop: ±30%
+  const maxVariation = isMobile ? 8 : 30 // Mobile: subtle spread, Desktop: ±30%
   const posVariation = (positionVariation - 1) * maxVariation
 
   // On mobile, scale down orb sizes to fit viewport
-  const mobileSizeMultiplier = isMobile ? 0.4 : 1.0 // Mobile: 40% size
+  const mobileSizeMultiplier = isMobile ? 0.4 : 1.0
+  const mobileOpacityMultiplier = isMobile ? 0.8 : 1
 
   const getOrbMotionStyle = (blurValue: number, durationSeconds: number) => {
     if (prefersReducedMotion) {
@@ -389,8 +413,8 @@ export function AnimatedBackground() {
       }
     }
 
-    const effectiveBlur = isMobile ? blurValue * orbBlur * 0.35 : blurValue * orbBlur
-    const effectiveBrightness = isMobile ? Math.min(orbBrightness, 0.75) : orbBrightness
+    const effectiveBlur = isMobile ? blurValue * orbBlur * 0.62 : blurValue * orbBlur
+    const effectiveBrightness = isMobile ? Math.max(0.72, Math.min(0.95, orbBrightness * 1.2)) : orbBrightness
 
     return {
       filter: `blur(${effectiveBlur}px) brightness(${effectiveBrightness})`,
@@ -400,16 +424,23 @@ export function AnimatedBackground() {
   }
 
   const getPosition = (baseTop: number, baseLeft: number, seed: number) => {
-    // On mobile, use different base positions - spread them around the center
+    // On mobile, spread orbs across the full canvas to avoid center clustering.
     let adjustedTop, adjustedLeft
 
     if (isMobile) {
-      // Mobile: distribute orbs in a circle pattern around center
-      // Convert seed to an angle for circular distribution
-      const angle = (seed / 7) * Math.PI * 2 // 0-2π radians
-      const radius = 20 // 20% radius from center
-      adjustedTop = 50 + Math.sin(angle) * radius
-      adjustedLeft = 50 + Math.cos(angle) * radius
+      const mobilePositions = [
+        { top: 24, left: 26 },
+        { top: 18, left: 74 },
+        { top: 46, left: 16 },
+        { top: 44, left: 82 },
+        { top: 74, left: 28 },
+        { top: 72, left: 72 },
+        { top: 58, left: 50 },
+        { top: 32, left: 54 },
+      ] as const
+      const preset = mobilePositions[seed % mobilePositions.length]
+      adjustedTop = preset.top
+      adjustedLeft = preset.left
     } else {
       // Desktop: use original positions
       adjustedTop = baseTop
@@ -435,117 +466,123 @@ export function AnimatedBackground() {
   }
 
   return (
-    <div className='fixed inset-0 overflow-hidden' style={{ backgroundColor: '#030712' }}>
+    <div className='pointer-events-none fixed inset-0 z-0' style={{ backgroundColor: '#030712' }}>
       {/* ============ ANIMATED ORBS ============ */}
       {/* Central main orb - největší, primární barva */}
       <div
-        className='absolute orb-1'
+        className='orb-1 absolute'
         style={{
-          top: '50%',
-          left: '50%',
-          transform: 'translate(-50%, -50%)',
+          ...getPosition(50, 50, 0),
           width: `${800 * orbSize * mobileSizeMultiplier}px`,
           height: `${800 * orbSize * mobileSizeMultiplier}px`,
           background: `radial-gradient(circle, ${orbColor} 0%, transparent 70%)`,
-          opacity: 0.25 * orbOpacity,
+          opacity: 0.25 * orbOpacity * mobileOpacityMultiplier,
           ...getOrbMotionStyle(120, 45),
         }}
       />
 
       {/* Secondary orbs - hue shifted variations */}
       <div
-        className='absolute orb-2'
+        className='orb-2 absolute'
         style={{
           ...getPosition(25, 25, 1),
           width: `${600 * orbSize * mobileSizeMultiplier}px`,
           height: `${600 * orbSize * mobileSizeMultiplier}px`,
           background: `radial-gradient(circle, ${orbColor1} 0%, transparent 70%)`,
-          opacity: 0.2 * orbOpacity,
+          opacity: 0.2 * orbOpacity * mobileOpacityMultiplier,
           ...getOrbMotionStyle(100, 38),
         }}
       />
 
       <div
-        className='absolute orb-3'
+        className='orb-3 absolute'
         style={{
           ...getPosition(75, 75, 2),
           width: `${650 * orbSize * mobileSizeMultiplier}px`,
           height: `${650 * orbSize * mobileSizeMultiplier}px`,
           background: `radial-gradient(circle, ${orbColor2} 0%, transparent 70%)`,
-          opacity: 0.22 * orbOpacity,
+          opacity: 0.22 * orbOpacity * mobileOpacityMultiplier,
           ...getOrbMotionStyle(110, 42),
         }}
       />
 
       {/* Tertiary accent orbs - smaller, more vibrant */}
       <div
-        className='absolute orb-4'
+        className='orb-4 absolute'
         style={{
           ...getPosition(33, 66, 3),
           width: `${500 * orbSize * mobileSizeMultiplier}px`,
           height: `${500 * orbSize * mobileSizeMultiplier}px`,
           background: `radial-gradient(circle, ${orbColor3} 0%, transparent 70%)`,
-          opacity: 0.18 * orbOpacity,
+          opacity: 0.18 * orbOpacity * mobileOpacityMultiplier,
           ...getOrbMotionStyle(90, 40),
         }}
       />
 
       <div
-        className='absolute orb-5'
+        className='orb-5 absolute'
         style={{
           ...getPosition(75, 33, 4),
           width: `${550 * orbSize * mobileSizeMultiplier}px`,
           height: `${550 * orbSize * mobileSizeMultiplier}px`,
           background: `radial-gradient(circle, ${orbColor4} 0%, transparent 70%)`,
-          opacity: 0.19 * orbOpacity,
+          opacity: 0.19 * orbOpacity * mobileOpacityMultiplier,
           ...getOrbMotionStyle(95, 36),
         }}
       />
 
       {/* Extreme hue shifts for maximum variation */}
       <div
-        className='absolute orb-6'
+        className='orb-6 absolute'
         style={{
           ...getPosition(66, 66, 5),
           width: `${700 * orbSize * mobileSizeMultiplier}px`,
           height: `${700 * orbSize * mobileSizeMultiplier}px`,
           background: `radial-gradient(circle, ${orbColor5} 0%, transparent 70%)`,
-          opacity: 0.21 * orbOpacity,
+          opacity: 0.21 * orbOpacity * mobileOpacityMultiplier,
           ...getOrbMotionStyle(115, 44),
         }}
       />
 
-      <div
-        className='absolute orb-7'
-        style={{
-          ...getPosition(50, 50, 6),
-          width: `${600 * orbSize * mobileSizeMultiplier}px`,
-          height: `${600 * orbSize * mobileSizeMultiplier}px`,
-          background: `radial-gradient(circle, ${orbColor6} 0%, transparent 70%)`,
-          opacity: 0.2 * orbOpacity,
-          ...getOrbMotionStyle(105, 50),
-        }}
-      />
+      {/* Additional accent orbs stay desktop-only to reduce mobile rendering cost */}
+      {!isMobile && (
+        <>
+          <div
+            className='orb-7 absolute'
+            style={{
+              ...getPosition(50, 50, 6),
+              width: `${600 * orbSize * mobileSizeMultiplier}px`,
+              height: `${600 * orbSize * mobileSizeMultiplier}px`,
+              background: `radial-gradient(circle, ${orbColor6} 0%, transparent 70%)`,
+              opacity: 0.2 * orbOpacity * mobileOpacityMultiplier,
+              ...getOrbMotionStyle(105, 50),
+            }}
+          />
 
-      {/* Additional accent orb */}
-      <div
-        className='absolute orb-8'
-        style={{
-          ...getPosition(66, 33, 7),
-          width: `${550 * orbSize * mobileSizeMultiplier}px`,
-          height: `${550 * orbSize * mobileSizeMultiplier}px`,
-          background: `radial-gradient(circle, ${orbColor1} 0%, transparent 70%)`,
-          opacity: 0.18 * orbOpacity,
-          ...getOrbMotionStyle(100, 46),
-        }}
-      />
+          <div
+            className='orb-8 absolute'
+            style={{
+              ...getPosition(66, 33, 7),
+              width: `${550 * orbSize * mobileSizeMultiplier}px`,
+              height: `${550 * orbSize * mobileSizeMultiplier}px`,
+              background: `radial-gradient(circle, ${orbColor1} 0%, transparent 70%)`,
+              opacity: 0.18 * orbOpacity * mobileOpacityMultiplier,
+              ...getOrbMotionStyle(100, 46),
+            }}
+          />
+        </>
+      )}
 
-      {/* Dark overlay pro kontrast a depth */}
-      <div className='absolute inset-0 bg-linear-to-b from-gray-950/70 via-gray-950/50 to-gray-950/70 pointer-events-none' />
+      {/* Subtle overlay for depth – reduced to keep orbs visible */}
+      <div
+        className={`pointer-events-none absolute inset-0 bg-linear-to-b ${
+          isMobile ? 'from-gray-950/20 via-transparent to-gray-950/20' : 'from-gray-950/40 via-transparent to-gray-950/40'
+        }`}
+      />
 
       {/* VIGNETTE EFFECT - controllable via easter egg */}
       <div
-        className='absolute inset-0 pointer-events-none transition-all duration-500'
+        className='pointer-events-none absolute inset-0 transition-all duration-500'
         style={{
           background: vignetteStyle,
         }}

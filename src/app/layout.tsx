@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
-import '../src/index.css'
+
+import '../index.css'
 
 const siteUrl = 'https://lowcash.dev'
 
@@ -52,7 +53,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <a
           href='#main-content'
-          className='sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[100] focus:rounded-md focus:bg-gray-950 focus:px-4 focus:py-2 focus:text-white'
+          className='sr-only focus:not-sr-only focus:fixed focus:top-4 focus:left-4 focus:z-[100] focus:rounded-md focus:bg-gray-950 focus:px-4 focus:py-2 focus:text-white'
         >
           Skip to content
         </a>

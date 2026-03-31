@@ -1,4 +1,5 @@
 import { ChevronUp } from 'lucide-react'
+
 import { FloatingRail } from './floating-rail'
 
 interface ScrollToTopProps {
@@ -8,9 +9,10 @@ interface ScrollToTopProps {
 
 export function ScrollToTop({ currentSection, onGoToFirst }: ScrollToTopProps) {
   const isVisible = currentSection > 0
+  const railVariant = 'bottom-right'
 
   return (
-    <FloatingRail variant='bottom-right'>
+    <FloatingRail variant={railVariant} interactive={isVisible}>
       <button
         onClick={onGoToFirst}
         onKeyDown={(e) => {
@@ -19,23 +21,20 @@ export function ScrollToTop({ currentSection, onGoToFirst }: ScrollToTopProps) {
             onGoToFirst()
           }
         }}
-        className={`pointer-events-auto transition-all duration-300 cursor-pointer ${
-          isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10 pointer-events-none'
+        className={`pointer-events-auto cursor-pointer transition-all duration-300 ${
+          isVisible ? 'translate-y-0 opacity-100' : 'pointer-events-none translate-y-10 opacity-0'
         }`}
-        style={{
-          marginBottom: 'env(safe-area-inset-bottom)',
-        }}
         aria-label='Scroll to top of page'
         aria-hidden={!isVisible}
       >
-        <div className='relative group'>
+        <div className='group relative'>
           <div
-            className='absolute inset-0 pointer-events-none rounded-2xl animate-glow-shimmer -z-10 scroll-to-top-glow'
+            className='animate-glow-shimmer scroll-to-top-glow pointer-events-none absolute inset-0 -z-10 rounded-2xl'
             aria-hidden='true'
           />
 
-          <div className='bg-black/40 backdrop-blur-sm rounded-2xl p-4 transition-all duration-500 hover:scale-105 scroll-to-top-inner'>
-            <ChevronUp className='w-6 h-6 scroll-to-top-icon' aria-hidden='true' />
+          <div className='scroll-to-top-inner rounded-2xl bg-black/40 p-4 backdrop-blur-sm transition-all duration-500 hover:scale-105'>
+            <ChevronUp className='scroll-to-top-icon h-6 w-6' aria-hidden='true' />
           </div>
         </div>
       </button>

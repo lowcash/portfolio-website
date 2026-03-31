@@ -1,10 +1,9 @@
+import lighthouse from 'lighthouse'
+import { spawn } from 'node:child_process'
 import fs from 'node:fs/promises'
 import path from 'node:path'
 import process from 'node:process'
 import { setTimeout as delay } from 'node:timers/promises'
-import { spawn } from 'node:child_process'
-
-import lighthouse from 'lighthouse'
 import { chromium } from 'playwright'
 
 const mode = process.argv[2] === 'mobile' ? 'mobile' : 'desktop'
@@ -12,6 +11,7 @@ const url = process.env.LIGHTHOUSE_URL ?? 'http://127.0.0.1:3000'
 const port = mode === 'mobile' ? 9223 : 9222
 const outputDir = path.resolve(process.cwd(), 'test-results')
 const outputPath = path.join(outputDir, `lighthouse-${mode}.html`)
+const summaryPath = path.join(outputDir, `lighthouse-${mode}.json`)
 
 const chromeProcess = spawn(
   chromium.executablePath(),
@@ -82,23 +82,22 @@ try {
 
   const categories = runnerResult.lhr.categories
   const formatScore = (key) => Math.round((categories[key]?.score ?? 0) * 100)
+  const summary = {
+    mode,
+    url,
+    outputPath,
+    generatedAt: new Date().toISOString(),
+    scores: {
+      performance: formatScore('performance'),
+      accessibility: formatScore('accessibility'),
+      bestPractices: formatScore('best-practices'),
+      seo: formatScore('seo'),
+    },
+  }
 
-  console.log(
-    JSON.stringify(
-      {
-        mode,
-        outputPath,
-        scores: {
-          performance: formatScore('performance'),
-          accessibility: formatScore('accessibility'),
-          bestPractices: formatScore('best-practices'),
-          seo: formatScore('seo'),
-        },
-      },
-      null,
-      2,
-    ),
-  )
+  await fs.writeFile(summaryPath, JSON.stringify(summary, null, 2))
+
+  console.log(JSON.stringify({ ...summary, summaryPath }, null, 2))
 } finally {
   chromeProcess.kill('SIGTERM')
 }

@@ -1,8 +1,10 @@
 import { Github, Linkedin, Send } from 'lucide-react'
-import { ContactContent } from '@/components/ui/contact-content'
-import { SectionWrapper } from '@/components/ui/section-wrapper'
+
 import { siteContent } from '@/lib/content'
 import { SECTION_STYLES } from '@/lib/section-config'
+
+import { ContactContent } from '@/components/ui/contact-content'
+import { SectionWrapper } from '@/components/ui/section-wrapper'
 
 export function Contact() {
   const content = siteContent.contact

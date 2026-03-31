@@ -1,10 +1,12 @@
-import { Brain, Sparkles, Zap, type LucideIcon } from 'lucide-react'
+import { Brain, type LucideIcon, Sparkles, Zap } from 'lucide-react'
+
+import { type WhoIAmIconKey, siteContent } from '@/lib/content'
+import { SECTION_STYLES } from '@/lib/section-config'
+
 import { Card } from '@/components/ui/card'
 import { SectionHeader } from '@/components/ui/section-header'
 import { SectionList } from '@/components/ui/section-list'
 import { SectionWrapper } from '@/components/ui/section-wrapper'
-import { siteContent, type WhoIAmIconKey } from '@/lib/content'
-import { SECTION_STYLES } from '@/lib/section-config'
 
 const iconMap: Record<WhoIAmIconKey, LucideIcon> = {
   zap: Zap,

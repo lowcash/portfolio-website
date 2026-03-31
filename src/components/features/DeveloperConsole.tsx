@@ -1,7 +1,9 @@
 // style-boundary-ignore-file: dynamic orbR/orbG/orbB RGB values computed from React state — inline styles are unavoidable here
-import { useEffect, useState, useRef } from 'react'
-import { Terminal, Trophy } from 'lucide-react'
-import type { Achievement } from '../features/EasterEggs'
+import { useEffect, useRef, useState } from 'react'
+
+import { Terminal, Trophy, X } from 'lucide-react'
+
+import type { Achievement } from '@/components/ui/easter-eggs'
 
 /**
  * Debug component - Easter egg for developers
@@ -27,11 +29,11 @@ const ACHIEVEMENT_HINTS: Record<string, string> = {
   'repeat-visitor': 'Visit the site 3+ times',
 }
 
-interface DebugInfoProps {
+interface DeveloperConsoleProps {
   onVisibilityChange?: (isVisible: boolean) => void
 }
 
-export function DebugInfo({ onVisibilityChange }: DebugInfoProps = {}) {
+export function DeveloperConsole({ onVisibilityChange }: DeveloperConsoleProps = {}) {
   const canUseStorage = typeof window !== 'undefined'
   const [isVisible, setIsVisible] = useState(false)
   const [scrollPercent, setScrollPercent] = useState(0)
@@ -76,12 +78,8 @@ export function DebugInfo({ onVisibilityChange }: DebugInfoProps = {}) {
     return { x: 20, y: 20 }
   })
 
-  // Persistent scale - DEFAULT 125% (1.0 = 125%, 0.8 = 100%)
-  const [scale, setScale] = useState(() => {
-    if (!canUseStorage || typeof window === 'undefined') return 1.0 // 125% default
-    const saved = localStorage.getItem('debug_scale')
-    return saved ? parseFloat(saved) : 1.0
-  })
+  // Scale is session-only — not persisted, always opens at readable default
+  const [scale, setScale] = useState(1.0)
 
   // Easter egg settings
   const [orbBrightness, setOrbBrightness] = useState(() => {
@@ -164,6 +162,7 @@ export function DebugInfo({ onVisibilityChange }: DebugInfoProps = {}) {
           // Mark dev console as opened (enables achievement system)
           if (newVal) {
             localStorage.setItem('dev_console_opened', 'true')
+            window.dispatchEvent(new CustomEvent('dev-console-opened'))
             console.log('%c🎮 Achievement system activated!', 'color: #10b981; font-size: 12px; font-weight: bold;')
           }
           return newVal
@@ -389,81 +388,96 @@ export function DebugInfo({ onVisibilityChange }: DebugInfoProps = {}) {
 
   // Check if mobile (before render)
   const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
+  const triggerInsetInline =
+    process.env.NODE_ENV === 'development'
+      ? 'max(0.875rem, calc(env(safe-area-inset-left) + 0.625rem))'
+      : 'max(0.25rem, env(safe-area-inset-left))'
+  const triggerInsetBlock =
+    process.env.NODE_ENV === 'development'
+      ? 'max(0.875rem, calc(env(safe-area-inset-bottom) + 0.625rem))'
+      : 'max(0.25rem, env(safe-area-inset-bottom))'
 
   if (!isVisible) {
     return (
-      <div
-        className='fixed z-100 bottom-4 left-4 opacity-20 hover:opacity-100 transition-opacity cursor-pointer touch-none'
+      <button
+        type='button'
+        className='fixed border-none bg-transparent cursor-pointer'
         onClick={() => {
           setIsVisible(true)
           // Mark dev console as opened (enables achievement system)
           localStorage.setItem('dev_console_opened', 'true')
+          window.dispatchEvent(new CustomEvent('dev-console-opened'))
           console.log('%c🎮 Achievement system activated!', 'color: #10b981; font-size: 12px; font-weight: bold;')
         }}
         onTouchEnd={(e) => {
           e.preventDefault()
           setIsVisible(true)
           localStorage.setItem('dev_console_opened', 'true')
+          window.dispatchEvent(new CustomEvent('dev-console-opened'))
           console.log('%c🎮 Achievement system activated!', 'color: #10b981; font-size: 12px; font-weight: bold;')
         }}
         title="Tap to open dev console (or press 'D' on desktop)"
         aria-label='Toggle debug console'
         style={{
-          // iOS safe area
-          paddingBottom: 'env(safe-area-inset-bottom)',
-          paddingLeft: 'env(safe-area-inset-left)',
+          left: triggerInsetInline,
+          bottom: triggerInsetBlock,
+          zIndex: 120,
+          padding: '0.375rem',
+          border: 'none',
+          background: 'transparent',
+          color: 'rgba(148, 163, 184, 0.38)',
         }}
       >
-        {/* Just the icon, no background - more subtle */}
-        <Terminal className='w-6 h-6 text-gray-400' aria-hidden='true' />
-      </div>
+        <Terminal className='h-5 w-5' aria-hidden='true' />
+      </button>
     )
   }
 
   return (
     <>
-      {/* Mobile: Fullscreen modal with backdrop */}
+      {/* Mobile: Fullscreen panel */}
       {isMobile && (
-        <div className='fixed inset-0 z-70 bg-black/80 backdrop-blur-sm animate-in fade-in duration-300'>
-          <div className='h-full w-full flex flex-col'>
-            {/* Cyber/retro styled panel - MOBILE fullscreen with scroll */}
+        <div
+          className='fixed inset-0 pointer-events-auto'
+          role='region'
+          aria-label='Developer debug console'
+          style={{
+            zIndex: 130,
+            background: 'rgba(3, 7, 18, 0.94)',
+            backdropFilter: 'blur(10px)',
+          }}
+        >
+          <div className='flex h-full flex-col'>
+            {/* Header */}
             <div
-              className='relative h-full flex flex-col backdrop-blur-xl'
-              role='region'
-              aria-label='Developer debug console'
+              className='flex shrink-0 items-center justify-between border-b-2 px-4 py-3'
               style={{
-                background: 'rgba(3, 7, 18, 0.95)',
+                borderColor: `rgb(${orbR}, ${orbG}, ${orbB})`,
+                background: `rgba(${orbR}, ${orbG}, ${orbB}, 0.15)`,
               }}
             >
-              {/* Header - Fixed at top */}
-              <div
-                className='px-4 py-3 flex items-center justify-between border-b-2 shrink-0'
-                style={{
-                  borderColor: `rgb(${orbR}, ${orbG}, ${orbB})`,
-                  background: `rgba(${orbR}, ${orbG}, ${orbB}, 0.15)`,
-                }}
-              >
-                <div className='flex items-center gap-2'>
-                  <Terminal className='w-5 h-5' style={{ color: `rgb(${orbR}, ${orbG}, ${orbB})` }} />
-                  <span className='text-white'>DEV.CONSOLE</span>
-                </div>
-                <button
-                  onClick={() => setIsVisible(false)}
-                  className='text-gray-400 hover:text-white transition-colors cursor-pointer text-2xl w-8 h-8 flex items-center justify-center'
-                  aria-label='Close console'
-                >
-                  ✕
-                </button>
+              <div className='flex items-center gap-2'>
+                <Terminal className='h-5 w-5' style={{ color: `rgb(${orbR}, ${orbG}, ${orbB})` }} />
+                <span className='text-white'>DEV.CONSOLE</span>
               </div>
+              <button
+                onClick={() => setIsVisible(false)}
+                className='flex h-12 w-12 cursor-pointer items-center justify-center rounded-xl border border-white/10 bg-white/6 text-white transition-colors hover:bg-white/12'
+                style={{ width: '3rem', height: '3rem', lineHeight: 1 }}
+                aria-label='Close console'
+              >
+                <X className='h-7 w-7 text-white' aria-hidden='true' strokeWidth={2.5} />
+              </button>
+            </div>
 
-              {/* Content - Scrollable */}
-              <div
-                className='flex-1 overflow-y-auto overscroll-contain px-4 py-4 space-y-3'
-                style={{ paddingBottom: 'env(safe-area-inset-bottom)' }}
-              >
-                {/* Rest of content from desktop version */}
-                {renderConsoleContent()}
-              </div>
+            {/* Content - Scrollable */}
+            <div
+              className='flex-1 space-y-3 overflow-y-auto overscroll-contain px-4 py-4'
+              style={{
+                paddingBottom: 'max(1rem, env(safe-area-inset-bottom))',
+              }}
+            >
+              {renderConsoleContent()}
             </div>
           </div>
         </div>
@@ -473,11 +487,11 @@ export function DebugInfo({ onVisibilityChange }: DebugInfoProps = {}) {
       {!isMobile && (
         <div
           ref={panelRef}
-          className={`fixed z-70 font-mono text-xs transition-all ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
-          onMouseDown={handleMouseDown}
+          className='fixed font-mono text-xs transition-all'
           role='region'
           aria-label='Developer debug console'
           style={{
+            zIndex: 70,
             left: `${position.x}px`,
             top: `${position.y}px`,
             transform: `scale(${scale})`,
@@ -485,7 +499,7 @@ export function DebugInfo({ onVisibilityChange }: DebugInfoProps = {}) {
         >
           {/* Cyber/retro styled panel */}
           <div
-            className='relative border-2 rounded-lg overflow-visible backdrop-blur-xl'
+            className='relative overflow-visible rounded-lg border-2 backdrop-blur-xl'
             style={{
               borderColor: `rgb(${orbR}, ${orbG}, ${orbB})`,
               boxShadow: `0 0 20px rgba(${orbR}, ${orbG}, ${orbB}, 0.3), inset 0 0 20px rgba(${orbR}, ${orbG}, ${orbB}, 0.05)`,
@@ -494,27 +508,37 @@ export function DebugInfo({ onVisibilityChange }: DebugInfoProps = {}) {
           >
             {/* Header */}
             <div
-              className='px-4 py-2 flex items-center justify-between border-b-2'
+              className='flex items-center justify-between border-b-2 px-4 py-2'
+              onMouseDown={handleMouseDown}
               style={{
                 borderColor: `rgb(${orbR}, ${orbG}, ${orbB})`,
                 background: `rgba(${orbR}, ${orbG}, ${orbB}, 0.1)`,
+                cursor: isDragging ? 'grabbing' : 'grab',
               }}
             >
               <div className='flex items-center gap-2'>
-                <Terminal className='w-4 h-4' style={{ color: `rgb(${orbR}, ${orbG}, ${orbB})` }} />
+                <Terminal className='h-4 w-4' style={{ color: `rgb(${orbR}, ${orbG}, ${orbB})` }} />
                 <span className='text-white'>DEV.CONSOLE</span>
                 <span className='text-[8px] text-gray-500'>(drag to move)</span>
               </div>
               <button
                 onClick={() => setIsVisible(false)}
-                className='text-gray-400 hover:text-white transition-colors cursor-pointer'
+                className='flex h-11 w-11 cursor-pointer items-center justify-center rounded-xl border border-white/10 bg-white/5 text-white transition-colors hover:bg-white/12'
+                style={{ width: '2.75rem', height: '2.75rem', lineHeight: 1 }}
+                aria-label='Close console'
               >
-                ✕
+                <X className='h-6 w-6 text-white' aria-hidden='true' strokeWidth={2.5} />
               </button>
             </div>
 
             {/* Content */}
-            <div className='p-4 space-y-2 min-w-[280px]'>{renderConsoleContent()}</div>
+            <div
+              data-testid='devtools-panel-content'
+              className='space-y-2 overflow-y-auto p-4'
+              style={{ minWidth: '420px', maxWidth: '620px', maxHeight: '72vh' }}
+            >
+              {renderConsoleContent()}
+            </div>
           </div>
         </div>
       )}
@@ -526,10 +550,10 @@ export function DebugInfo({ onVisibilityChange }: DebugInfoProps = {}) {
     return (
       <>
         {/* Scroll Progress */}
-        <div className='flex justify-between items-center'>
+        <div className='flex items-center justify-between'>
           <span className='text-gray-400'>SCROLL:</span>
           <div className='flex items-center gap-2'>
-            <div className='w-24 h-1.5 bg-gray-800 rounded-full overflow-hidden'>
+            <div className='h-1.5 w-24 overflow-hidden rounded-full bg-gray-800'>
               <div
                 className='h-full rounded-full transition-all'
                 style={{
@@ -538,12 +562,12 @@ export function DebugInfo({ onVisibilityChange }: DebugInfoProps = {}) {
                 }}
               />
             </div>
-            <span className='text-white tabular-nums w-12 text-right'>{scrollPercent.toFixed(1)}%</span>
+            <span className='w-12 text-right text-white tabular-nums'>{scrollPercent.toFixed(1)}%</span>
           </div>
         </div>
 
         {/* RGB Values */}
-        <div className='flex justify-between items-center'>
+        <div className='flex items-center justify-between'>
           <span className='text-gray-400'>ORB_RGB:</span>
           <div className='flex gap-2 text-white tabular-nums'>
             <span style={{ color: `rgb(255, ${orbG}, ${orbB})` }}>{orbR.toString().padStart(3, '0')}</span>
@@ -553,10 +577,10 @@ export function DebugInfo({ onVisibilityChange }: DebugInfoProps = {}) {
         </div>
 
         {/* Color Preview */}
-        <div className='flex justify-between items-center'>
+        <div className='flex items-center justify-between'>
           <span className='text-gray-400'>COLOR:</span>
           <div
-            className='w-32 h-6 rounded border-2 border-gray-700'
+            className='h-6 w-32 rounded border-2 border-gray-700'
             style={{
               background: `rgb(${orbR}, ${orbG}, ${orbB})`,
               boxShadow: `0 0 10px rgba(${orbR}, ${orbG}, ${orbB}, 0.5)`,
@@ -565,7 +589,7 @@ export function DebugInfo({ onVisibilityChange }: DebugInfoProps = {}) {
         </div>
 
         {/* FPS */}
-        <div className='flex justify-between items-center'>
+        <div className='flex items-center justify-between'>
           <span className='text-gray-400'>FPS:</span>
           <span
             className='text-white tabular-nums'
@@ -577,19 +601,19 @@ export function DebugInfo({ onVisibilityChange }: DebugInfoProps = {}) {
 
         {/* DIVIDER */}
         <div
-          className='border-t-2 border-gray-800 my-3'
+          className='my-3 border-t-2 border-gray-800'
           style={{ borderColor: `rgba(${orbR}, ${orbG}, ${orbB}, 0.3)` }}
         />
 
         {/* CONTROLS SECTION */}
         <div className='space-y-3'>
-          <div className='text-xs text-gray-500 uppercase tracking-wider'>⚙️ Controls</div>
+          <div className='text-xs tracking-wider text-gray-500 uppercase'>⚙️ Controls</div>
 
           {/* Animation Speed Slider */}
           <div>
-            <div className='flex justify-between items-center mb-1'>
-              <span className='text-gray-400 text-[10px]'>ANIMATION SPEED:</span>
-              <span className='text-white tabular-nums text-[10px]'>{animationSpeed.toFixed(1)}x</span>
+            <div className='mb-1 flex items-center justify-between'>
+              <span className='text-[10px] text-gray-400'>ANIMATION SPEED:</span>
+              <span className='text-[10px] text-white tabular-nums'>{animationSpeed.toFixed(1)}x</span>
             </div>
             <input
               type='range'
@@ -598,7 +622,7 @@ export function DebugInfo({ onVisibilityChange }: DebugInfoProps = {}) {
               step='0.1'
               value={animationSpeed}
               onChange={(e) => setAnimationSpeed(parseFloat(e.target.value))}
-              className='w-full h-1.5 bg-gray-800 rounded-full appearance-none cursor-pointer'
+              className='h-1.5 w-full cursor-pointer appearance-none rounded-full bg-gray-800'
               style={{
                 accentColor: `rgb(${orbR}, ${orbG}, ${orbB})`,
               }}
@@ -607,9 +631,9 @@ export function DebugInfo({ onVisibilityChange }: DebugInfoProps = {}) {
 
           {/* Color Variation Slider */}
           <div>
-            <div className='flex justify-between items-center mb-1'>
-              <span className='text-gray-400 text-[10px]'>COLOR VARIATION:</span>
-              <span className='text-white tabular-nums text-[10px]'>{colorVariation.toFixed(0)}%</span>
+            <div className='mb-1 flex items-center justify-between'>
+              <span className='text-[10px] text-gray-400'>COLOR VARIATION:</span>
+              <span className='text-[10px] text-white tabular-nums'>{colorVariation.toFixed(0)}%</span>
             </div>
             <input
               type='range'
@@ -618,7 +642,7 @@ export function DebugInfo({ onVisibilityChange }: DebugInfoProps = {}) {
               step='10'
               value={colorVariation}
               onChange={(e) => setColorVariation(parseFloat(e.target.value))}
-              className='w-full h-1.5 bg-gray-800 rounded-full appearance-none cursor-pointer'
+              className='h-1.5 w-full cursor-pointer appearance-none rounded-full bg-gray-800'
               style={{
                 accentColor: `rgb(${orbR}, ${orbG}, ${orbB})`,
               }}
@@ -627,9 +651,9 @@ export function DebugInfo({ onVisibilityChange }: DebugInfoProps = {}) {
 
           {/* Position Variation Slider */}
           <div>
-            <div className='flex justify-between items-center mb-1'>
-              <span className='text-gray-400 text-[10px]'>POSITION SPREAD:</span>
-              <span className='text-white tabular-nums text-[10px]'>{(positionVariation * 100).toFixed(0)}%</span>
+            <div className='mb-1 flex items-center justify-between'>
+              <span className='text-[10px] text-gray-400'>POSITION SPREAD:</span>
+              <span className='text-[10px] text-white tabular-nums'>{(positionVariation * 100).toFixed(0)}%</span>
             </div>
             <input
               type='range'
@@ -638,7 +662,7 @@ export function DebugInfo({ onVisibilityChange }: DebugInfoProps = {}) {
               step='0.1'
               value={positionVariation}
               onChange={(e) => setPositionVariation(parseFloat(e.target.value))}
-              className='w-full h-1.5 bg-gray-800 rounded-full appearance-none cursor-pointer'
+              className='h-1.5 w-full cursor-pointer appearance-none rounded-full bg-gray-800'
               style={{
                 accentColor: `rgb(${orbR}, ${orbG}, ${orbB})`,
               }}
@@ -647,9 +671,9 @@ export function DebugInfo({ onVisibilityChange }: DebugInfoProps = {}) {
 
           {/* Orb Size Slider */}
           <div>
-            <div className='flex justify-between items-center mb-1'>
-              <span className='text-gray-400 text-[10px]'>ORB SIZE:</span>
-              <span className='text-white tabular-nums text-[10px]'>{orbSize.toFixed(1)}x</span>
+            <div className='mb-1 flex items-center justify-between'>
+              <span className='text-[10px] text-gray-400'>ORB SIZE:</span>
+              <span className='text-[10px] text-white tabular-nums'>{orbSize.toFixed(1)}x</span>
             </div>
             <input
               type='range'
@@ -658,7 +682,7 @@ export function DebugInfo({ onVisibilityChange }: DebugInfoProps = {}) {
               step='0.1'
               value={orbSize}
               onChange={(e) => setOrbSize(parseFloat(e.target.value))}
-              className='w-full h-1.5 bg-gray-800 rounded-full appearance-none cursor-pointer'
+              className='h-1.5 w-full cursor-pointer appearance-none rounded-full bg-gray-800'
               style={{
                 accentColor: `rgb(${orbR}, ${orbG}, ${orbB})`,
               }}
@@ -667,9 +691,9 @@ export function DebugInfo({ onVisibilityChange }: DebugInfoProps = {}) {
 
           {/* Orb Blur Slider */}
           <div>
-            <div className='flex justify-between items-center mb-1'>
-              <span className='text-gray-400 text-[10px]'>ORB BLUR:</span>
-              <span className='text-white tabular-nums text-[10px]'>{orbBlur.toFixed(1)}x</span>
+            <div className='mb-1 flex items-center justify-between'>
+              <span className='text-[10px] text-gray-400'>ORB BLUR:</span>
+              <span className='text-[10px] text-white tabular-nums'>{orbBlur.toFixed(1)}x</span>
             </div>
             <input
               type='range'
@@ -678,7 +702,7 @@ export function DebugInfo({ onVisibilityChange }: DebugInfoProps = {}) {
               step='0.1'
               value={orbBlur}
               onChange={(e) => setOrbBlur(parseFloat(e.target.value))}
-              className='w-full h-1.5 bg-gray-800 rounded-full appearance-none cursor-pointer'
+              className='h-1.5 w-full cursor-pointer appearance-none rounded-full bg-gray-800'
               style={{
                 accentColor: `rgb(${orbR}, ${orbG}, ${orbB})`,
               }}
@@ -687,9 +711,9 @@ export function DebugInfo({ onVisibilityChange }: DebugInfoProps = {}) {
 
           {/* Orb Opacity Slider */}
           <div>
-            <div className='flex justify-between items-center mb-1'>
-              <span className='text-gray-400 text-[10px]'>ORB OPACITY:</span>
-              <span className='text-white tabular-nums text-[10px]'>{(orbOpacity * 100).toFixed(0)}%</span>
+            <div className='mb-1 flex items-center justify-between'>
+              <span className='text-[10px] text-gray-400'>ORB OPACITY:</span>
+              <span className='text-[10px] text-white tabular-nums'>{(orbOpacity * 100).toFixed(0)}%</span>
             </div>
             <input
               type='range'
@@ -698,7 +722,7 @@ export function DebugInfo({ onVisibilityChange }: DebugInfoProps = {}) {
               step='0.1'
               value={orbOpacity}
               onChange={(e) => setOrbOpacity(parseFloat(e.target.value))}
-              className='w-full h-1.5 bg-gray-800 rounded-full appearance-none cursor-pointer'
+              className='h-1.5 w-full cursor-pointer appearance-none rounded-full bg-gray-800'
               style={{
                 accentColor: `rgb(${orbR}, ${orbG}, ${orbB})`,
               }}
@@ -707,9 +731,9 @@ export function DebugInfo({ onVisibilityChange }: DebugInfoProps = {}) {
 
           {/* Scale Slider - RESIZABLE CONSOLE */}
           <div>
-            <div className='flex justify-between items-center mb-1'>
-              <span className='text-gray-400 text-[10px]'>CONSOLE SCALE:</span>
-              <span className='text-white tabular-nums text-[10px]'>{((scale / 0.8) * 100).toFixed(0)}%</span>
+            <div className='mb-1 flex items-center justify-between'>
+              <span className='text-[10px] text-gray-400'>CONSOLE SCALE:</span>
+              <span className='text-[10px] text-white tabular-nums'>{((scale / 0.8) * 100).toFixed(0)}%</span>
             </div>
             <input
               type='range'
@@ -722,7 +746,7 @@ export function DebugInfo({ onVisibilityChange }: DebugInfoProps = {}) {
                 setScale(newScale)
                 localStorage.setItem('debug_scale', String(newScale))
               }}
-              className='w-full h-1.5 bg-gray-800 rounded-full appearance-none cursor-pointer'
+              className='h-1.5 w-full cursor-pointer appearance-none rounded-full bg-gray-800'
               style={{
                 accentColor: `rgb(${orbR}, ${orbG}, ${orbB})`,
               }}
@@ -759,7 +783,7 @@ export function DebugInfo({ onVisibilityChange }: DebugInfoProps = {}) {
               localStorage.setItem('orb_opacity', String(defaults.opacity))
               localStorage.setItem('position_variation', String(defaults.position))
             }}
-            className='w-full px-3 py-1.5 text-[10px] text-gray-400 hover:text-white border border-gray-700 hover:border-gray-500 rounded transition-all'
+            className='w-full rounded border border-gray-700 px-3 py-1.5 text-[10px] text-gray-400 transition-all hover:border-gray-500 hover:text-white'
           >
             RESET TO DEFAULT
           </button>
@@ -784,7 +808,7 @@ export function DebugInfo({ onVisibilityChange }: DebugInfoProps = {}) {
                 )
               }
             }}
-            className='w-full px-3 py-1.5 text-[10px] text-red-400 hover:text-red-300 border border-red-700 hover:border-red-500 rounded transition-all'
+            className='w-full rounded border border-red-700 px-3 py-1.5 text-[10px] text-red-400 transition-all hover:border-red-500 hover:text-red-300'
           >
             RESET ACHIEVEMENTS
           </button>
@@ -792,15 +816,15 @@ export function DebugInfo({ onVisibilityChange }: DebugInfoProps = {}) {
 
         {/* DIVIDER */}
         <div
-          className='border-t-2 border-gray-800 my-3'
+          className='my-3 border-t-2 border-gray-800'
           style={{ borderColor: `rgba(${orbR}, ${orbG}, ${orbB}, 0.3)` }}
         />
 
         {/* ACHIEVEMENTS SECTION */}
         <div className='space-y-2'>
           <div className='flex items-center gap-2'>
-            <Trophy className='w-3 h-3 text-yellow-400' />
-            <span className='text-xs text-gray-500 uppercase tracking-wider'>Achievements</span>
+            <Trophy className='h-3 w-3 text-yellow-400' />
+            <span className='text-xs tracking-wider text-gray-500 uppercase'>Achievements</span>
             <span className='text-[10px] text-gray-600'>
               {achievements.filter((a) => a.unlocked).length}/{achievements.length}
             </span>
@@ -817,10 +841,10 @@ export function DebugInfo({ onVisibilityChange }: DebugInfoProps = {}) {
                   }}
                 >
                   <div
-                    className={`aspect-square flex items-center justify-center text-xl rounded border-2 transition-all cursor-pointer ${
+                    className={`flex aspect-square cursor-pointer items-center justify-center rounded border-2 text-xl transition-all ${
                       achievement.unlocked
                         ? 'border-yellow-400/50 bg-yellow-400/10'
-                        : 'border-gray-700 bg-gray-800/30 grayscale opacity-30'
+                        : 'border-gray-700 bg-gray-800/30 opacity-30 grayscale'
                     }`}
                     onMouseEnter={() => {
                       // Desktop: hover to show tooltip (ignore on mobile to prevent double-tap issues)
@@ -908,7 +932,7 @@ export function DebugInfo({ onVisibilityChange }: DebugInfoProps = {}) {
 
                       return (
                         <div
-                          className={`absolute z-9999 pointer-events-none ${
+                          className={`pointer-events-none absolute z-9999 ${
                             showBelow ? 'top-full mt-2' : '-top-2 -translate-y-full'
                           } ${alignLeft ? 'left-0' : alignRight ? 'right-0' : 'left-1/2 -translate-x-1/2'}`}
                           style={{
@@ -916,7 +940,7 @@ export function DebugInfo({ onVisibilityChange }: DebugInfoProps = {}) {
                           }}
                         >
                           <div
-                            className='bg-gray-900 border-2 rounded-lg p-2 shadow-2xl min-w-[200px] max-w-[240px]'
+                            className='max-w-[240px] min-w-[200px] rounded-lg border-2 bg-gray-900 p-2 shadow-2xl'
                             style={{
                               borderColor: tooltip.achievement.unlocked
                                 ? `rgb(${orbR}, ${orbG}, ${orbB})`
@@ -926,7 +950,7 @@ export function DebugInfo({ onVisibilityChange }: DebugInfoProps = {}) {
                                 : '0 4px 6px rgba(0, 0, 0, 0.3)',
                             }}
                           >
-                            <div className='flex items-start gap-2 mb-1'>
+                            <div className='mb-1 flex items-start gap-2'>
                               <span className='text-lg'>{tooltip.achievement.icon}</span>
                               <div className='flex-1'>
                                 <div
@@ -938,7 +962,7 @@ export function DebugInfo({ onVisibilityChange }: DebugInfoProps = {}) {
                                 </div>
                               </div>
                             </div>
-                            <div className='text-[9px] text-gray-400 mt-1'>
+                            <div className='mt-1 text-[9px] text-gray-400'>
                               {tooltip.achievement.unlocked
                                 ? tooltip.achievement.description
                                 : ACHIEVEMENT_HINTS[tooltip.achievement.id] || 'Keep exploring...'}
@@ -947,7 +971,7 @@ export function DebugInfo({ onVisibilityChange }: DebugInfoProps = {}) {
                           {/* Arrow - flip based on position */}
                           {showBelow ? (
                             <div
-                              className={`absolute bottom-full w-0 h-0 ${
+                              className={`absolute bottom-full h-0 w-0 ${
                                 alignLeft ? 'left-6' : alignRight ? 'right-6' : 'left-1/2 -translate-x-1/2'
                               }`}
                               style={{
@@ -960,7 +984,7 @@ export function DebugInfo({ onVisibilityChange }: DebugInfoProps = {}) {
                             />
                           ) : (
                             <div
-                              className={`absolute top-full w-0 h-0 ${
+                              className={`absolute top-full h-0 w-0 ${
                                 alignLeft ? 'left-6' : alignRight ? 'right-6' : 'left-1/2 -translate-x-1/2'
                               }`}
                               style={{
@@ -979,12 +1003,12 @@ export function DebugInfo({ onVisibilityChange }: DebugInfoProps = {}) {
               ))}
             </div>
           ) : (
-            <div className='text-[10px] text-gray-600 text-center py-2'>No achievements yet. Keep exploring!</div>
+            <div className='py-2 text-center text-[10px] text-gray-600'>No achievements yet. Keep exploring!</div>
           )}
         </div>
 
         {/* Hint */}
-        <div className='pt-2 border-t border-gray-800 text-gray-500 text-center text-[9px]'>
+        <div className='border-t border-gray-800 pt-2 text-center text-[9px] text-gray-500'>
           <div className='hidden md:block'>Press 'D' to toggle</div>
         </div>
       </>

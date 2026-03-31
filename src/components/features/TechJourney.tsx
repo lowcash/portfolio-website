@@ -1,12 +1,14 @@
 import { Box, Code, Cpu, Database, Globe, type LucideIcon } from 'lucide-react'
+
+import { type TechJourneyIconKey, siteContent } from '@/lib/content'
+import { SECTION_STYLES } from '@/lib/section-config'
+
 import { Card } from '@/components/ui/card'
 import { FeatureGrid } from '@/components/ui/feature-grid'
 import { SectionHeader } from '@/components/ui/section-header'
 import { SectionWrapper } from '@/components/ui/section-wrapper'
 import { TagList } from '@/components/ui/tag-list'
 import { TechTag } from '@/components/ui/tech-tag'
-import { siteContent, type TechJourneyIconKey } from '@/lib/content'
-import { SECTION_STYLES } from '@/lib/section-config'
 
 const iconMap: Record<TechJourneyIconKey, LucideIcon> = {
   code: Code,

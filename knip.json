@@ -1,5 +1,4 @@
 {
-  "$schema": "https://unpkg.com/knip@6/schema.json",
   "entry": ["scripts/run-lighthouse.mjs", "scripts/analyze-style-boundary.mjs"],
   "project": ["src/**/*.{ts,tsx}", "tests/**/*.{ts,tsx}", "scripts/**/*.mjs"],
   "ignore": [".next/**"]

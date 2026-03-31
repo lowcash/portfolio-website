@@ -1,9 +1,8 @@
 import { ExternalLink } from 'lucide-react'
-import type { ReactNode } from 'react'
 
 interface SectionLinkProps {
   href: string
-  children: ReactNode
+  children: React.ReactNode
 }
 
 export function SectionLink({ href, children }: SectionLinkProps) {

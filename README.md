@@ -55,7 +55,12 @@ Live URL: [https://lowcash.dev](https://lowcash.dev)
 ## 🎨 Styling
 
 The project uses Tailwind CSS for utility-first styling.
-Global styles are imported in `app/layout.tsx` from `src/index.css`.
+
+Policy:
+
+- `src/styles/globals.css` is the authored global style source.
+- `src/index.css` is generated output consumed by `app/layout.tsx`.
+- Edit authored styles, then regenerate output via the project workflow.
 
 ---
 

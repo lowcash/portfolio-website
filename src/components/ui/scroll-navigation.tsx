@@ -30,6 +30,10 @@ export function ScrollNavigation({
   const drawerRef = useRef<HTMLDivElement>(null)
   const scrollPositionRef = useRef(0)
   const isNavigatingRef = useRef(false)
+  const htmlStyleRestoreRef = useRef({
+    scrollBehavior: '',
+    scrollSnapType: '',
+  })
 
   const sections = Array.from({ length: totalSections }, (_, i) => ({
     id: i,
@@ -45,15 +49,16 @@ export function ScrollNavigation({
     setDragStartY(null)
     setDragCurrentY(null)
 
-    // Navigate after a short delay to allow the menu close cleanup to finish
-    // but WITHOUT restoring the old scroll position
-    setTimeout(() => {
-      onSectionClick(index)
-      // Reset navigation flag after navigation is initiated
-      setTimeout(() => {
-        isNavigatingRef.current = false
-      }, 100)
-    }, 50)
+    // Let close-state cleanup settle first, then trigger section navigation.
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        onSectionClick(index)
+        // Reset navigation flag after navigation is initiated
+        setTimeout(() => {
+          isNavigatingRef.current = false
+        }, 100)
+      })
+    })
   }
 
   // Swipe to close functionality
@@ -148,13 +153,18 @@ export function ScrollNavigation({
     const body = document.body
 
     if (mobileMenuOpen) {
+      htmlStyleRestoreRef.current = {
+        scrollBehavior: html.style.scrollBehavior,
+        scrollSnapType: html.style.scrollSnapType,
+      }
+
       // Save current scroll position IMMEDIATELY
       const currentScrollY = window.scrollY
       scrollPositionRef.current = currentScrollY
 
-      // CRITICAL: Disable scroll snap AND smooth scrolling FIRST
-      html.classList.add('no-scroll-snap')
-      html.style.scrollBehavior = 'auto' // Prevent smooth scroll during restoration
+      // Disable scroll snap and smooth scrolling without mutating html className.
+      html.style.scrollBehavior = 'auto'
+      html.style.scrollSnapType = 'none'
 
       // Prevent scroll using position fixed on body to avoid any layout shift
       body.style.position = 'fixed'
@@ -185,9 +195,8 @@ export function ScrollNavigation({
 
         // CRITICAL: Use requestAnimationFrame to ensure DOM has updated before re-enabling features
         requestAnimationFrame(() => {
-          // Re-enable scroll snap and smooth scrolling after 1 RAF
-          html.classList.remove('no-scroll-snap')
-          html.style.scrollBehavior = ''
+          html.style.scrollBehavior = htmlStyleRestoreRef.current.scrollBehavior
+          html.style.scrollSnapType = htmlStyleRestoreRef.current.scrollSnapType
 
           // END scroll restoration - notify parent to resume handleScroll
           if (onScrollRestore) {
@@ -200,8 +209,8 @@ export function ScrollNavigation({
       body.style.position = ''
       body.style.top = ''
       body.style.width = ''
-      html.classList.remove('no-scroll-snap')
-      html.style.scrollBehavior = ''
+      html.style.scrollBehavior = htmlStyleRestoreRef.current.scrollBehavior
+      html.style.scrollSnapType = htmlStyleRestoreRef.current.scrollSnapType
     }
   }, [mobileMenuOpen, onScrollRestore])
 

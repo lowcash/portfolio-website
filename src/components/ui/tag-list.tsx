@@ -1,7 +1,5 @@
-import type { ReactNode } from 'react'
-
 interface TagListProps {
-  children: ReactNode
+  children: React.ReactNode
   stacked?: boolean
 }
 

@@ -24,7 +24,7 @@ export function MobileDrawerBackdrop({ isOpen, onClose, children }: MobileDrawer
       <button
         type='button'
         className='absolute bg-transparent'
-        style={{ top: 0, left: 0, right: 0, height: '7rem', zIndex: 2 }}
+        style={{ top: 0, left: 0, right: 0, height: '4rem', zIndex: 1 }}
         onClick={onClose}
         aria-label='Close menu backdrop'
       />

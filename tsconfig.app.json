@@ -8,13 +8,13 @@
 
     /* Bundler mode */
     "moduleResolution": "bundler",
-    "baseUrl": ".",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": ["./src/*"]
     },
     "resolveJsonModule": true,
     "isolatedModules": true,
     "incremental": true,
+    "composite": true,
     "noEmit": true,
     "jsx": "preserve",
 

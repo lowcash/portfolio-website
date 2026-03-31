@@ -410,11 +410,6 @@ html {
   /* NOTE: scroll-behavior removed - causes iOS Safari conflicts with scroll-snap */
 }
 
-/* Disable scroll snap when mobile menu is open */
-html.no-scroll-snap {
-  scroll-snap-type: none !important;
-}
-
 /* HIDE SCROLLBAR - minimalistický look */
 html::-webkit-scrollbar {
   display: none;
@@ -429,6 +424,17 @@ body {
   scrollbar-width: none;
   background-color: #030712; /* Dark background - prevents white flash on overscroll */
   overscroll-behavior: none; /* Prevents bounce effect on mobile */
+}
+
+/* Keep free scrolling on phones; tablets and desktop use snap. */
+@media (max-width: 767px) {
+  html {
+    scroll-snap-type: none;
+  }
+
+  .scroll-snap-section {
+    scroll-snap-align: none;
+  }
 }
 
 /* Performance optimizations for animations */

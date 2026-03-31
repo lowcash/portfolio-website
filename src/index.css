@@ -2459,23 +2459,15 @@ html {
   overflow-x: hidden;
 }
 
-html.no-scroll-snap {
-  scroll-snap-type: none !important;
-}
-
 /* Scroll snap alignment for sections - desktop only */
 .scroll-snap-section {
   scroll-snap-align: start;
 }
 
-/* Disable scroll snap on mobile to prevent jumping and allow free scrolling */
-@media (width <= 768px) {
+/* Phones use gentle proximity snap — sections nudge into place but don't hijack scrolling. */
+@media (max-width: 767px) {
   html {
-    scroll-snap-type: none;
-  }
-
-  .scroll-snap-section {
-    scroll-snap-align: none;
+    scroll-snap-type: y proximity;
   }
 }
 
@@ -2873,19 +2865,6 @@ body {
 
 .orb-8 {
   animation: 46s ease-in-out infinite reverse orb-float-2;
-}
-
-@media (width <= 768px) {
-  .orb-1,
-  .orb-2,
-  .orb-3,
-  .orb-4,
-  .orb-5,
-  .orb-6,
-  .orb-7,
-  .orb-8 {
-    animation: none;
-  }
 }
 
 .scroll-to-top-glow {

@@ -2,8 +2,6 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { Trophy } from 'lucide-react'
 
-import { FloatingRail } from './floating-rail'
-
 /**
  * Easter Eggs System with Achievements
  *
@@ -25,31 +23,6 @@ import { FloatingRail } from './floating-rail'
  *
  * Open Dev Console (tap terminal icon bottom-left or press D on desktop) to see all achievements!
  */
-
-// Define CSS animations for achievement popup
-const animationStyles = `
-  @keyframes slideInRight {
-    from {
-      opacity: 0;
-      transform: translateX(400px);
-    }
-    to {
-      opacity: 1;
-      transform: translateX(0);
-    }
-  }
-
-  @keyframes slideOutRight {
-    from {
-      opacity: 1;
-      transform: translateX(0);
-    }
-    to {
-      opacity: 0;
-      transform: translateX(400px);
-    }
-  }
-`
 
 export interface Achievement {
   id: string
@@ -390,8 +363,8 @@ export function EasterEggs() {
         const maxScroll = docHeight - winHeight
         const percent = maxScroll > 0 ? (scrollTop / maxScroll) * 100 : 0
 
-        // Check if exactly 50% (with 1% tolerance)
-        if (Math.abs(percent - 50) < 1) {
+        // Keep this forgiving to avoid flaky precision around section/layout rounding.
+        if (Math.abs(percent - 50) < 2.5) {
           unlockAchievement('perfectly-balanced')
 
           // Special console message with explanation
@@ -406,6 +379,8 @@ export function EasterEggs() {
     }
 
     window.addEventListener('scroll', handleScroll, { passive: true })
+    handleScroll()
+
     return () => {
       window.removeEventListener('scroll', handleScroll)
       clearTimeout(checkTimeout)
@@ -880,43 +855,69 @@ export function EasterEggs() {
     }
   }, [])
 
+  const isDesktopViewport = typeof window !== 'undefined' && window.innerWidth >= 1024
+  const achievementRightOffset = isDesktopViewport ? '5.75rem' : 'max(1rem, env(safe-area-inset-right))'
+  const achievementLayerStyle = isDesktopViewport
+    ? {
+        position: 'fixed' as const,
+        top: 'calc(50% - 7rem)',
+        left: 0,
+        right: 0,
+        zIndex: 80,
+        width: '100%',
+        maxWidth: '72rem',
+        margin: '0 auto',
+        paddingLeft: '1.5rem',
+        paddingRight: '0.5rem',
+        display: 'flex',
+        justifyContent: 'flex-end',
+      }
+    : {
+        position: 'fixed' as const,
+        top: '5.5rem',
+        right: 0,
+        zIndex: 80,
+        paddingRight: achievementRightOffset,
+      }
+
   return (
     <>
-      <style>{animationStyles}</style>
-      {/* Achievement Popup - centered vertically and anchored to the same right rail as side dots */}
+      {/* Achievement Popup - centered vertically and placed left of desktop side nav. */}
       {showAchievement && (
         <div
           data-testid='achievement-popup-layer'
-          className='pointer-events-none fixed inset-x-0 top-1/2 -translate-y-1/2'
-          style={{ zIndex: 70 }}
+          className='pointer-events-none'
+          style={achievementLayerStyle}
         >
-          <FloatingRail variant='center-right' childOffsetRightPx={22} interactive={false}>
-            <div
-              role='alert'
-              aria-live='polite'
-              className='pointer-events-auto max-w-xs rounded-xl border border-purple-500/50 p-4 shadow-2xl'
-              style={{
-                animation: isHidingAchievement
-                  ? 'slideOutRight 0.5s ease-in forwards'
-                  : 'slideInRight 0.5s ease-out forwards',
-                boxShadow: '0 0 50px rgba(139, 92, 246, 0.4), 0 0 100px rgba(139, 92, 246, 0.2)',
-                backdropFilter: 'blur(5px)',
-                background: 'rgba(0, 0, 0, 0.75)',
-              }}
-            >
-              <div className='flex items-start gap-3'>
-                <div className='text-3xl'>{showAchievement.icon}</div>
-                <div className='flex-1'>
-                  <div className='mb-1 flex items-center gap-2'>
-                    <Trophy className='h-4 w-4 text-yellow-400' />
-                    <span className='text-sm font-semibold text-yellow-400'>Achievement Unlocked!</span>
-                  </div>
-                  <h3 className='font-semibold text-white'>{showAchievement.name}</h3>
-                  <p className='mt-1 text-sm text-gray-300'>{showAchievement.description}</p>
+          <div
+            role='alert'
+            aria-live='polite'
+            className='pointer-events-auto rounded-xl border border-purple-500/50 p-4 shadow-2xl'
+            style={{
+              width: isDesktopViewport ? 'min(20rem, calc(100vw - 8rem))' : 'min(20rem, calc(100vw - 2rem))',
+              marginRight: isDesktopViewport ? achievementRightOffset : undefined,
+              animation: isHidingAchievement
+                ? 'slideOutRight 0.5s ease-in forwards'
+                : 'slideInRight 0.5s ease-out forwards',
+              borderColor: 'rgba(var(--orb-r), var(--orb-g), var(--orb-b), 0.6)',
+              boxShadow:
+                '0 0 45px rgba(var(--orb-r), var(--orb-g), var(--orb-b), 0.35), 0 0 90px rgba(var(--orb-r), var(--orb-g), var(--orb-b), 0.18)',
+              backdropFilter: 'blur(5px)',
+              background: 'rgba(0, 0, 0, 0.75)',
+            }}
+          >
+            <div className='flex items-start gap-3'>
+              <div className='text-3xl'>{showAchievement.icon}</div>
+              <div className='flex-1'>
+                <div className='mb-1 flex items-center gap-2'>
+                  <Trophy className='h-4 w-4 text-yellow-400' />
+                  <span className='text-sm font-semibold text-yellow-400'>Achievement Unlocked!</span>
                 </div>
+                <h3 className='font-semibold text-white'>{showAchievement.name}</h3>
+                <p className='mt-1 text-sm text-gray-300'>{showAchievement.description}</p>
               </div>
             </div>
-          </FloatingRail>
+          </div>
         </div>
       )}
 
@@ -952,7 +953,7 @@ export function EasterEggs() {
       <style>{`
         @keyframes slideInRight {
           from {
-            transform: translateX(100%);
+            transform: translateX(24px);
             opacity: 0;
           }
           to {
@@ -967,7 +968,7 @@ export function EasterEggs() {
             opacity: 1;
           }
           to {
-            transform: translateX(100%);
+            transform: translateX(24px);
             opacity: 0;
           }
         }

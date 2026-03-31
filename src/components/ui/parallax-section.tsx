@@ -1,7 +1,5 @@
-import type { ReactNode } from 'react'
-
 interface ParallaxSectionProps extends React.HTMLAttributes<HTMLElement> {
-  children: ReactNode
+  children: React.ReactNode
   id: string
   className?: string
   style?: React.CSSProperties

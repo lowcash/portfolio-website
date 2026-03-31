@@ -1,15 +1,20 @@
-import type { ReactNode } from 'react'
-
-type FloatingRailVariant = 'center-right' | 'bottom-right'
+type FloatingRailVariant = 'center-right' | 'bottom-right' | 'bottom-left'
 
 interface FloatingRailProps {
-  children: ReactNode
+  children: React.ReactNode
   variant: FloatingRailVariant
   desktopOnly?: boolean
   childOffsetRightPx?: number
+  interactive?: boolean
 }
 
-export function FloatingRail({ children, variant, desktopOnly = false, childOffsetRightPx = 0 }: FloatingRailProps) {
+export function FloatingRail({
+  children,
+  variant,
+  desktopOnly = false,
+  childOffsetRightPx = 0,
+  interactive = true,
+}: FloatingRailProps) {
   const outerStyle =
     variant === 'center-right'
       ? {
@@ -24,9 +29,11 @@ export function FloatingRail({ children, variant, desktopOnly = false, childOffs
           bottom: 0,
         }
 
+  const isBottomLeft = variant === 'bottom-left'
+
   return (
     <div
-      className={`${desktopOnly ? 'desktop-rail-only ' : ''}fixed inset-x-0 z-50 pointer-events-none`}
+      className={`${desktopOnly ? 'desktop-rail-only ' : ''}fixed pointer-events-none inset-x-0 z-50`}
       style={outerStyle}
     >
       <div
@@ -34,14 +41,22 @@ export function FloatingRail({ children, variant, desktopOnly = false, childOffs
         style={{
           width: '100%',
           maxWidth: '72rem',
-          paddingLeft: '1.5rem',
-          paddingRight: '0.5rem',
-          paddingBottom: variant === 'bottom-right' ? '2rem' : undefined,
+          paddingLeft: isBottomLeft ? '0.5rem' : '1.5rem',
+          paddingRight: isBottomLeft ? '1.5rem' : '0.5rem',
+          paddingBottom:
+            variant === 'bottom-right'
+              ? 'max(1.75rem, env(safe-area-inset-bottom))'
+              : variant === 'bottom-left'
+                ? 'max(2rem, calc(env(safe-area-inset-bottom) + 0.75rem))'
+                : undefined,
           display: 'flex',
-          justifyContent: 'flex-end',
+          justifyContent: isBottomLeft ? 'flex-start' : 'flex-end',
         }}
       >
-        <div className='pointer-events-auto' style={{ marginRight: `${childOffsetRightPx}px` }}>
+        <div
+          className={interactive ? 'pointer-events-auto' : 'pointer-events-none'}
+          style={{ marginRight: `${childOffsetRightPx}px` }}
+        >
           {children}
         </div>
       </div>
