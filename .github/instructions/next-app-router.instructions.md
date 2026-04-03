@@ -77,10 +77,7 @@ export default function Home() {
 
 ### Client Orchestration (Boundary Pattern)
 
-> **Note**: This is a _project design choice_, not a Next.js framework convention.  
-> Next.js is unopinionated about file organisation. Only `page.tsx`, `layout.tsx`, `route.ts`, `error.tsx`, `loading.tsx`, and `not-found.tsx` are special filenames.  
-> **Alternative approach**: place `'use client'` granularly on leaf components — better code splitting, but directives are scattered.  
-> This repo uses a single orchestration boundary (file: `app/client-chrome.tsx`) because state flow and maintenance simplicity were prioritised over bundle granularity.
+> This repo intentionally uses one client orchestration boundary to keep engine state flow explicit.
 
 ```typescript
 'use client'
@@ -124,8 +121,8 @@ export function AppShell() {
 
 **Trade-offs: single boundary vs. granular**
 
-| Approach                                          | Bundle size                        | Maintainability                  | State clarity             |
-| ------------------------------------------------- | ---------------------------------- | -------------------------------- | ------------------------- |
+| Approach | Bundle size | Maintainability | State clarity |
+|----------|-------------|-----------------|---------------|
 | **Single boundary** (this repo)                   | Slightly larger                    | Simple — one place for all state | Props-down flow, explicit |
 | **Granular** (Next.js recommended for large apps) | Smaller — tree-shake per component | More components, self-contained  | Local state per component |
 
@@ -253,6 +250,12 @@ export default function RootLayout({ children }) {
 }
 ```
 
+**Guidance**:
+
+- Keep `metadata` static when values are build-time stable; use `generateMetadata` only for route-dependent values.
+- Keep Twitter metadata only when actively maintained with valid creator/site values.
+- Keep Open Graph image routes on Next.js file convention names (`opengraph-image.tsx`, `twitter-image.tsx`).
+
 **JSON-LD Schema** (optional, for rich snippets):
 
 ```typescript
@@ -267,22 +270,9 @@ const personJsonLd = {
 // In head: <script>{JSON.stringify(personJsonLd)}</script>
 ```
 
-## Import Paths (Aliases)
+## Imports
 
-**Always use `@/` absolute imports** (defined in `tsconfig.json`):
-
-```typescript
-// ✅ GOOD: Absolute alias
-import { Button } from '@/components/ui/button'
-import { WhoIAm } from '@/components/features/WhoIAm'
-import { cn } from '@/lib/utils'
-
-// ❌ BAD: Relative chains
-import { Button } from '../../components/ui/button'
-import { WhoIAm } from '../components/features/WhoIAm'
-```
-
-**Enforced by**: `imports.instructions.md`
+Import ownership rules are defined in `imports.instructions.md`.
 
 ## Performance Best Practices
 
@@ -339,6 +329,12 @@ useEffect(() => {
 }, [])
 ```
 
+### 5. **Effect Logic in React 19+**
+
+- Use `useEffectEvent` for effect-local callbacks that must read latest values without re-subscribing listeners/timers.
+- Do not use `useEffectEvent` to bypass real dependencies; if a value should re-run the effect, keep it in dependencies.
+- Do not pass Effect Events to JSX props or other components; they are local to the effect lifecycle.
+
 ## Error Handling & Fallbacks
 
 ```typescript
@@ -373,6 +369,6 @@ npm run start    # Runs production build
 
 **See Also**:
 
-- `architecture.instructions.md` – Framework-agnostic principles
+- `architecture.instructions.md` – Repository architecture ownership and boundaries
 - `docs/ARCHITECTURE.md` – Full system design & tech stack rationale
 - Next.js Docs: https://nextjs.org/docs/app

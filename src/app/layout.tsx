@@ -47,13 +47,6 @@ export const metadata: Metadata = {
       'Fullstack developer specializing in TypeScript, React, Next.js, and AI-assisted development. Building modern web applications with agentic workflows.',
     images: ['/opengraph-image'],
   },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Lukáš Machala (lowcash) • Fullstack Developer & AI Architect',
-    description:
-      'Fullstack developer specializing in TypeScript, React, Next.js, and AI-assisted development. Building modern web applications with agentic workflows.',
-    images: ['/opengraph-image'],
-  },
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

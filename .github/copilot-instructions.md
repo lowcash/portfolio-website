@@ -1,6 +1,6 @@
 # Copilot Instructions
 
-Use the `.github` instruction stack in this repository as the primary active guidance layer, not as optional suggestions.
+Use this repository's `.github` customization stack as the primary active guidance layer.
 
 ## Tech Stack
 
@@ -12,48 +12,17 @@ Current versions in use (update line items as your project upgrades):
 - **Styling**: Tailwind CSS 4+
 - **Testing**: Playwright E2E
 
-**Note**: Always update version references in `.copilot-instructions.md` and `.github/instructions/next-app-router.instructions.md` when major versions change.
+**Note**: Update version references in this file and `.github/instructions/next-app-router.instructions.md` when major versions change.
 
-## Required References
+## Foundational Guidance
 
-- `.github/instructions/next-app-router.instructions.md` – App Router boundaries, client/server split, metadata
-- `.github/instructions/architecture.instructions.md` – Component layering, state boundaries, styling strategy
-- `.github/instructions/clean-code.instructions.md` – Code quality, dead-code auditing
-- `.github/instructions/imports.instructions.md` – Import organization and alias usage
-- `docs/ARCHITECTURE.md` – System design and styling architecture
+- `.github/instructions/next-app-router.instructions.md` - App Router boundaries, client/server orchestration, metadata conventions
+- `.github/instructions/architecture.instructions.md` - Component layering, state boundaries, styling ownership
+- `.github/instructions/clean-code.instructions.md` - Refactoring discipline, suppression rules, dead-code removal
+- `.github/instructions/imports.instructions.md` - Alias and import ownership policy
+- `docs/ARCHITECTURE.md` - Full system design and rationale
 
-## Core Expectations
+## Repository Notes
 
-- **Prefer migration-first fixes** over suppression or rule bypasses
-- **Prefer alias-based imports** (`@/*`) over deep relative chains
-- **Keep styling** inside `src/styles/` as modular files
-- **Use CSS variables** for dynamic styling (colors, animations) instead of React state
-- **Remove dead code** incrementally and validate with existing analyzers
-- **RSC-first flow**: `app/layout.tsx` (document shell) → `app/page.tsx` (server assembly) → client orchestration layer
-
-## Style Architecture
-
-CSS organized into logical modules with a single entry point:
-
-```
-[project]/styles/
-├── globals.css[.ts]     ← Entry point (@imports or main stylesheet)
-├── theme.css            ← Design tokens, color palette, CSS variables
-├── typography.css       ← Font scale, heading styles (optional)
-├── base.css             ← HTML/body reset, accessibility helpers, scroll behavior
-├── accessibility.css    ← Focus states, skip-to-content, sr-only
-└── animations.css       ← @keyframes, animation utilities
-```
-
-**Import location**:
-
-- Import global CSS once in `app/layout.tsx` → `import '../styles/globals.css'`
-
-## Standards
-
-- **Component naming**: PascalCase (`.tsx`)
-- **Utilities**: camelCase (`.ts`)
-- **Styles**: kebab-case (`.css`)
-- **Hooks**: `use*` prefix (camelCase)
-- **Import order**: External → `@/` aliases → relative (rare)
-- **Formatting**: Prettier automatic format (run `npm run format` before commit)
+- React Compiler is enabled in `next.config.mjs`; keep `babel-plugin-react-compiler` in devDependencies.
+- Playwright projects are `desktop-chrome` and `mobile-safari`.

@@ -2,10 +2,9 @@
 applyTo: 'src/components/**/*.{ts,tsx},src/lib/**/*.{ts,tsx},src/styles/**/*.css'
 ---
 
-# Architecture & Component Organization (Framework-Agnostic)
+# Architecture & Component Organization (Next.js)
 
-This document outlines architectural principles applicable across frameworks (Next.js, Vite, Svelte, etc.).  
-For framework-specific implementation details, see `next-app-router.instructions.md`.
+This document defines architecture ownership for this Next.js repository.
 
 ## Core Principles
 
@@ -15,10 +14,10 @@ Organize components into logical layers to prevent mixing concerns:
 
 | Layer | Unit | Purpose | Constraints |
 |-------|------|---------|-------------|
-| **UI Layer** | `components/ui/` | Base styled components (buttons, cards, containers) | Zero business logic; pure presentation |
-| **Feature Layer** | `components/features/` | Content modules (sections, pages) | Compose UI primitives; no raw className styling |
-| **Shared Layer** | `components/shared/` | Utilities used across features (animations, effects) | May be stateful; prevent duplication |
-| **Layout Layer** | `components/layout/` | Structure wrappers (container, wrapper) | Pure composition; no raw styling |
+| **UI Layer** | `src/components/ui/` | Base styled components (buttons, cards, containers) | Zero business logic; pure presentation |
+| **Feature Layer** | `src/components/features/` | Content modules (sections, pages) | Compose UI primitives; no raw className styling |
+| **Shared Layer** | `src/components/shared/` | Cross-feature utilities and effects | May be stateful; avoid duplicating feature logic |
+| **Layout Layer** | `src/components/layout/` | Structure wrappers and orchestration boundaries | Pure composition; no feature-specific styling |
 
 **Rule**: Features compose UI primitives. Never define raw styling in features.
 
@@ -33,18 +32,19 @@ Clear separation of state ownership:
 | **Local state** | Feature component | Form input, dropdown toggled |
 | **Persistent state** | Browser storage | User preferences, achievements |
 
-**Best Practice**: Centralize "engine" state in a single orchestrator component.
+**Best Practice**: Centralize engine state in one client orchestrator and pass state downward.
 
 ### 3. **Styling Strategy**
 
-- **Global Styles**: One entry point (CSS/SCSS/Tailwind); animations, resets, CSS variables
-- **Component Styles**: Utility-first (Tailwind), never raw class definitions
-- **Dynamic Values**: CSS custom properties for runtime changes (no React re-renders)
+- **Global Styles**: One entry point in `src/styles/globals.css` with imported style modules
+- **Component Styles**: Utility-first (Tailwind), no ad-hoc raw class definitions in feature components
+- **Dynamic Values**: CSS custom properties for runtime visuals instead of frequent React state updates
 - **Responsive**: Mobile-first media query approach
 
-## See Also
+### 4. **Naming & Refactoring**
 
-- `next-app-router.instructions.md` – Next.js 15+ specific implementation
-- `docs/ARCHITECTURE.md` – Full system design for this project
-- `clean-code.instructions.md` – Code quality guidelines
-- `imports.instructions.md` – Import organization
+- **Components**: PascalCase (`.tsx`)
+- **Utilities**: camelCase (`.ts`)
+- **Styles**: kebab-case (`.css`)
+- **Hooks**: `use*` prefix
+- **Migration-first**: update consumers, then remove old paths; no suppression-first shortcuts

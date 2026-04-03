@@ -4,6 +4,8 @@ applyTo: '**/*.{ts,tsx,js,jsx,mjs,json,css}'
 
 # Clean Code Guardrails
 
+This document enforces implementation discipline. Architecture ownership lives in `architecture.instructions.md`.
+
 ## Dead Code
 
 - Detect unused exports, imports, and types with Knip (`npm run analyze:unused` / `knip --strict`).
@@ -13,7 +15,7 @@ applyTo: '**/*.{ts,tsx,js,jsx,mjs,json,css}'
 ## Styling Boundary
 
 - Raw class definitions and styling decisions live in `src/components/ui/` (or your project's ui layer).
-- Feature components compose UI primitives — they do not define raw `className` styling.
+- Feature components compose UI primitives and follow the layering model from `architecture.instructions.md`.
 - CSS custom properties (variables) for runtime-dynamic values (colors, animations); avoid React state for frequently-updated visuals.
 
 ## Refactoring Discipline
@@ -32,4 +34,4 @@ applyTo: '**/*.{ts,tsx,js,jsx,mjs,json,css}'
 
 - Logic that is used once does not need a helper or abstraction.
 - Do not add docstrings, comments, or type annotations to code you did not change.
-- Do not add error handling for scenarios that cannot happen at a given system boundary.
+- Run `npm run format` before commit when touching multiple files.

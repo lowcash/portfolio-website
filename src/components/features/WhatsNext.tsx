@@ -1,11 +1,12 @@
 import { Rocket, Target, TrendingUp } from 'lucide-react'
 
-import { siteContent } from '../../lib/content'
-import { SECTION_STYLES } from '../../lib/section-config'
-import { FeatureCard } from '../ui/feature-card'
-import { SectionHeader } from '../ui/section-header'
-import { SectionWrapper } from '../ui/section-wrapper'
-import { Stack } from '../ui/stack'
+import { siteContent } from '@/lib/content'
+import { SECTION_STYLES } from '@/lib/section-config'
+
+import { FeatureCard } from '@/components/ui/feature-card'
+import { SectionHeader } from '@/components/ui/section-header'
+import { SectionWrapper } from '@/components/ui/section-wrapper'
+import { Stack } from '@/components/ui/stack'
 
 export function WhatsNext() {
   const iconMap = {

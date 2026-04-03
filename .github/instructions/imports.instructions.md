@@ -2,7 +2,7 @@
 applyTo: '**/*.{ts,tsx,js,jsx,mjs}'
 ---
 
-Import policy:
+This file owns import path policy for the repository.
 
 - Prefer alias-based absolute imports over deep relative chains.
 - Use `@/*` for application code that lives under `src/`.
