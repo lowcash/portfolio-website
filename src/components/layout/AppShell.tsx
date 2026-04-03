@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react'
 
 import { siteContent } from '@/lib/content'
+import { subscribeToScrollMetrics } from '@/lib/scroll-metrics'
 
 import { DeveloperConsole } from '@/components/features/DeveloperConsole'
 import { AnimatedBackground } from '@/components/shared/AnimatedBackground'
@@ -23,8 +24,6 @@ export function AppShell({ sectionIds }: AppShellProps) {
   const [isRestoringScroll, setIsRestoringScroll] = useState(false)
 
   useEffect(() => {
-    let frameId: number | null = null
-
     const updateCurrentSection = () => {
       const windowHeight = window.innerHeight
       const viewportMiddle = windowHeight / 2
@@ -49,26 +48,13 @@ export function AppShell({ sectionIds }: AppShellProps) {
       setCurrentSection(closestIndex)
     }
 
-    const handleScroll = () => {
-      if (isMobileMenuOpen || isRestoringScroll || frameId !== null) {
+    return subscribeToScrollMetrics(() => {
+      if (isMobileMenuOpen || isRestoringScroll) {
         return
       }
 
-      frameId = requestAnimationFrame(() => {
-        updateCurrentSection()
-        frameId = null
-      })
-    }
-
-    updateCurrentSection()
-    window.addEventListener('scroll', handleScroll, { passive: true })
-
-    return () => {
-      window.removeEventListener('scroll', handleScroll)
-      if (frameId !== null) {
-        cancelAnimationFrame(frameId)
-      }
-    }
+      updateCurrentSection()
+    })
   }, [sectionIds, isMobileMenuOpen, isRestoringScroll])
 
   const scrollToSection = (index: number) => {

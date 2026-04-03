@@ -1,42 +1,16 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
+
+import { subscribeToScrollMetrics } from '@/lib/scroll-metrics'
 
 const PROGRESS_HIDE_THRESHOLD = 0.003
 
 export function ScrollProgress() {
   const [progress, setProgress] = useState(0)
-  const frameRef = useRef<number | null>(null)
 
   useEffect(() => {
-    const updateProgress = () => {
-      const scrollTop = window.scrollY
-      const maxScroll = document.documentElement.scrollHeight - window.innerHeight
-      const nextProgress = maxScroll > 0 ? scrollTop / maxScroll : 0
-
-      setProgress(Math.min(1, Math.max(0, nextProgress)))
-      frameRef.current = null
-    }
-
-    const handleScrollOrResize = () => {
-      if (frameRef.current !== null) {
-        return
-      }
-
-      frameRef.current = requestAnimationFrame(updateProgress)
-    }
-
-    handleScrollOrResize()
-
-    window.addEventListener('scroll', handleScrollOrResize, { passive: true })
-    window.addEventListener('resize', handleScrollOrResize)
-
-    return () => {
-      window.removeEventListener('scroll', handleScrollOrResize)
-      window.removeEventListener('resize', handleScrollOrResize)
-
-      if (frameRef.current !== null) {
-        cancelAnimationFrame(frameRef.current)
-      }
-    }
+    return subscribeToScrollMetrics((metrics) => {
+      setProgress(metrics.progress)
+    })
   }, [])
 
   const progressPercent = Math.round(progress * 100)
