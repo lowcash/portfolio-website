@@ -11,11 +11,11 @@ import { ScrollNavigation } from '@/components/ui/scroll-navigation'
 import { ScrollProgress } from '@/components/ui/scroll-progress'
 import { ScrollToTop } from '@/components/ui/scroll-to-top'
 
-type ClientChromeProps = {
+type AppShellProps = {
   sectionIds: string[]
 }
 
-export function ClientChrome({ sectionIds }: ClientChromeProps) {
+export function AppShell({ sectionIds }: AppShellProps) {
   const sectionMeta = siteContent.navigation.sections
   const [currentSection, setCurrentSection] = useState(0)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
@@ -94,7 +94,7 @@ export function ClientChrome({ sectionIds }: ClientChromeProps) {
       <EasterEggs />
       <AnimatedBackground />
 
-        <ScrollToTop currentSection={currentSection} onGoToFirst={() => scrollToSection(0)} />
+      <ScrollToTop currentSection={currentSection} onGoToFirst={() => scrollToSection(0)} />
 
       <ScrollNavigation
         currentSection={currentSection}
@@ -105,7 +105,7 @@ export function ClientChrome({ sectionIds }: ClientChromeProps) {
         onScrollRestore={setIsRestoringScroll}
       />
 
-      <DeveloperConsole onVisibilityChange={setIsDevConsoleOpen} />
+      <DeveloperConsole onVisibilityChange={setIsDevConsoleOpen} isMobileMenuOpen={isMobileMenuOpen} />
       <ScrollProgress />
     </>
   )

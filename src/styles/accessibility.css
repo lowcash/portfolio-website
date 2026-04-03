@@ -1,0 +1,86 @@
+/**
+ * Accessibility Styles
+ * 
+ * Focus indicators, skip-to-content link, and screen reader utilities.
+ * Ensures keyboard navigation and assistive technology compatibility.
+ */
+
+/**
+ * Skip-to-Content Link
+ * Hidden by default; visible on focus to allow keyboard users to jump to main content
+ */
+.skip-to-content {
+  position: fixed;
+  top: -100px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 9999;
+  padding: 1rem 2rem;
+  background: linear-gradient(135deg, #a855f7 0%, #ec4899 100%);
+  color: white;
+  text-decoration: none;
+  border-radius: 0.5rem;
+  font-weight: 600;
+  transition: top 0.3s ease;
+  box-shadow: 0 10px 40px rgba(168, 85, 247, 0.5);
+}
+
+.skip-to-content:focus {
+  top: 1rem;
+  outline: 3px solid white;
+  outline-offset: 3px;
+}
+
+/**
+ * Global Focus Styles
+ * Enhanced visibility for keyboard navigation
+ */
+*:focus-visible {
+  outline: 2px solid #a855f7;
+  outline-offset: 2px;
+  transition: outline 0.2s ease;
+}
+
+/* Button & Link Focus */
+button:focus-visible,
+a:focus-visible {
+  outline: 2px solid #a855f7;
+  outline-offset: 3px;
+}
+
+/* Form Input Focus */
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid #a855f7;
+  outline-offset: 1px;
+  box-shadow: 0 0 0 4px rgba(168, 85, 247, 0.1);
+}
+
+/**
+ * Screen Reader Only
+ * Hides content visually but keeps it available to screen readers
+ */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+/* Remove .sr-only when focused (for skip links) */
+.sr-only:focus {
+  position: static;
+  width: auto;
+  height: auto;
+  padding: inherit;
+  margin: inherit;
+  overflow: visible;
+  clip: auto;
+  white-space: normal;
+}

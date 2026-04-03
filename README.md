@@ -54,13 +54,43 @@ Live URL: [https://lowcash.dev](https://lowcash.dev)
 
 ## 🎨 Styling
 
-The project uses Tailwind CSS for utility-first styling.
+The project uses **Tailwind CSS v4+** for utility-first styling with a modular CSS architecture.
 
-Policy:
+### CSS Structure
 
-- `src/styles/globals.css` is the authored global style source.
-- `src/index.css` is generated output consumed by `app/layout.tsx`.
-- Edit authored styles, then regenerate output via the project workflow.
+```
+src/styles/
+├── globals.css       # Entry point (@imports all modules)
+├── theme.css         # Design tokens & CSS variables (colors, spacing tokens)
+├── typography.css    # Font scale, heading styles, text element defaults
+├── base.css          # HTML/body reset, scroll behavior, a11y helpers
+├── accessibility.css # Focus styles, skip-to-content, screen-reader utilities
+└── animations.css    # Keyframes (glow, floating, orbs) & animation utilities
+```
+
+### Development Workflow
+
+- **Edit** authored styles in `src/styles/` modules
+- **Import** `src/styles/globals.css` in `src/app/layout.tsx` (orchestrates all submodules)
+- **Tailwind** automatically compiles utilities from component `className` attributes
+- **Dev Server**: CSS output hot-reloads without page refresh
+
+### CSS Variables (Dynamic Theming)
+
+Components use CSS custom properties for runtime customization:
+
+```css
+/* Set by JavaScript based on current section */
+--orb-r: 255; /* Red component (0-255) */
+--orb-g: 100; /* Green component (0-255) */
+--orb-b: 50; /* Blue component (0-255) */
+
+/* Consumed by animations & components */
+color: rgb(var(--orb-r), var(--orb-g), var(--orb-b));
+box-shadow: 0 0 20px rgba(var(--orb-r), var(--orb-g), var(--orb-b), 0.5);
+```
+
+**Benefits**: No React re-renders for color updates; GPU-accelerated CSS changes only.
 
 ---
 

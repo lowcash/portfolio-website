@@ -8,4 +8,4 @@ Import policy:
 - Use `@/*` for application code that lives under `src/`.
 - Prefer same-folder `./` imports only for tightly local siblings.
 - Avoid `../..` chains when an alias import can express ownership more clearly.
-- When migrating Next.js repos to `src/app`, keep aliases aligned with `@/* -> ./src/*`.
+- Keep aliases aligned with `tsconfig.json` path mappings (e.g. `@/* -> ./src/*`). When reorganising the project structure, update both the tsconfig paths and all import sites together.

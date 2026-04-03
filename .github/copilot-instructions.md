@@ -5,6 +5,7 @@ Use the `.github` instruction stack in this repository as the primary active gui
 ## Tech Stack
 
 Current versions in use (update line items as your project upgrades):
+
 - **Framework**: Next.js 16+ (App Router)
 - **UI Framework**: React 19+
 - **Language**: TypeScript 5+
@@ -45,6 +46,7 @@ CSS organized into logical modules with a single entry point:
 ```
 
 **Import location**:
+
 - Import global CSS once in `app/layout.tsx` → `import '../styles/globals.css'`
 
 ## Standards

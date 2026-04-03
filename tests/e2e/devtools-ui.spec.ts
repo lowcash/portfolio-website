@@ -92,12 +92,28 @@ test.describe('Devtools and layered UI interactions', () => {
       const style = getComputedStyle(el)
       return {
         minWidth: Number.parseFloat(style.minWidth),
+        maxWidth: Number.parseFloat(style.maxWidth),
         maxHeight: Number.parseFloat(style.maxHeight),
       }
     })
 
     expect(contentStyle.minWidth).toBeGreaterThanOrEqual(420)
-    expect(contentStyle.maxHeight).toBeGreaterThanOrEqual(500)
+    expect(contentStyle.maxWidth).toBeGreaterThanOrEqual(850)
+    expect(contentStyle.maxHeight).toBeGreaterThanOrEqual(600)
+  })
+
+  test('devtools achievement grid renders 16 slots', async ({ page }) => {
+    await page.evaluate(() => {
+      localStorage.removeItem('achievements')
+      window.dispatchEvent(new CustomEvent('achievements-reset'))
+    })
+
+    const toggleButton = page.getByRole('button', { name: 'Toggle debug console' })
+    await toggleButton.evaluate((btn: HTMLElement) => btn.click())
+
+    const consoleRegion = page.getByRole('region', { name: 'Developer debug console' })
+    await expect(consoleRegion).toBeVisible()
+    await expect(consoleRegion.locator('div.grid.grid-cols-4 > div')).toHaveCount(16)
   })
 
   test('achievement popup is rendered above side dots navigation on desktop', async ({ page }, testInfo) => {

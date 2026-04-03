@@ -1,0 +1,98 @@
+/**
+ * Typography System
+ * 
+ * Defines font scales, heading styles, and text element defaults.
+ * Uses CSS custom properties for dynamic sizing across components.
+ */
+
+:root {
+  /* Font Scale - Relative to 16px base */
+  --text-xs: 0.75rem; /* 12px */
+  --text-sm: 0.875rem; /* 14px */
+  --text-base: 1rem; /* 16px */
+  --text-lg: 1.125rem; /* 18px */
+  --text-xl: 1.25rem; /* 20px */
+  --text-2xl: 1.5rem; /* 24px */
+  --text-3xl: 1.875rem; /* 30px */
+
+  /* Font Weight Scale */
+  --font-weight-normal: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* Base Font */
+  --font-size: 16px;
+  --line-height: 1.5;
+}
+
+/**
+ * Base Typography
+ * Applied to semantic heading and text elements
+ */
+@layer base {
+  /* Reset border/outline for better visibility */
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  /* Body defaults */
+  body {
+    @apply bg-background text-foreground;
+  }
+
+  /* Headings (only when not already styled by Tailwind classes) */
+  :where(:not(:has([class*=' text-']), :not(:has([class^='text-'])))) {
+    h1 {
+      font-size: var(--text-2xl);
+      font-weight: var(--font-weight-medium);
+      line-height: var(--line-height);
+    }
+
+    h2 {
+      font-size: var(--text-xl);
+      font-weight: var(--font-weight-medium);
+      line-height: var(--line-height);
+    }
+
+    h3 {
+      font-size: var(--text-lg);
+      font-weight: var(--font-weight-medium);
+      line-height: var(--line-height);
+    }
+
+    h4 {
+      font-size: var(--text-base);
+      font-weight: var(--font-weight-medium);
+      line-height: var(--line-height);
+    }
+
+    /* Paragraph */
+    p {
+      font-size: var(--text-base);
+      font-weight: var(--font-weight-normal);
+      line-height: var(--line-height);
+    }
+
+    /* Form labels */
+    label {
+      font-size: var(--text-base);
+      font-weight: var(--font-weight-medium);
+      line-height: var(--line-height);
+    }
+
+    /* Button text */
+    button {
+      font-size: var(--text-base);
+      font-weight: var(--font-weight-medium);
+      line-height: var(--line-height);
+    }
+
+    /* Input fields */
+    input {
+      font-size: var(--text-base);
+      font-weight: var(--font-weight-normal);
+      line-height: var(--line-height);
+    }
+  }
+}

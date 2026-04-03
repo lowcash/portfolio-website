@@ -1,7 +1,7 @@
-import fs from 'node:fs/promises'
-import { readFileSync } from 'node:fs'
-import path from 'node:path'
 import { execFileSync } from 'node:child_process'
+import { readFileSync } from 'node:fs'
+import fs from 'node:fs/promises'
+import path from 'node:path'
 
 const ROOT_DIR = process.cwd()
 const SOURCE_DIR = path.join(ROOT_DIR, 'src')

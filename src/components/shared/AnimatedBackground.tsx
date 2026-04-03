@@ -1,5 +1,5 @@
 // style-boundary-ignore-file: orb animation uses JS-computed inline styles (size, position, filter, duration) — cannot be expressed as static Tailwind classes
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 
 import { ANIMATION_CONFIG, SECTION_COUNT } from '@/lib/constants'
 import { ORB_COLORS } from '@/lib/section-config'
@@ -139,19 +139,16 @@ export function AnimatedBackground() {
   const [orbOpacity, setOrbOpacity] = useState(1.4) // Hidden, controlled by opacity
   const [positionVariation, setPositionVariation] = useState(1.0) // 100% = default positions
 
-  // Track window width for responsive vignette
-  const [isMobile, setIsMobile] = useState(() => {
-    if (typeof window === 'undefined') return false
-    return window.innerWidth < 768
-  })
+  // Track window width for responsive vignette — start false (SSR-safe), update on client mount
+  const [isMobile, setIsMobile] = useState(false)
 
-  // Update isMobile on resize
-  useEffect(() => {
+  // Update isMobile on resize — useLayoutEffect runs synchronously before paint (client-only)
+  useLayoutEffect(() => {
     const updateSize = () => {
       setIsMobile(window.innerWidth < 768)
     }
 
-    updateSize() // Initial check
+    updateSize()
     window.addEventListener('resize', updateSize)
     return () => window.removeEventListener('resize', updateSize)
   }, [])
@@ -419,7 +416,7 @@ export function AnimatedBackground() {
     return {
       filter: `blur(${effectiveBlur}px) brightness(${effectiveBrightness})`,
       animationDuration: `${durationSeconds / animationSpeed}s`,
-      willChange: isMobile ? 'auto' : 'transform',
+      willChange: 'transform',
     }
   }
 
@@ -576,7 +573,9 @@ export function AnimatedBackground() {
       {/* Subtle overlay for depth – reduced to keep orbs visible */}
       <div
         className={`pointer-events-none absolute inset-0 bg-linear-to-b ${
-          isMobile ? 'from-gray-950/20 via-transparent to-gray-950/20' : 'from-gray-950/40 via-transparent to-gray-950/40'
+          isMobile
+            ? 'from-gray-950/20 via-transparent to-gray-950/20'
+            : 'from-gray-950/40 via-transparent to-gray-950/40'
         }`}
       />
 

@@ -26,7 +26,7 @@ export function SectionWrapper({
   return (
     <section
       data-section={id}
-      className={`section-wrapper-safe-rail min-h-screen flex items-center justify-center py-20 relative ${fullHeight ? 'h-screen' : ''} ${className}`}
+      className={`relative flex min-h-screen items-center justify-center px-6 py-20 md:px-8 ${fullHeight ? 'h-screen' : ''} ${className}`}
       style={{ scrollSnapAlign: 'start' }}
     >
       <div className={resolvedContainerClassName}>{children}</div>

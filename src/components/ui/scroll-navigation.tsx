@@ -240,7 +240,7 @@ export function ScrollNavigation({
       </FloatingRail>
 
       {/* MOBILE - Hamburger button (top-right) with dynamic glow */}
-      <div className='mobile-until-lg pointer-events-none fixed top-0 right-0 left-0' style={{ zIndex: 60 }}>
+      <div className='pointer-events-none fixed top-0 right-0 left-0 lg:hidden' style={{ zIndex: 60 }}>
         <div className='relative mx-auto h-0 max-w-6xl px-6'>
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
@@ -250,7 +250,7 @@ export function ScrollNavigation({
                 setMobileMenuOpen(!mobileMenuOpen)
               }
             }}
-            className='pointer-events-auto absolute top-6 transition-all duration-300 hover:scale-105'
+            className='pointer-events-auto absolute top-7 transition-all duration-300 hover:scale-105'
             style={{ right: '1rem' }}
             aria-label={mobileMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
             aria-expanded={mobileMenuOpen}

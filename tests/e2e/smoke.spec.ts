@@ -59,6 +59,8 @@ test.describe('Portfolio smoke baseline', () => {
 
   test('includes canonical and person schema metadata', async ({ page }) => {
     await expect(page.locator('link[rel="canonical"]')).toHaveAttribute('href', 'https://lowcash.dev')
+    await expect(page.locator('meta[property="og:image"]')).toHaveAttribute('content', /opengraph-image/)
+    await expect(page.locator('meta[name="twitter:card"]')).toHaveAttribute('content', 'summary_large_image')
     await expect(page.locator('script[type="application/ld+json"]')).toHaveCount(1)
     const schemaContent = await page
       .locator('script[type="application/ld+json"]')

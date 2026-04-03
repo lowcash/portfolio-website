@@ -1,0 +1,525 @@
+/**
+ * Animations & Keyframe Definitions
+ * 
+ * Comprehensive animation library covering:
+ * - Glow effects (pulse, breathe, shimmer)
+ * - Floating animations (orbs, background)
+ * - Scroll-based interactions
+ * 
+ * All animations respect prefers-reduced-motion preference.
+ */
+
+/* ============================================
+   GLOW EFFECTS - Various intensity levels
+   ============================================ */
+
+@keyframes glow-pulse {
+  0%,
+  100% {
+    filter: drop-shadow(0 0 40px currentColor);
+  }
+  50% {
+    filter: drop-shadow(0 0 80px currentColor);
+  }
+}
+
+@keyframes glow-breathe {
+  0%,
+  100% {
+    box-shadow:
+      0 0 40px var(--glow-color),
+      inset 0 2px 20px rgba(0, 0, 0, 0.5),
+      inset 0 0 30px var(--inner-glow);
+  }
+  50% {
+    box-shadow:
+      0 0 70px var(--glow-color),
+      inset 0 2px 20px rgba(0, 0, 0, 0.5),
+      inset 0 0 30px var(--inner-glow);
+  }
+}
+
+@keyframes glow-shimmer {
+  0% {
+    background-position: -200% center;
+  }
+  100% {
+    background-position: 200% center;
+  }
+}
+
+@keyframes glow-combo {
+  0%,
+  100% {
+    box-shadow:
+      0 0 40px var(--glow-color),
+      inset 0 2px 20px rgba(0, 0, 0, 0.5),
+      inset 0 0 30px var(--inner-glow);
+    filter: brightness(1);
+  }
+  50% {
+    box-shadow:
+      0 0 70px var(--glow-color),
+      inset 0 2px 20px rgba(0, 0, 0, 0.5),
+      inset 0 0 30px var(--inner-glow);
+    filter: brightness(1.15);
+  }
+}
+
+@keyframes gentle-bounce {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+/* Animation utility classes */
+.animate-glow-pulse {
+  animation: glow-pulse 4s ease-in-out infinite;
+}
+
+.animate-glow-breathe {
+  animation: glow-breathe 5s ease-in-out infinite;
+}
+
+.animate-glow-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+
+.animate-glow-shimmer::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.1) 50%, transparent 100%);
+  background-size: 200% 100%;
+  animation: glow-shimmer 6s linear infinite;
+  pointer-events: none;
+}
+
+.animate-glow-combo {
+  animation: glow-combo 4.5s ease-in-out infinite;
+}
+
+.animate-gentle-bounce {
+  animation: gentle-bounce 1s ease-in-out infinite;
+}
+
+/* ============================================
+   FLOATING ANIMATIONS - Background & Orbs
+   ============================================ */
+
+/**
+ * Slow floating - Large smooth arcs
+ * Use for large background orbs
+ */
+@keyframes float-slow {
+  0%,
+  100% {
+    transform: translate(-50%, -50%) translateY(0px) translateX(0px) scale(1);
+  }
+  25% {
+    transform: translate(-50%, -50%) translateY(40px) translateX(30px) scale(1.05);
+  }
+  50% {
+    transform: translate(-50%, -50%) translateY(0px) translateX(50px) scale(1);
+  }
+  75% {
+    transform: translate(-50%, -50%) translateY(-40px) translateX(20px) scale(0.95);
+  }
+}
+
+/**
+ * Medium floating - Balanced movement with rotation
+ */
+@keyframes float-medium {
+  0%,
+  100% {
+    transform: translate(-50%, -50%) translateY(0px) translateX(0px) scale(1) rotate(0deg);
+  }
+  33% {
+    transform: translate(-50%, -50%) translateY(-35px) translateX(-40px) scale(1.08) rotate(2deg);
+  }
+  66% {
+    transform: translate(-50%, -50%) translateY(35px) translateX(35px) scale(0.92) rotate(-2deg);
+  }
+}
+
+/**
+ * Fast floating - Quick, energetic movement
+ */
+@keyframes float-fast {
+  0%,
+  100% {
+    transform: translate(-50%, -50%) translateY(0px) translateX(0px) scale(1);
+  }
+  33% {
+    transform: translate(-50%, -50%) translateY(-45px) translateX(-25px) scale(1.1);
+  }
+  66% {
+    transform: translate(-50%, -50%) translateY(30px) translateX(40px) scale(0.9);
+  }
+}
+
+.animate-float-slow {
+  animation: float-slow 25s ease-in-out infinite;
+}
+
+.animate-float-medium {
+  animation: float-medium 20s ease-in-out infinite;
+}
+
+.animate-float-fast {
+  animation: float-fast 18s ease-in-out infinite;
+}
+
+/* ============================================
+   FLUID BACKGROUND ANIMATIONS - Morphing & Effects
+   ============================================ */
+
+@keyframes fluid-morph {
+  0%,
+  100% {
+    transform: scale(1) rotate(0deg);
+    opacity: 0.4;
+  }
+  33% {
+    transform: scale(1.1) rotate(5deg);
+    opacity: 0.5;
+  }
+  66% {
+    transform: scale(0.95) rotate(-5deg);
+    opacity: 0.35;
+  }
+}
+
+@keyframes noise-drift {
+  0% {
+    transform: translate(0, 0) scale(1);
+  }
+  100% {
+    transform: translate(-10%, -10%) scale(1.1);
+  }
+}
+
+@keyframes light-sweep {
+  0% {
+    transform: translateX(-100%) rotate(45deg);
+    opacity: 0;
+  }
+  50% {
+    opacity: 0.1;
+  }
+  100% {
+    transform: translateX(200%) rotate(45deg);
+    opacity: 0;
+  }
+}
+
+/**
+ * Float-pulse - Pulsing floating motion
+ * Creates visible breathing effect for decorative elements
+ */
+@keyframes float-pulse {
+  0%,
+  100% {
+    transform: translate(0, 0) scale(1);
+    opacity: 0.2;
+  }
+  25% {
+    transform: translate(-30px, 40px) scale(1.15);
+    opacity: 0.25;
+  }
+  50% {
+    transform: translate(50px, -20px) scale(0.9);
+    opacity: 0.15;
+  }
+  75% {
+    transform: translate(-20px, -50px) scale(1.05);
+    opacity: 0.22;
+  }
+}
+
+/* ============================================
+   ORB ANIMATIONS - Large dramatic movements
+   ============================================ */
+
+/**
+ * Orb float keyframes (1-6)
+ * Each orb has unique movement pattern to create organic, non-repetitive motion
+ * Large scale translations create visible impact; vary timing ensures no sync
+ */
+
+@keyframes orb-float-1 {
+  0%,
+  100% {
+    transform: translate(-50%, -50%) translateX(0px) translateY(0px) scale(1);
+  }
+  25% {
+    transform: translate(-50%, -50%) translateX(-180px) translateY(120px) scale(1.2);
+  }
+  50% {
+    transform: translate(-50%, -50%) translateX(150px) translateY(-100px) scale(0.85);
+  }
+  75% {
+    transform: translate(-50%, -50%) translateX(80px) translateY(140px) scale(1.1);
+  }
+}
+
+@keyframes orb-float-2 {
+  0%,
+  100% {
+    transform: translate(-50%, -50%) translateX(0px) translateY(0px) scale(1);
+  }
+  30% {
+    transform: translate(-50%, -50%) translateX(140px) translateY(-150px) scale(1.15);
+  }
+  60% {
+    transform: translate(-50%, -50%) translateX(-160px) translateY(110px) scale(0.9);
+  }
+  90% {
+    transform: translate(-50%, -50%) translateX(90px) translateY(80px) scale(1.05);
+  }
+}
+
+@keyframes orb-float-3 {
+  0%,
+  100% {
+    transform: translate(-50%, -50%) translateX(0px) translateY(0px) scale(1);
+  }
+  20% {
+    transform: translate(-50%, -50%) translateX(-150px) translateY(-130px) scale(1.18);
+  }
+  55% {
+    transform: translate(-50%, -50%) translateX(120px) translateY(150px) scale(0.88);
+  }
+  85% {
+    transform: translate(-50%, -50%) translateX(-70px) translateY(-90px) scale(1.08);
+  }
+}
+
+@keyframes orb-float-4 {
+  0%,
+  100% {
+    transform: translate(-50%, -50%) translateX(0px) translateY(0px) scale(1);
+  }
+  35% {
+    transform: translate(-50%, -50%) translateX(170px) translateY(130px) scale(1.12);
+  }
+  65% {
+    transform: translate(-50%, -50%) translateX(-140px) translateY(-110px) scale(0.92);
+  }
+  88% {
+    transform: translate(-50%, -50%) translateX(100px) translateY(-70px) scale(1.06);
+  }
+}
+
+@keyframes orb-float-5 {
+  0%,
+  100% {
+    transform: translate(-50%, -50%) translateX(0px) translateY(0px) scale(1);
+  }
+  40% {
+    transform: translate(-50%, -50%) translateX(-190px) translateY(160px) scale(1.25);
+  }
+  70% {
+    transform: translate(-50%, -50%) translateX(110px) translateY(-120px) scale(0.82);
+  }
+}
+
+@keyframes orb-float-6 {
+  0%,
+  100% {
+    transform: translate(-50%, -50%) translateX(0px) translateY(0px) scale(1);
+  }
+  28% {
+    transform: translate(-50%, -50%) translateX(155px) translateY(-140px) scale(1.2);
+  }
+  58% {
+    transform: translate(-50%, -50%) translateX(-125px) translateY(155px) scale(0.86);
+  }
+  82% {
+    transform: translate(-50%, -50%) translateX(90px) translateY(70px) scale(1.1);
+  }
+}
+
+/**
+ * Orb animation assignments
+ * 8 orbs total; unique durations prevent sync patterns
+ * Last 2 orbs run in reverse for additional variety
+ */
+.orb-1 {
+  animation: orb-float-1 45s ease-in-out infinite;
+}
+.orb-2 {
+  animation: orb-float-2 38s ease-in-out infinite;
+}
+.orb-3 {
+  animation: orb-float-3 42s ease-in-out infinite;
+}
+.orb-4 {
+  animation: orb-float-4 40s ease-in-out infinite;
+}
+.orb-5 {
+  animation: orb-float-5 36s ease-in-out infinite;
+}
+.orb-6 {
+  animation: orb-float-6 44s ease-in-out infinite;
+}
+.orb-7 {
+  animation: orb-float-1 50s ease-in-out infinite reverse;
+}
+.orb-8 {
+  animation: orb-float-2 46s ease-in-out infinite reverse;
+}
+
+/**
+ * Mobile orb animation — reduced amplitude (40-50px vs 150-190px desktop)
+ * so motion is perceptible on small viewports without orbs moving off-screen.
+ * Faster durations (11-16s vs 36-50s) make the motion visible to the eye.
+ */
+@keyframes orb-float-mobile-1 {
+  0%,
+  100% {
+    transform: translate(-50%, -50%) translateX(0px) translateY(0px) scale(1);
+  }
+  25% {
+    transform: translate(-50%, -50%) translateX(-40px) translateY(30px) scale(1.08);
+  }
+  50% {
+    transform: translate(-50%, -50%) translateX(35px) translateY(-25px) scale(0.94);
+  }
+  75% {
+    transform: translate(-50%, -50%) translateX(20px) translateY(35px) scale(1.04);
+  }
+}
+
+@keyframes orb-float-mobile-2 {
+  0%,
+  100% {
+    transform: translate(-50%, -50%) translateX(0px) translateY(0px) scale(1);
+  }
+  30% {
+    transform: translate(-50%, -50%) translateX(38px) translateY(-42px) scale(1.1);
+  }
+  65% {
+    transform: translate(-50%, -50%) translateX(-35px) translateY(30px) scale(0.92);
+  }
+}
+
+@media (max-width: 768px) {
+  .orb-1 {
+    animation: orb-float-mobile-1 15s ease-in-out infinite;
+  }
+  .orb-2 {
+    animation: orb-float-mobile-2 12s ease-in-out infinite reverse;
+  }
+  .orb-3 {
+    animation: orb-float-mobile-1 14s ease-in-out infinite 2s;
+  }
+  .orb-4 {
+    animation: orb-float-mobile-2 13s ease-in-out infinite reverse 1s;
+  }
+  .orb-5 {
+    animation: orb-float-mobile-1 11s ease-in-out infinite 3s;
+  }
+  .orb-6 {
+    animation: orb-float-mobile-2 16s ease-in-out infinite reverse 4s;
+  }
+  .orb-7,
+  .orb-8 {
+    animation: none; /* Desktop-only; JSX conditionally hides these on mobile */
+  }
+}
+
+/* ============================================
+   SCROLL-BASED COMPONENT ANIMATIONS
+   ============================================ */
+
+/**
+ * Scroll-to-Top Button Glow
+ * Uses dynamic CSS variables set by JavaScript (--orb-r, --orb-g, --orb-b)
+ * Prevents re-renders by updating CSS vars instead of React state
+ */
+.scroll-to-top-glow {
+  box-shadow: 0 0 40px rgba(var(--orb-r), var(--orb-g), var(--orb-b), 0.5);
+  transition: box-shadow 0.3s ease-out;
+}
+
+.scroll-to-top-inner {
+  box-shadow:
+    inset 0 2px 20px rgba(0, 0, 0, 0.5),
+    inset 0 0 30px rgba(var(--orb-r), var(--orb-g), var(--orb-b), 0.08);
+  transition: box-shadow 0.3s ease-out;
+}
+
+.scroll-to-top-icon {
+  color: rgb(var(--orb-r), var(--orb-g), var(--orb-b));
+  transition: color 0.3s ease-out;
+}
+
+/**
+ * Navigation Dot Active/Inactive States
+ * Color derives from current section (--orb-r/g/b)
+ */
+.scroll-nav-dot-active {
+  background-color: rgb(var(--orb-r), var(--orb-g), var(--orb-b));
+  box-shadow: 0 0 12px rgba(var(--orb-r), var(--orb-g), var(--orb-b), 0.8);
+  transition: all 0.3s ease-out;
+}
+
+.scroll-nav-dot-inactive {
+  background-color: rgba(156, 163, 175, 0.4);
+  transition: all 0.3s ease-out;
+}
+
+/* Mobile: subtle glow for smaller dots */
+@media (max-width: 768px) {
+  .scroll-nav-dot-active {
+    box-shadow: 0 0 8px rgba(var(--orb-r), var(--orb-g), var(--orb-b), 0.8);
+  }
+}
+
+/**
+ * Section-Themed Links
+ * Text color changes with section, creates cohesive visual flow
+ */
+.section-link {
+  color: rgb(var(--orb-r), var(--orb-g), var(--orb-b));
+  transition: all 0.3s ease-out;
+}
+
+.section-link:hover {
+  color: rgba(var(--orb-r), var(--orb-g), var(--orb-b), 0.8);
+  filter: brightness(1.2);
+}
+
+/* Desktop devtools panel should expose scroll affordance when content overflows. */
+.devtools-scroll-area {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(var(--orb-r), var(--orb-g), var(--orb-b), 0.7) rgba(17, 24, 39, 0.65);
+}
+
+.devtools-scroll-area::-webkit-scrollbar {
+  width: 0.625rem;
+}
+
+.devtools-scroll-area::-webkit-scrollbar-track {
+  border-radius: 9999px;
+  background: rgba(17, 24, 39, 0.65);
+}
+
+.devtools-scroll-area::-webkit-scrollbar-thumb {
+  border-radius: 9999px;
+  background: rgba(var(--orb-r), var(--orb-g), var(--orb-b), 0.7);
+}
+
+.devtools-scroll-area::-webkit-scrollbar-thumb:hover {
+  background: rgba(var(--orb-r), var(--orb-g), var(--orb-b), 0.9);
+}

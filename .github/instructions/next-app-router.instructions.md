@@ -36,6 +36,7 @@ export default function RootLayout({ children }) {
 ```
 
 **Constraints**:
+
 - ✅ Defines `<html>`, `<head>`, `<body>` elements
 - ✅ Exports `metadata` object (Open Graph, JSON-LD schema)
 - ✅ Imports global CSS (only place to import global styles)
@@ -65,6 +66,7 @@ export default function Home() {
 ```
 
 **Principles**:
+
 - ✅ Pure server component (default, no `'use client'`)
 - ✅ Maps section data → feature components
 - ✅ Wraps each section in layout helper (SectionWrapper)
@@ -91,10 +93,10 @@ import { DevPanel } from '@/components/features/DevPanel'
 export function AppShell() {
   const [currentSection, setCurrentSection] = useState(0)
   const [menuOpen, setMenuOpen] = useState(false)
-  
+
   useEffect(() => {
     let rafId: number
-    
+
     const handleScroll = () => {
       if (rafId) cancelAnimationFrame(rafId)
       rafId = requestAnimationFrame(() => {
@@ -102,14 +104,14 @@ export function AppShell() {
         setCurrentSection(newSection)
       })
     }
-    
+
     window.addEventListener('scroll', handleScroll)
     return () => {
       window.removeEventListener('scroll', handleScroll)
       cancelAnimationFrame(rafId)
     }
   }, [])
-  
+
   return (
     <>
       <NavBar currentSection={currentSection} onMenuChange={setMenuOpen} />
@@ -122,12 +124,13 @@ export function AppShell() {
 
 **Trade-offs: single boundary vs. granular**
 
-| Approach | Bundle size | Maintainability | State clarity |
-|----------|-------------|-----------------|---------------|
-| **Single boundary** (this repo) | Slightly larger | Simple — one place for all state | Props-down flow, explicit |
-| **Granular** (Next.js recommended for large apps) | Smaller — tree-shake per component | More components, self-contained | Local state per component |
+| Approach                                          | Bundle size                        | Maintainability                  | State clarity             |
+| ------------------------------------------------- | ---------------------------------- | -------------------------------- | ------------------------- |
+| **Single boundary** (this repo)                   | Slightly larger                    | Simple — one place for all state | Props-down flow, explicit |
+| **Granular** (Next.js recommended for large apps) | Smaller — tree-shake per component | More components, self-contained  | Local state per component |
 
 **Pattern (single boundary)**:
+
 1. One `'use client'` component: colocate it in `src/components/layout/` (e.g. `AppShell.tsx`) or directly in `app/`
 2. Mount interactive components: scroll listener, nav dots, UI toggles
 3. Pass state as props: `currentSection`, `menuOpen` → child components
@@ -168,20 +171,23 @@ src/styles/
 ### Global CSS Entry Point (Single Source of Truth)
 
 **`app/layout.tsx`** (imports once, at root):
+
 ```typescript
 import '../styles/globals.css'
 ```
 
 **`src/styles/globals.css`** (orchestrates all submodules):
+
 ```css
-@import './theme.css';         /* CSS variables, design tokens */
-@import './typography.css';    /* Font scales, heading defaults */
-@import './base.css';          /* HTML/body reset, scroll behavior */
+@import './theme.css'; /* CSS variables, design tokens */
+@import './typography.css'; /* Font scales, heading defaults */
+@import './base.css'; /* HTML/body reset, scroll behavior */
 @import './accessibility.css'; /* Focus states, sr-only, a11y */
-@import './animations.css';    /* @keyframes, animation utilities */
+@import './animations.css'; /* @keyframes, animation utilities */
 ```
 
 **Workflow**:
+
 - **Dev**: `npm run dev` → Tailwind watches `src/components/**/*.tsx` for `className` + CSS imports
 - **Prod**: `npm run build` → Tailwind purges unused styles, minifies
 - **Best Practice**: All global CSS lives in `src/styles/`; components use **Tailwind utilities only** (no component-scoped CSS files)
@@ -189,6 +195,7 @@ import '../styles/globals.css'
 ### CSS Variables for Dynamic Styling (No React Re-renders)
 
 **Set by JavaScript once** (in the app shell on mount/update):
+
 ```typescript
 useEffect(() => {
   document.documentElement.style.setProperty('--orb-r', r.toString())
@@ -198,6 +205,7 @@ useEffect(() => {
 ```
 
 **Consumed by all components** (in `src/styles/theme.css` and `src/styles/animations.css`):
+
 ```css
 /* src/styles/theme.css: Define CSS variables */
 :root {
@@ -210,11 +218,12 @@ useEffect(() => {
 .scroll-nav-dot-active {
   background-color: rgb(var(--orb-r), var(--orb-g), var(--orb-b));
   box-shadow: 0 0 12px rgba(var(--orb-r), var(--orb-g), var(--orb-b), 0.8);
-  transition: --orb-r 0.3s ease-out;  /* GPU-accelerated, no JS intermediate */
+  transition: --orb-r 0.3s ease-out; /* GPU-accelerated, no JS intermediate */
 }
 ```
 
 **Why this pattern?**
+
 - CSS vars update at browser native speed (GPU-accelerated)
 - No React re-renders → no component reconciliation cost
 - Smooth transitions via CSS alone
@@ -223,6 +232,7 @@ useEffect(() => {
 ## Metadata & SEO
 
 **`app/layout.tsx`**:
+
 ```typescript
 import type { Metadata } from 'next'
 
@@ -244,6 +254,7 @@ export default function RootLayout({ children }) {
 ```
 
 **JSON-LD Schema** (optional, for rich snippets):
+
 ```typescript
 const personJsonLd = {
   '@context': 'https://schema.org',
@@ -286,6 +297,7 @@ import { WhoIAm } from '../components/features/WhoIAm'
 ### 2. **Server-Side Rendering**
 
 ✅ Content in `app/page.tsx` is server-rendered and sent to browser immediately
+
 - No "flash of empty page"
 - SEO-friendly
 - Initial HTML includes all sections
@@ -293,12 +305,14 @@ import { WhoIAm } from '../components/features/WhoIAm'
 ### 3. **CSS Variables over State**
 
 ✅ Animations and color updates via CSS vars (no re-renders)
+
 ```css
 --orb-r: 255;
 transition: --orb-r 300ms ease-out;
 ```
 
 ❌ Avoid React state for frequently-changing visuals
+
 ```jsx
 const [color, setColor] = useState('rgb(255, 100, 50)')
 // onScroll → setColor(...) → re-render → browser recalculates layout
@@ -309,14 +323,14 @@ const [color, setColor] = useState('rgb(255, 100, 50)')
 ```typescript
 useEffect(() => {
   let rafId: number
-  
+
   const handler = () => {
     if (rafId) cancelAnimationFrame(rafId)
     rafId = requestAnimationFrame(() => {
       // Update state at most 60 times per second
     })
   }
-  
+
   window.addEventListener('scroll', handler)
   return () => {
     window.removeEventListener('scroll', handler)
@@ -358,6 +372,7 @@ npm run start    # Runs production build
 ---
 
 **See Also**:
+
 - `architecture.instructions.md` – Framework-agnostic principles
 - `docs/ARCHITECTURE.md` – Full system design & tech stack rationale
 - Next.js Docs: https://nextjs.org/docs/app

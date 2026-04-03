@@ -1,8 +1,8 @@
 import type { Metadata } from 'next'
 
-import '../styles/globals.css'
-
 import { SkipToContentLink } from '@/components/ui/skip-to-content-link'
+
+import '../styles/globals.css'
 
 const siteUrl = 'https://lowcash.dev'
 
@@ -45,7 +45,14 @@ export const metadata: Metadata = {
     title: 'Lukáš Machala (lowcash) • Fullstack Developer & AI Architect',
     description:
       'Fullstack developer specializing in TypeScript, React, Next.js, and AI-assisted development. Building modern web applications with agentic workflows.',
-    images: ['/og-image.png'],
+    images: ['/opengraph-image'],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Lukáš Machala (lowcash) • Fullstack Developer & AI Architect',
+    description:
+      'Fullstack developer specializing in TypeScript, React, Next.js, and AI-assisted development. Building modern web applications with agentic workflows.',
+    images: ['/opengraph-image'],
   },
 }
 

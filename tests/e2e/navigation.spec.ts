@@ -99,4 +99,37 @@ test.describe('Mobile navigation baseline', () => {
     await expect(drawer).not.toBeVisible()
     await expect(page.locator('#contact')).toBeInViewport({ ratio: 0.15 })
   })
+
+  test('mobile menu suppresses devtools trigger interactions', async ({ page }) => {
+    const menuTrigger = page.locator('button[aria-controls="mobile-navigation-menu"]')
+    await menuTrigger.click()
+
+    const drawer = page.getByRole('navigation', { name: 'Mobile navigation' })
+    await expect(drawer).toBeVisible()
+
+    const devtoolsTrigger = page.getByRole('button', { name: 'Toggle debug console' })
+    await expect(devtoolsTrigger).toBeVisible()
+
+    await expect
+      .poll(async () => {
+        return devtoolsTrigger.evaluate((el) => {
+          const style = getComputedStyle(el)
+          return {
+            pointerEvents: style.pointerEvents,
+            opacity: Number(style.opacity),
+            zIndex: Number(style.zIndex || '0'),
+          }
+        })
+      })
+      .toEqual({
+        pointerEvents: 'none',
+        opacity: 0,
+        zIndex: 40,
+      })
+
+    await page.getByLabel('Close menu backdrop').click()
+    await page.waitForTimeout(400)
+
+    await expect(drawer).not.toBeVisible()
+  })
 })

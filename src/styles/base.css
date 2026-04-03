@@ -1,0 +1,93 @@
+/**
+ * Base Styles & Reset
+ * 
+ * HTML/body reset, scrollbar hiding, and foundational browser defaults.
+ */
+
+html {
+  font-size: var(--font-size);
+  overflow-x: hidden;
+  -ms-overflow-style: none; /* IE and Edge */
+  scrollbar-width: none; /* Firefox */
+  scroll-snap-type: y proximity; /* Desktop: gentle section snapping */
+  scroll-padding-top: 0;
+  background-color: #030712; /* Dark background - prevents white flash on overscroll */
+  overscroll-behavior: none; /* Prevents bounce effect on mobile */
+  height: 100%; /* iOS Safari fix */
+}
+
+/* Hide scrollbar visual - minimalist look */
+html::-webkit-scrollbar {
+  display: none;
+}
+
+body::-webkit-scrollbar {
+  display: none;
+}
+
+body {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+  background-color: #030712;
+  overscroll-behavior: none;
+}
+
+/**
+ * Mobile: Use gentle proximity snap (not aggressive mandatory snap)
+ * Allows smooth scrolling while nudging sections into alignment
+ */
+@media (max-width: 767px) {
+  html {
+    scroll-snap-type: y proximity;
+  }
+
+  .scroll-snap-section {
+    scroll-snap-align: none;
+  }
+}
+
+/**
+ * Performance: Enable will-change only when needed
+ * Avoids jank from excessive GPU layer creation
+ */
+@media (prefers-reduced-motion: no-preference) {
+  * {
+    will-change: auto;
+  }
+
+  [class*='motion'] {
+    will-change: transform, opacity;
+  }
+}
+
+/**
+ * Respect user motion preferences
+ * Disables animations for users who prefer reduced motion
+ */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/**
+ * Fade-in Helper Classes
+ * Used for scroll-triggered reveal animations
+ */
+.fade-in-element {
+  opacity: 0;
+  transition: opacity 0.6s ease-out;
+}
+
+.fade-in-element.visible {
+  opacity: 1;
+}
+
+.fade-in-element:not(.visible) {
+  opacity: 0;
+}
