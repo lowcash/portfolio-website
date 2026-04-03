@@ -16,8 +16,8 @@ Current versions in use (update line items as your project upgrades):
 
 ## Foundational Guidance
 
-- `.github/instructions/next-app-router.instructions.md` - App Router boundaries, client/server orchestration, metadata conventions
-- `.github/instructions/architecture.instructions.md` - Component layering, state boundaries, styling ownership
+- `.github/instructions/next-app-router.instructions.md` - Next.js App Router rules: boundaries, metadata, server actions
+- `.github/instructions/architecture.instructions.md` - Stack-agnostic component layering, state boundaries, styling ownership
 - `.github/instructions/clean-code.instructions.md` - Refactoring discipline, suppression rules, dead-code removal
 - `.github/instructions/imports.instructions.md` - Alias and import ownership policy
 - `docs/ARCHITECTURE.md` - Full system design and rationale

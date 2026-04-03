@@ -2,9 +2,10 @@
 applyTo: 'src/components/**/*.{ts,tsx},src/lib/**/*.{ts,tsx},src/styles/**/*.css'
 ---
 
-# Architecture & Component Organization (Next.js)
+# Architecture & Component Organization (Framework-Agnostic)
 
-This document defines architecture ownership for this Next.js repository.
+This document defines stack-agnostic architecture ownership for this repository and reusable web projects.
+Use framework-specific instruction files (for example `next-app-router.instructions.md`) for runtime and router rules.
 
 ## Core Principles
 
