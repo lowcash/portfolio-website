@@ -1,4 +1,4 @@
-import { expect, test, type Page } from '@playwright/test'
+import { type Page, expect, test } from '@playwright/test'
 
 async function getCardBoxes(page: Page) {
   await page.locator('#tech-journey').scrollIntoViewIfNeeded()
