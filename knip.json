@@ -1,5 +1,4 @@
 {
-  "entry": ["scripts/run-lighthouse.mjs", "scripts/analyze-style-boundary.mjs"],
-  "project": ["src/**/*.{ts,tsx}", "tests/**/*.{ts,tsx}", "scripts/**/*.mjs"],
-  "ignore": [".next/**"]
+  "entry": ["scripts/run-lighthouse.mjs"],
+  "project": ["src/**/*.{ts,tsx}", "tests/**/*.{ts,tsx}", "scripts/**/*.mjs"]
 }

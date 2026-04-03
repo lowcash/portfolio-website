@@ -5,8 +5,8 @@ Use the `.github` instruction stack in this repository as the primary active gui
 ## Tech Stack
 
 Current versions in use (update line items as your project upgrades):
-- **Framework**: Next.js 15+ (App Router)
-- **UI Framework**: React 18+
+- **Framework**: Next.js 16+ (App Router)
+- **UI Framework**: React 19+
 - **Language**: TypeScript 5+
 - **Styling**: Tailwind CSS 4+
 - **Testing**: Playwright E2E

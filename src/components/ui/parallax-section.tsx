@@ -9,7 +9,7 @@ export function ParallaxSection({ children, id, className, style, ...props }: Pa
   return (
     <section
       id={id}
-      className={`${className || ''} scroll-snap-section`.trim()}
+      className={`min-h-screen ${className || ''} scroll-snap-section`.trim()}
       style={{
         ...style,
       }}

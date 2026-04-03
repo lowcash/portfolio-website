@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useEffect, useEffectEvent, useRef, useState } from 'react'
 
 import { Trophy } from 'lucide-react'
 
@@ -11,15 +11,17 @@ import { Trophy } from 'lucide-react'
  * 3. Idle 60 seconds → "Patience is a Virtue"
  * 4. Rapid 10 clicks → "Click Master"
  * 5. Copy text → "Copy Cat"
- * 6. Visit on April Fools → "Fooled Ya!"
- * 7. Konami Code → "Classic Gamer"
- * 8. Shake device → "Shake It Off"
- * 9. Visit midnight-5AM → "Night Owl"
- * 10. Visit 5AM-8AM → "Early Bird"
- * 11. Visit on weekend → "Workaholic"
- * 12. Scroll 10,000px → "Marathon Runner"
- * 13. Reach bottom <2min → "Speed Reader"
- * 14. Visit 3+ times → "Repeat Visitor"
+ * 6. Konami Code → "Classic Gamer"
+ * 7. Shake device → "Shake It Off"
+ * 8. Scroll 10,000px → "Marathon Runner"
+ * 9. Reach bottom <2min → "Speed Reader"
+ * 10. Visit 3+ times → "Repeat Visitor"
+ * 11. Visit 5 sections → "Section Hopper"
+ * 12. Visit all sections → "World Tour"
+ * 13. Tweak orb settings 5x → "Settings Tinkerer"
+ * 14. Use navigation controls 3x → "Nav Master"
+ * 15. Use scroll-to-top shortcut → "Round Trip"
+ * 16. Reach contact and return hero → "Back to Origin"
  *
  * Open Dev Console (tap terminal icon bottom-left or press D on desktop) to see all achievements!
  */
@@ -70,13 +72,6 @@ const ACHIEVEMENTS: Achievement[] = [
     unlocked: false,
   },
   {
-    id: 'april-fools',
-    name: 'Fooled Ya!',
-    description: "Visited on April Fools' Day",
-    icon: '🤡',
-    unlocked: false,
-  },
-  {
     id: 'konami',
     name: 'Classic Gamer',
     description: 'Entered the Konami Code',
@@ -88,27 +83,6 @@ const ACHIEVEMENTS: Achievement[] = [
     name: 'Shake It Off',
     description: 'Shook your device or moved mouse rapidly',
     icon: '📱',
-    unlocked: false,
-  },
-  {
-    id: 'night-owl',
-    name: 'Night Owl',
-    description: 'Visited between midnight and 5 AM',
-    icon: '🦉',
-    unlocked: false,
-  },
-  {
-    id: 'early-bird',
-    name: 'Early Bird',
-    description: 'Visited between 5 AM and 8 AM',
-    icon: '🐦',
-    unlocked: false,
-  },
-  {
-    id: 'workaholic',
-    name: 'Workaholic',
-    description: 'Visited on the weekend',
-    icon: '💼',
     unlocked: false,
   },
   {
@@ -130,6 +104,48 @@ const ACHIEVEMENTS: Achievement[] = [
     name: 'Repeat Visitor',
     description: 'Visited the site 3+ times',
     icon: '🔄',
+    unlocked: false,
+  },
+  {
+    id: 'section-hopper',
+    name: 'Section Hopper',
+    description: 'Visited 5 different sections',
+    icon: '🧭',
+    unlocked: false,
+  },
+  {
+    id: 'world-tour',
+    name: 'World Tour',
+    description: 'Visited every section on the page',
+    icon: '🗺️',
+    unlocked: false,
+  },
+  {
+    id: 'settings-tinkerer',
+    name: 'Settings Tinkerer',
+    description: 'Tweaked orb settings 5 times',
+    icon: '🎛️',
+    unlocked: false,
+  },
+  {
+    id: 'nav-master',
+    name: 'Nav Master',
+    description: 'Used navigation controls 3 times',
+    icon: '🛰️',
+    unlocked: false,
+  },
+  {
+    id: 'round-trip',
+    name: 'Round Trip',
+    description: 'Used the scroll-to-top shortcut',
+    icon: '🔝',
+    unlocked: false,
+  },
+  {
+    id: 'back-to-origin',
+    name: 'Back to Origin',
+    description: 'Reached contact and returned to hero',
+    icon: '🏠',
     unlocked: false,
   },
 ]
@@ -163,7 +179,6 @@ export function EasterEggs() {
   const achievementHidingTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const [idleCursor, setIdleCursor] = useState(false)
   const [particles, setParticles] = useState<Array<{ id: number; x: number; y: number }>>([])
-  const [aprilFoolsMode, setAprilFoolsMode] = useState(false)
   const [achievementsEnabled, setAchievementsEnabled] = useState(() => {
     if (!canUseStorage) {
       return false
@@ -176,6 +191,10 @@ export function EasterEggs() {
   const clickTimesRef = useRef<number[]>([])
   const konamiIndexRef = useRef(0)
   const userHasInteractedRef = useRef(false) // Track if user has actually interacted
+  const visitedSectionsRef = useRef(new Set<string>())
+  const navClicksRef = useRef(0)
+  const orbSettingsChangesRef = useRef(0)
+  const hasReachedContactRef = useRef(false)
 
   useEffect(() => {
     if (!canUseStorage) {
@@ -210,7 +229,7 @@ export function EasterEggs() {
         'color: #fbbf24; font-size: 18px; font-weight: bold; text-decoration: underline;',
       )
       console.log(
-        '%c14 achievements available! Press D to open Dev Console and track your progress.',
+        '%c16 achievements available! Press D to open Dev Console and track your progress.',
         'color: #a855f7; font-size: 12px;',
       )
       console.log('') // Empty line
@@ -262,53 +281,50 @@ export function EasterEggs() {
   }, [])
 
   // Unlock achievement helper
-  const unlockAchievement = useCallback(
-    (id: string) => {
-      if (!canUseStorage || !achievementsEnabled) {
-        return
+  const unlockAchievement = useEffectEvent((id: string) => {
+    if (!canUseStorage || !achievementsEnabled) {
+      return
+    }
+
+    setAchievements((prev) => {
+      const achievement = prev.find((a) => a.id === id)
+      if (!achievement || achievement.unlocked) {
+        return prev
       }
 
-      setAchievements((prev) => {
-        const achievement = prev.find((a) => a.id === id)
-        if (!achievement || achievement.unlocked) {
-          return prev
-        }
+      const updated = prev.map((a) => (a.id === id ? { ...a, unlocked: true, unlockedAt: Date.now() } : a))
 
-        const updated = prev.map((a) => (a.id === id ? { ...a, unlocked: true, unlockedAt: Date.now() } : a))
+      // Show achievement popup
+      const unlockedAchievement = updated.find((a) => a.id === id)
+      if (unlockedAchievement) {
+        // Clear any pending timers
+        if (achievementTimeoutRef.current) clearTimeout(achievementTimeoutRef.current)
+        if (achievementHidingTimeoutRef.current) clearTimeout(achievementHidingTimeoutRef.current)
 
-        // Show achievement popup
-        const unlockedAchievement = updated.find((a) => a.id === id)
-        if (unlockedAchievement) {
-          // Clear any pending timers
-          if (achievementTimeoutRef.current) clearTimeout(achievementTimeoutRef.current)
-          if (achievementHidingTimeoutRef.current) clearTimeout(achievementHidingTimeoutRef.current)
+        // Show popup immediately
+        setShowAchievement(unlockedAchievement)
+        setIsHidingAchievement(false)
 
-          // Show popup immediately
-          setShowAchievement(unlockedAchievement)
-          setIsHidingAchievement(false)
+        // Trigger exit animation after 4 seconds (visible time)
+        achievementTimeoutRef.current = setTimeout(() => {
+          setIsHidingAchievement(true)
 
-          // Trigger exit animation after 4 seconds (visible time)
-          achievementTimeoutRef.current = setTimeout(() => {
-            setIsHidingAchievement(true)
+          // Remove from DOM after exit animation completes (0.5s)
+          achievementHidingTimeoutRef.current = setTimeout(() => {
+            setShowAchievement(null)
+            setIsHidingAchievement(false)
+          }, 500)
+        }, 4000)
 
-            // Remove from DOM after exit animation completes (0.5s)
-            achievementHidingTimeoutRef.current = setTimeout(() => {
-              setShowAchievement(null)
-              setIsHidingAchievement(false)
-            }, 500)
-          }, 4000)
+        // Console message
+        console.log(`%c🏆 Achievement Unlocked!`, 'color: #fbbf24; font-size: 16px; font-weight: bold;')
+        console.log(`%c${unlockedAchievement.icon} ${unlockedAchievement.name}`, 'color: #a855f7; font-size: 14px;')
+        console.log(`%c${unlockedAchievement.description}`, 'color: #9ca3af; font-size: 12px;')
+      }
 
-          // Console message
-          console.log(`%c🏆 Achievement Unlocked!`, 'color: #fbbf24; font-size: 16px; font-weight: bold;')
-          console.log(`%c${unlockedAchievement.icon} ${unlockedAchievement.name}`, 'color: #a855f7; font-size: 14px;')
-          console.log(`%c${unlockedAchievement.description}`, 'color: #9ca3af; font-size: 12px;')
-        }
-
-        return updated
-      })
-    },
-    [achievementsEnabled, canUseStorage],
-  )
+      return updated
+    })
+  })
 
   // 1. TRIPLE-CLICK ON LOGO
   useEffect(() => {
@@ -343,7 +359,7 @@ export function EasterEggs() {
       document.removeEventListener('click', handleLogoClick)
       clearTimeout(clickTimer)
     }
-  }, [achievementsEnabled, unlockAchievement])
+  }, [achievementsEnabled])
 
   // 2. PERFECTLY BALANCED (50% scroll)
   useEffect(() => {
@@ -385,7 +401,7 @@ export function EasterEggs() {
       window.removeEventListener('scroll', handleScroll)
       clearTimeout(checkTimeout)
     }
-  }, [achievementsEnabled, unlockAchievement])
+  }, [achievementsEnabled])
 
   // 3. IDLE DETECTION (60 seconds) - FIXED: Only start after user interaction
   useEffect(() => {
@@ -433,7 +449,7 @@ export function EasterEggs() {
       ;[...interactionEvents, ...idleEvents].forEach((event) => window.removeEventListener(event, resetIdleTimer))
       if (idleTimerRef.current) clearTimeout(idleTimerRef.current)
     }
-  }, [achievementsEnabled, unlockAchievement])
+  }, [achievementsEnabled])
 
   // Apply idle cursor
   useEffect(() => {
@@ -479,7 +495,7 @@ export function EasterEggs() {
 
     document.addEventListener('click', handleClick)
     return () => document.removeEventListener('click', handleClick)
-  }, [achievementsEnabled, unlockAchievement])
+  }, [achievementsEnabled])
 
   // 5. COPY TEXT
   useEffect(() => {
@@ -501,51 +517,9 @@ export function EasterEggs() {
 
     document.addEventListener('copy', handleCopy)
     return () => document.removeEventListener('copy', handleCopy)
-  }, [achievementsEnabled, unlockAchievement])
+  }, [achievementsEnabled])
 
-  // 6. APRIL FOOLS MODE
-  useEffect(() => {
-    if (!achievementsEnabled) {
-      return
-    }
-
-    const now = new Date()
-    const isAprilFools = now.getMonth() === 3 && now.getDate() === 1 // April = month 3 (0-indexed)
-
-    // Check URL parameter: ?april_fools=true
-    const urlParams = new URLSearchParams(window.location.search)
-    const urlTrigger = urlParams.get('april_fools') === 'true'
-
-    if (isAprilFools || urlTrigger) {
-      unlockAchievement('april-fools')
-      setAprilFoolsMode(true)
-
-      console.log('%c🤡 APRIL FOOLS! Everything is upside down!', 'color: #f59e0b; font-size: 16px; font-weight: bold;')
-
-      // If URL trigger, show hint
-      if (urlTrigger && !isAprilFools) {
-        console.log(
-          '%c💡 Hint: Remove ?april_fools=true from URL to disable',
-          'color: #6b7280; font-size: 10px; font-style: italic;',
-        )
-      }
-    }
-  }, [achievementsEnabled, unlockAchievement])
-
-  // Apply April Fools styling
-  useEffect(() => {
-    if (aprilFoolsMode) {
-      document.body.style.transform = 'rotate(180deg)'
-    } else {
-      document.body.style.transform = ''
-    }
-
-    return () => {
-      document.body.style.transform = ''
-    }
-  }, [aprilFoolsMode])
-
-  // 7. KONAMI CODE
+  // 6. KONAMI CODE
   useEffect(() => {
     if (!achievementsEnabled) {
       return
@@ -575,14 +549,12 @@ export function EasterEggs() {
           unlockAchievement('konami')
           konamiIndexRef.current = 0
 
-          // Matrix rain effect (brief)
           console.log(
             '%c🎮 KONAMI CODE ACTIVATED!',
             'color: #10b981; font-size: 20px; font-weight: bold; text-shadow: 0 0 10px #10b981;',
           )
           console.log('%c↑ ↑ ↓ ↓ ← → ← → B A', 'color: #6ee7b7; font-size: 14px;')
 
-          // Visual feedback
           document.body.style.animation = 'konamiFlash 0.5s ease-in-out'
           setTimeout(() => {
             document.body.style.animation = ''
@@ -595,9 +567,9 @@ export function EasterEggs() {
 
     window.addEventListener('keydown', handleKeyDown)
     return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [achievementsEnabled, unlockAchievement])
+  }, [achievementsEnabled])
 
-  // 8. SHAKE DETECTION (mobile) + RAPID MOUSE MOVEMENT (desktop)
+  // 7. SHAKE DETECTION (mobile) + RAPID MOUSE MOVEMENT (desktop)
   useEffect(() => {
     if (!achievementsEnabled) {
       return
@@ -637,7 +609,6 @@ export function EasterEggs() {
           unlockAchievement('shake')
           shakeCount = 0
 
-          // Shuffle colors (trigger re-render of orb colors)
           const root = document.documentElement
           const randomVariation = Math.random() * 100
           root.style.setProperty('--color-variation', String(randomVariation / 100))
@@ -651,34 +622,25 @@ export function EasterEggs() {
       lastZ = safeZ
     }
 
-    // DESKTOP ALTERNATIVE: Rapid mouse movement
     let mouseMovements: Array<{ time: number; distance: number }> = []
 
     const handleMouseMove = (e: MouseEvent) => {
       const now = Date.now()
-
-      // Calculate distance from last position
       const deltaX = Math.abs(e.clientX - lastX)
       const deltaY = Math.abs(e.clientY - lastY)
       const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY)
 
-      // Track significant movements (increased threshold from 50 to 100)
       if (distance > 100) {
         mouseMovements.push({ time: now, distance })
-
-        // Remove old movements (older than 1 second)
         mouseMovements = mouseMovements.filter((m) => now - m.time < 1000)
 
-        // Check if we have rapid movement (increased from 5 to 8 movements, increased total distance from 1000 to 2000px)
         if (mouseMovements.length >= 8) {
           const totalDistance = mouseMovements.reduce((sum, m) => sum + m.distance, 0)
 
-          // If total distance > 2000px in 1 second (doubled from 1000)
           if (totalDistance > 2000) {
             unlockAchievement('shake')
             mouseMovements = []
 
-            // Shuffle colors
             const root = document.documentElement
             const randomVariation = Math.random() * 100
             root.style.setProperty('--color-variation', String(randomVariation / 100))
@@ -700,73 +662,147 @@ export function EasterEggs() {
       window.removeEventListener('mousemove', handleMouseMove)
       clearTimeout(shakeTimer)
     }
-  }, [achievementsEnabled, unlockAchievement])
+  }, [achievementsEnabled])
 
-  // 9. NIGHT OWL (midnight to 5 AM)
+  // 8. SECTION EXPLORATION + HERO RETURN
   useEffect(() => {
     if (!achievementsEnabled) {
       return
     }
 
-    const now = new Date()
-    const hours = now.getHours()
+    const sectionIds = [
+      'hero',
+      'who-i-am',
+      'tech-journey',
+      'notable-work',
+      'work-experience',
+      'education',
+      'beyond-code',
+      'whats-next',
+      'contact',
+    ]
 
-    if (hours >= 0 && hours < 5) {
-      unlockAchievement('night-owl')
+    const checkSections = () => {
+      const viewportMiddle = window.innerHeight / 2
+      let activeSection: string | null = null
+      let closestDistance = Number.POSITIVE_INFINITY
 
-      console.log(
-        '%c🦉 NIGHT OWL! You visited between midnight and 5 AM!',
-        'color: #6b7280; font-size: 16px; font-weight: bold;',
-      )
+      sectionIds.forEach((id) => {
+        const element = document.getElementById(id)
+        if (!element) {
+          return
+        }
+
+        const rect = element.getBoundingClientRect()
+        const sectionMiddle = rect.top + rect.height / 2
+        const distance = Math.abs(sectionMiddle - viewportMiddle)
+
+        if (distance < closestDistance) {
+          closestDistance = distance
+          activeSection = id
+        }
+      })
+
+      if (!activeSection) {
+        return
+      }
+
+      visitedSectionsRef.current.add(activeSection)
+
+      if (visitedSectionsRef.current.size >= 5) {
+        unlockAchievement('section-hopper')
+      }
+
+      if (visitedSectionsRef.current.size === sectionIds.length) {
+        unlockAchievement('world-tour')
+      }
+
+      if (activeSection === 'contact') {
+        hasReachedContactRef.current = true
+      }
+
+      if (hasReachedContactRef.current && activeSection === 'hero' && window.scrollY < 220) {
+        unlockAchievement('back-to-origin')
+      }
     }
-  }, [achievementsEnabled, unlockAchievement])
 
-  // 10. EARLY BIRD (5 AM to 8 AM)
+    checkSections()
+    window.addEventListener('scroll', checkSections, { passive: true })
+
+    return () => {
+      window.removeEventListener('scroll', checkSections)
+    }
+  }, [achievementsEnabled])
+
+  // 9. ORB SETTINGS TINKERER
   useEffect(() => {
     if (!achievementsEnabled) {
       return
     }
 
-    const now = new Date()
-    const hours = now.getHours()
-
-    if (hours >= 5 && hours < 8) {
-      unlockAchievement('early-bird')
-
-      console.log(
-        '%c🐦 EARLY BIRD! You visited between 5 AM and 8 AM!',
-        'color: #6b7280; font-size: 16px; font-weight: bold;',
-      )
+    const handleSettingsChange = () => {
+      orbSettingsChangesRef.current += 1
+      if (orbSettingsChangesRef.current >= 5) {
+        unlockAchievement('settings-tinkerer')
+      }
     }
-  }, [achievementsEnabled, unlockAchievement])
 
-  // 11. WORKAHOLIC (weekend)
+    window.addEventListener('orb-settings-change', handleSettingsChange)
+
+    return () => {
+      window.removeEventListener('orb-settings-change', handleSettingsChange)
+    }
+  }, [achievementsEnabled])
+
+  // 10. NAVIGATION INTERACTIONS
   useEffect(() => {
     if (!achievementsEnabled) {
       return
     }
 
-    const now = new Date()
-    const dayOfWeek = now.getDay()
+    const handleClick = (e: MouseEvent) => {
+      const target = e.target as HTMLElement
+      const triggerButton = target.closest('button')
 
-    if (dayOfWeek === 6 || dayOfWeek === 0) {
-      // Saturday (6) or Sunday (0)
-      unlockAchievement('workaholic')
+      if (!triggerButton) {
+        return
+      }
 
-      console.log('%c💼 WORKAHOLIC! You visited on the weekend!', 'color: #6b7280; font-size: 16px; font-weight: bold;')
+      if (triggerButton.matches('button[aria-label="Scroll to top of page"]')) {
+        unlockAchievement('round-trip')
+      }
+
+      const isDesktopNav = triggerButton.matches('button[aria-label^="Navigate to "]')
+      const isMobileNav = Boolean(triggerButton.closest('#mobile-navigation-menu'))
+
+      if (isDesktopNav || isMobileNav) {
+        navClicksRef.current += 1
+        if (navClicksRef.current >= 3) {
+          unlockAchievement('nav-master')
+        }
+      }
     }
-  }, [achievementsEnabled, unlockAchievement])
 
-  // 12. MARATHON RUNNER (10,000 pixels scrolled)
+    document.addEventListener('click', handleClick)
+
+    return () => {
+      document.removeEventListener('click', handleClick)
+    }
+  }, [achievementsEnabled])
+
+  // 11. MARATHON RUNNER (10,000 pixels scrolled)
   useEffect(() => {
     if (!achievementsEnabled) {
       return
     }
 
     let totalScroll = 0
+    let previousScrollY = window.scrollY
 
     const handleScroll = () => {
-      totalScroll += Math.abs(window.scrollY - (document.documentElement.scrollTop || document.body.scrollTop))
+      const currentScrollY = window.scrollY
+      totalScroll += Math.abs(currentScrollY - previousScrollY)
+      previousScrollY = currentScrollY
 
       if (totalScroll >= 10000) {
         unlockAchievement('marathon-runner')
@@ -785,9 +821,9 @@ export function EasterEggs() {
     return () => {
       window.removeEventListener('scroll', handleScroll)
     }
-  }, [achievementsEnabled, unlockAchievement])
+  }, [achievementsEnabled])
 
-  // 13. SPEED READER (reach bottom in under 2 minutes)
+  // 12. SPEED READER (reach bottom in under 2 minutes)
   useEffect(() => {
     if (!achievementsEnabled) {
       return
@@ -824,9 +860,9 @@ export function EasterEggs() {
     return () => {
       window.removeEventListener('scroll', handleScroll)
     }
-  }, [achievementsEnabled, unlockAchievement])
+  }, [achievementsEnabled])
 
-  // 14. REPEAT VISITOR (3+ visits)
+  // 13. REPEAT VISITOR (3+ visits)
   useEffect(() => {
     if (!canUseStorage || !achievementsEnabled) {
       return
@@ -845,7 +881,7 @@ export function EasterEggs() {
 
     // Increment visit count
     localStorage.setItem('visit_count', String(count + 1))
-  }, [achievementsEnabled, canUseStorage, unlockAchievement])
+  }, [achievementsEnabled, canUseStorage])
 
   // Cleanup timers on unmount
   useEffect(() => {
@@ -855,70 +891,59 @@ export function EasterEggs() {
     }
   }, [])
 
-  const isDesktopViewport = typeof window !== 'undefined' && window.innerWidth >= 1024
-  const achievementRightOffset = isDesktopViewport ? '5.75rem' : 'max(1rem, env(safe-area-inset-right))'
-  const achievementLayerStyle = isDesktopViewport
-    ? {
-        position: 'fixed' as const,
-        top: 'calc(50% - 7rem)',
-        left: 0,
-        right: 0,
-        zIndex: 80,
-        width: '100%',
-        maxWidth: '72rem',
-        margin: '0 auto',
-        paddingLeft: '1.5rem',
-        paddingRight: '0.5rem',
-        display: 'flex',
-        justifyContent: 'flex-end',
-      }
-    : {
-        position: 'fixed' as const,
-        top: '5.5rem',
-        right: 0,
-        zIndex: 80,
-        paddingRight: achievementRightOffset,
-      }
+  const renderAchievementCard = (width: string, marginRight?: string) => (
+    <div
+      role='alert'
+      aria-live='polite'
+      className='pointer-events-auto rounded-xl border border-purple-500/50 p-4 shadow-2xl'
+      style={{
+        width,
+        marginRight,
+        animation: isHidingAchievement ? 'slideOutRight 0.5s ease-in forwards' : 'slideInRight 0.5s ease-out forwards',
+        borderColor: 'rgba(var(--orb-r), var(--orb-g), var(--orb-b), 0.6)',
+        boxShadow:
+          '0 0 45px rgba(var(--orb-r), var(--orb-g), var(--orb-b), 0.35), 0 0 90px rgba(var(--orb-r), var(--orb-g), var(--orb-b), 0.18)',
+        backdropFilter: 'blur(16px)',
+        background: 'rgba(10, 10, 20, 0.42)',
+      }}
+    >
+      <div className='flex items-start gap-3'>
+        <div className='text-3xl'>{showAchievement?.icon}</div>
+        <div className='flex-1'>
+          <div className='mb-1 flex items-center gap-2'>
+            <Trophy className='h-4 w-4 text-yellow-400' />
+            <span className='text-sm font-semibold text-yellow-400'>Achievement Unlocked!</span>
+          </div>
+          <h3 className='font-semibold text-white'>{showAchievement?.name}</h3>
+          <p className='mt-1 text-sm text-gray-300'>{showAchievement?.description}</p>
+        </div>
+      </div>
+    </div>
+  )
 
   return (
     <>
-      {/* Achievement Popup - centered vertically and placed left of desktop side nav. */}
+      {/* Achievement Popup - above desktop side nav, top-right on mobile. */}
       {showAchievement && (
-        <div
-          data-testid='achievement-popup-layer'
-          className='pointer-events-none'
-          style={achievementLayerStyle}
-        >
+        <>
           <div
-            role='alert'
-            aria-live='polite'
-            className='pointer-events-auto rounded-xl border border-purple-500/50 p-4 shadow-2xl'
-            style={{
-              width: isDesktopViewport ? 'min(20rem, calc(100vw - 8rem))' : 'min(20rem, calc(100vw - 2rem))',
-              marginRight: isDesktopViewport ? achievementRightOffset : undefined,
-              animation: isHidingAchievement
-                ? 'slideOutRight 0.5s ease-in forwards'
-                : 'slideInRight 0.5s ease-out forwards',
-              borderColor: 'rgba(var(--orb-r), var(--orb-g), var(--orb-b), 0.6)',
-              boxShadow:
-                '0 0 45px rgba(var(--orb-r), var(--orb-g), var(--orb-b), 0.35), 0 0 90px rgba(var(--orb-r), var(--orb-g), var(--orb-b), 0.18)',
-              backdropFilter: 'blur(5px)',
-              background: 'rgba(0, 0, 0, 0.75)',
-            }}
+            data-testid='achievement-popup-layer'
+            className='pointer-events-none fixed inset-x-0 z-80 hidden lg:block'
+            style={{ bottom: 'calc(50% + 12.5rem)' }}
           >
-            <div className='flex items-start gap-3'>
-              <div className='text-3xl'>{showAchievement.icon}</div>
-              <div className='flex-1'>
-                <div className='mb-1 flex items-center gap-2'>
-                  <Trophy className='h-4 w-4 text-yellow-400' />
-                  <span className='text-sm font-semibold text-yellow-400'>Achievement Unlocked!</span>
-                </div>
-                <h3 className='font-semibold text-white'>{showAchievement.name}</h3>
-                <p className='mt-1 text-sm text-gray-300'>{showAchievement.description}</p>
-              </div>
+            <div className='mx-auto flex max-w-6xl justify-end pr-2 pl-6'>
+              {renderAchievementCard('min(20rem, calc(100vw - 8rem))', '5.75rem')}
             </div>
           </div>
-        </div>
+
+          <div
+            data-testid='achievement-popup-layer-mobile'
+            className='pointer-events-none fixed right-4 left-4 z-80 flex justify-end lg:hidden'
+            style={{ top: 'calc(5.5rem + env(safe-area-inset-top))' }}
+          >
+            {renderAchievementCard('min(20rem, calc(100vw - 2rem))')}
+          </div>
+        </>
       )}
 
       {/* Particle Effects */}

@@ -33,7 +33,7 @@ export function FloatingRail({
 
   return (
     <div
-      className={`${desktopOnly ? 'desktop-rail-only ' : ''}fixed pointer-events-none inset-x-0 z-50`}
+      className={`${desktopOnly ? 'hidden lg:block ' : ''}fixed pointer-events-none inset-x-0 z-50`}
       style={outerStyle}
     >
       <div

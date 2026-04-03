@@ -9,9 +9,9 @@ import { TechJourney } from '@/components/features/TechJourney'
 import { WhatsNext } from '@/components/features/WhatsNext'
 import { WhoIAm } from '@/components/features/WhoIAm'
 import { WorkExperience } from '@/components/features/WorkExperience'
+import { AppShell } from '@/components/layout/AppShell'
+import { MainContent } from '@/components/ui/main-content'
 import { ParallaxSection } from '@/components/ui/parallax-section'
-
-import { ClientChrome } from './client-chrome'
 
 const sections = [
   { id: 'hero', name: 'Hey There', Component: Hero },
@@ -28,21 +28,15 @@ const sections = [
 export default function HomePage() {
   return (
     <>
-      <main id='main-content' role='main' className='relative z-10'>
+      <MainContent>
         {sections.map(({ id, name, Component }, index) => (
-          <ParallaxSection
-            key={id}
-            id={id}
-            className='min-h-screen'
-            role={index === 0 ? 'banner' : 'region'}
-            aria-label={name}
-          >
+          <ParallaxSection key={id} id={id} role={index === 0 ? 'banner' : 'region'} aria-label={name}>
             <Component />
           </ParallaxSection>
         ))}
-      </main>
+      </MainContent>
 
-      <ClientChrome sectionIds={siteContent.navigation.sections.map((section) => section.id)} />
+      <AppShell sectionIds={siteContent.navigation.sections.map((section) => section.id)} />
     </>
   )
 }
