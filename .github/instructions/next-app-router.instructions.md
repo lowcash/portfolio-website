@@ -34,9 +34,13 @@ This file is intentionally reusable across Next.js projects; keep repo-specific 
 ## Metadata and SEO
 
 - Keep `metadata` static unless route-dependent values require `generateMetadata`.
-- Use file conventions for social images: `opengraph-image.tsx` and `twitter-image.tsx`.
+- Use file-based metadata conventions only for assets and channels the project actively uses.
 - Keep JSON-LD in root layout via `application/ld+json` script when needed.
-- If Twitter/X is not actively used, omit `twitter` metadata fields.
+- Omit channel-specific metadata fields for channels that are not part of the distribution strategy.
+
+## Static Assets
+
+- `public/` is the standard location for static assets with stable URL paths (Next.js docs: [public folder](https://nextjs.org/docs/app/api-reference/file-conventions/public-folder)). Use route handlers only when custom headers, auth, or access control are needed.
 
 ## Server Actions and Fullstack Boundaries
 

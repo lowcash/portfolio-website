@@ -20,9 +20,9 @@ Current versions in use (update line items as your project upgrades):
 - `.github/instructions/architecture.instructions.md` - Stack-agnostic component layering, state boundaries, styling ownership
 - `.github/instructions/clean-code.instructions.md` - Refactoring discipline, suppression rules, dead-code removal
 - `.github/instructions/imports.instructions.md` - Alias and import ownership policy
+- `.github/instructions/testing.instructions.md` - Playwright project targeting and baseline test/perf workflow
 - `docs/ARCHITECTURE.md` - Full system design and rationale
 
 ## Repository Notes
 
-- React Compiler is enabled in `next.config.mjs`; keep `babel-plugin-react-compiler` in devDependencies.
-- Playwright projects are `desktop-chrome` and `mobile-safari`.
+- React Compiler is enabled (`reactCompiler: true` in `next.config.mjs`); `babel-plugin-react-compiler` must stay in devDependencies.
