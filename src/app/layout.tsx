@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+import { Analytics } from '@vercel/analytics/next'
 
 import { SkipToContentLink } from '@/components/ui/skip-to-content-link'
 
@@ -15,7 +16,10 @@ const personJsonLd = {
   jobTitle: 'Fullstack Developer & AI Architect',
   description:
     'Fullstack developer specializing in TypeScript, React, Next.js, and AI-assisted development. Building modern web applications with agentic workflows.',
-  sameAs: ['https://github.com/Lowcash', 'https://linkedin.com/in/lukáš-machala-00549114a'],
+  sameAs: [
+    'https://github.com/Lowcash',
+    'https://linkedin.com/in/lukáš-machala-00549114a',
+  ],
   knowsAbout: [
     'TypeScript',
     'React',
@@ -58,6 +62,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         {children}
 
         <script type='application/ld+json' dangerouslySetInnerHTML={{ __html: JSON.stringify(personJsonLd) }} />
+        <Analytics />
       </body>
     </html>
   )

@@ -1,7 +1,14 @@
 import type { MetadataRoute } from 'next'
 
+import { getProductionSiteUrl, isProductionLikeEnvironment } from './seo-env'
+
 export default function sitemap(): MetadataRoute.Sitemap {
-  const base = 'https://lowcash.dev'
+  if (!isProductionLikeEnvironment()) {
+    return []
+  }
+
+  const base = getProductionSiteUrl('https://lowcash.dev')
+
   return [
     {
       url: base,
