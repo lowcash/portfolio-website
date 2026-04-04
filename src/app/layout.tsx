@@ -1,4 +1,5 @@
 import type { Metadata } from 'next'
+
 import { Analytics } from '@vercel/analytics/next'
 
 import { SkipToContentLink } from '@/components/ui/skip-to-content-link'
@@ -16,10 +17,7 @@ const personJsonLd = {
   jobTitle: 'Fullstack Developer & AI Architect',
   description:
     'Fullstack developer specializing in TypeScript, React, Next.js, and AI-assisted development. Building modern web applications with agentic workflows.',
-  sameAs: [
-    'https://github.com/Lowcash',
-    'https://linkedin.com/in/lukáš-machala-00549114a',
-  ],
+  sameAs: ['https://github.com/Lowcash', 'https://linkedin.com/in/lukáš-machala-00549114a'],
   knowsAbout: [
     'TypeScript',
     'React',
@@ -37,15 +35,28 @@ const personJsonLd = {
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
+  applicationName: 'lowcash.dev',
+  category: 'technology',
+  manifest: '/manifest.webmanifest',
   title: 'Lukáš Machala (lowcash) • Fullstack Developer & AI Architect',
   description:
     'Fullstack developer specializing in TypeScript, React, Next.js, and AI-assisted development. Building modern web applications with agentic workflows.',
+  icons: {
+    icon: [{ url: '/icon.svg', type: 'image/svg+xml' }],
+  },
   alternates: {
     canonical: '/',
   },
   openGraph: {
     type: 'website',
     url: siteUrl,
+    title: 'Lukáš Machala (lowcash) • Fullstack Developer & AI Architect',
+    description:
+      'Fullstack developer specializing in TypeScript, React, Next.js, and AI-assisted development. Building modern web applications with agentic workflows.',
+    images: ['/opengraph-image'],
+  },
+  twitter: {
+    card: 'summary_large_image',
     title: 'Lukáš Machala (lowcash) • Fullstack Developer & AI Architect',
     description:
       'Fullstack developer specializing in TypeScript, React, Next.js, and AI-assisted development. Building modern web applications with agentic workflows.',
