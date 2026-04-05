@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 import { siteContent } from '@/lib/content'
 import { subscribeToScrollMetrics } from '@/lib/scroll-metrics'
@@ -22,6 +22,8 @@ export function AppShell({ sectionIds }: AppShellProps) {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [, setIsDevConsoleOpen] = useState(false)
   const [isRestoringScroll, setIsRestoringScroll] = useState(false)
+  const hasInitializedHash = useRef(false)
+  const hashRestoreTimeoutRef = useRef<number | null>(null)
 
   useEffect(() => {
     const updateCurrentSection = () => {
@@ -57,7 +59,21 @@ export function AppShell({ sectionIds }: AppShellProps) {
     })
   }, [sectionIds, isMobileMenuOpen, isRestoringScroll])
 
-  const scrollToSection = (index: number) => {
+  const setSectionHash = (index: number) => {
+    const sectionId = sectionIds[index]
+    const nextUrl =
+      index === 0
+        ? `${window.location.pathname}${window.location.search}`
+        : `${window.location.pathname}${window.location.search}#${sectionId}`
+
+    const currentUrl = `${window.location.pathname}${window.location.search}${window.location.hash}`
+
+    if (currentUrl !== nextUrl) {
+      window.history.replaceState(null, '', nextUrl)
+    }
+  }
+
+  const scrollToSection = (index: number, behavior: ScrollBehavior = 'smooth', updateHash = true) => {
     const sectionId = sectionIds[index]
     const element = document.getElementById(sectionId)
     if (!element) return
@@ -67,13 +83,70 @@ export function AppShell({ sectionIds }: AppShellProps) {
       const elementPosition = element.getBoundingClientRect().top + window.pageYOffset
       window.scrollTo({
         top: elementPosition,
-        behavior: 'smooth',
+        behavior,
       })
+      if (updateHash) {
+        setSectionHash(index)
+      }
       return
     }
 
-    element.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    element.scrollIntoView({ behavior, block: 'start' })
+
+    if (updateHash) {
+      setSectionHash(index)
+    }
   }
+
+  useEffect(() => {
+    const restoreHashSection = () => {
+      const hashId = window.location.hash.replace('#', '')
+
+      if (!hashId) {
+        hasInitializedHash.current = true
+        return
+      }
+
+      const sectionIndex = sectionIds.indexOf(hashId)
+      if (sectionIndex === -1) {
+        hasInitializedHash.current = true
+        return
+      }
+
+      setIsRestoringScroll(true)
+      scrollToSection(sectionIndex, 'auto', false)
+      setCurrentSection(sectionIndex)
+
+      if (hashRestoreTimeoutRef.current !== null) {
+        window.clearTimeout(hashRestoreTimeoutRef.current)
+      }
+
+      hashRestoreTimeoutRef.current = window.setTimeout(() => {
+        setIsRestoringScroll(false)
+      }, 180)
+
+      hasInitializedHash.current = true
+    }
+
+    const frameId = window.requestAnimationFrame(restoreHashSection)
+    window.addEventListener('hashchange', restoreHashSection)
+
+    return () => {
+      window.cancelAnimationFrame(frameId)
+      window.removeEventListener('hashchange', restoreHashSection)
+      if (hashRestoreTimeoutRef.current !== null) {
+        window.clearTimeout(hashRestoreTimeoutRef.current)
+      }
+    }
+  }, [sectionIds])
+
+  useEffect(() => {
+    if (!hasInitializedHash.current || isRestoringScroll) {
+      return
+    }
+
+    setSectionHash(currentSection)
+  }, [currentSection, isRestoringScroll, sectionIds])
 
   return (
     <>

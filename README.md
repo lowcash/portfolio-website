@@ -4,11 +4,14 @@ A modern, interactive developer portfolio featuring scroll-based navigation, par
 
 ## 🚀 Tech Stack
 
-- **React 18** - UI Library
-- **Next.js (App Router)** - SSR-first framework
+- **React 19** - UI Library (with React Compiler enabled)
+- **Next.js 16 (App Router)** - SSR-first framework
 - **TypeScript** - Type Safety
 - **Tailwind CSS** - Styling
 - **Lucide React** - Icons
+- **Knip** - Dead code detection
+- **Playwright** - E2E testing
+- **Lighthouse** - Performance baseline
 
 ## 📁 Project Structure
 
