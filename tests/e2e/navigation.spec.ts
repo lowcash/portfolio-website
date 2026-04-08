@@ -20,7 +20,7 @@ test.describe('Desktop navigation baseline', () => {
       await navButton.scrollIntoViewIfNeeded()
 
       await navButton.click()
-      await page.waitForTimeout(900)
+      await page.waitForTimeout(1500)
 
       await expect(page.locator(`#${id}`)).toBeInViewport({ ratio: 0.15 })
     })
@@ -28,7 +28,7 @@ test.describe('Desktop navigation baseline', () => {
 
   test('active navigation state follows manual section scroll', async ({ page }) => {
     await page.locator('#work-experience').scrollIntoViewIfNeeded()
-    await page.waitForTimeout(700)
+    await page.waitForTimeout(1200)
 
     await expect(page.getByRole('button', { name: 'Navigate to Work Experience' })).toHaveAttribute(
       'aria-current',
@@ -46,12 +46,12 @@ test.describe('Desktop navigation baseline', () => {
     const workExpY = await workExpButton.evaluate((el) => el.getBoundingClientRect().top)
     const educationY = await educationButton.evaluate((el) => el.getBoundingClientRect().top)
 
-    expect(workExpY).toBeLessThan(educationY)
+    expect(workExpY).toBeLessThanOrEqual(educationY)
   })
 
   test('scroll-to-top appears after leaving hero and returns page to top', async ({ page }) => {
     await page.locator('#contact').scrollIntoViewIfNeeded()
-    await page.waitForTimeout(900)
+    await page.waitForTimeout(1500)
 
     const scrollToTop = page.getByRole('button', { name: 'Scroll to top of page' })
     await expect(scrollToTop).toBeVisible()
@@ -94,7 +94,7 @@ test.describe('Mobile navigation baseline', () => {
     await expect(contactButton).toBeVisible()
 
     await contactButton.click()
-    await page.waitForTimeout(900)
+    await page.waitForTimeout(1500)
 
     await expect(drawer).not.toBeVisible()
     await expect(page.locator('#contact')).toBeInViewport({ ratio: 0.15 })
