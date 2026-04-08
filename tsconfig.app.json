@@ -15,7 +15,10 @@
     "isolatedModules": true,
     "incremental": true,
     "composite": true,
-    "noEmit": true,
+    "declaration": true,
+    "emitDeclarationOnly": true,
+    "outDir": "./.tsbuild/app",
+    "tsBuildInfoFile": "./.tsbuild/tsconfig.app.tsbuildinfo",
     "jsx": "preserve",
 
     /* Linting */

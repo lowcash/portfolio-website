@@ -206,6 +206,7 @@ export const siteContent = {
         multipleLinks: [
           { url: 'https://pohlazenipoteleadusi.cz', text: 'Massage Therapy Site' },
           { url: 'https://pinkladyyachtingservices.com', text: 'Yachting Services Site' },
+          { url: 'https://akce.zivesklo.cz', text: 'Živé Sklo Site' },
         ],
         iconColor: 'text-emerald-400',
       },

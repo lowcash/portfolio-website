@@ -22,10 +22,12 @@ export default defineConfig({
     {
       name: 'desktop-chrome',
       use: { ...devices['Desktop Chrome'] },
+      testIgnore: ['**/*.mobile.spec.ts'],
     },
     {
       name: 'mobile-safari',
       use: { ...devices['iPhone 14'] },
+      testIgnore: ['**/*.desktop.spec.ts'],
     },
   ],
 })
