@@ -24,6 +24,8 @@ export function AppShell({ sectionIds }: AppShellProps) {
   const [isRestoringScroll, setIsRestoringScroll] = useState(false)
   const hasInitializedHash = useRef(false)
   const hashRestoreTimeoutRef = useRef<number | null>(null)
+  const isUserNavigatingRef = useRef(false)
+  const userNavTimeoutRef = useRef<number | null>(null)
 
   useEffect(() => {
     const updateCurrentSection = () => {
@@ -51,7 +53,7 @@ export function AppShell({ sectionIds }: AppShellProps) {
     }
 
     return subscribeToScrollMetrics(() => {
-      if (isMobileMenuOpen || isRestoringScroll) {
+      if (isMobileMenuOpen || isRestoringScroll || isUserNavigatingRef.current) {
         return
       }
 
@@ -74,6 +76,17 @@ export function AppShell({ sectionIds }: AppShellProps) {
   }
 
   const scrollToSection = (index: number, behavior: ScrollBehavior = 'smooth', updateHash = true) => {
+    if (behavior === 'smooth') {
+      setCurrentSection(index)
+      isUserNavigatingRef.current = true
+      if (userNavTimeoutRef.current !== null) {
+        window.clearTimeout(userNavTimeoutRef.current)
+      }
+      userNavTimeoutRef.current = window.setTimeout(() => {
+        isUserNavigatingRef.current = false
+      }, 1100)
+    }
+
     const sectionId = sectionIds[index]
     const element = document.getElementById(sectionId)
     if (!element) return
@@ -136,6 +149,9 @@ export function AppShell({ sectionIds }: AppShellProps) {
       window.removeEventListener('hashchange', restoreHashSection)
       if (hashRestoreTimeoutRef.current !== null) {
         window.clearTimeout(hashRestoreTimeoutRef.current)
+      }
+      if (userNavTimeoutRef.current !== null) {
+        window.clearTimeout(userNavTimeoutRef.current)
       }
     }
   }, [sectionIds])
