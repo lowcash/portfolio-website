@@ -27,6 +27,7 @@ export function MobileDrawerBackdrop({ isOpen, onClose, children }: MobileDrawer
         style={{ top: 0, left: 0, right: 0, height: '4rem', zIndex: 1 }}
         onClick={onClose}
         aria-label='Close menu backdrop'
+        tabIndex={isOpen ? 0 : -1}
       />
 
       {children}

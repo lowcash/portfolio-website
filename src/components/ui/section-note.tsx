@@ -5,7 +5,7 @@ interface SectionNoteProps {
 export function SectionNote({ text }: SectionNoteProps) {
   return (
     <div className='mt-16 text-center'>
-      <p className='text-gray-500 max-w-2xl mx-auto'>{text}</p>
+      <p className='mx-auto max-w-2xl text-gray-400'>{text}</p>
     </div>
   )
 }

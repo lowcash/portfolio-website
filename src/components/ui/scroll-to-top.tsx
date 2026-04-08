@@ -25,7 +25,7 @@ export function ScrollToTop({ currentSection, onGoToFirst }: ScrollToTopProps) {
           isVisible ? 'translate-y-0 opacity-100' : 'pointer-events-none translate-y-10 opacity-0'
         }`}
         aria-label='Scroll to top of page'
-        aria-hidden={!isVisible}
+        tabIndex={isVisible ? 0 : -1}
       >
         <div className='group relative'>
           <div

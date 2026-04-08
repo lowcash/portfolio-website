@@ -10,14 +10,20 @@ interface SectionHeaderProps {
 
 export function SectionHeader({ title, subtitle, gradient, glowColors }: SectionHeaderProps) {
   return (
-    <header className='text-center mb-16'>
+    <header className='mb-16 text-center'>
       <h2
-        className={`text-4xl sm:text-5xl md:text-6xl lg:text-7xl mb-6 pb-[3px] ${gradient} bg-clip-text text-transparent`}
+        className='relative mb-6 pb-[3px] text-4xl text-white sm:text-5xl md:text-6xl lg:text-7xl'
         style={{ filter: `drop-shadow(0 0 12px ${glowColors.primary}) drop-shadow(0 0 24px ${glowColors.secondary})` }}
       >
-        {title}
+        <span className='relative'>{title}</span>
+        <span
+          aria-hidden='true'
+          className={`pointer-events-none absolute inset-0 ${gradient} bg-clip-text text-transparent`}
+        >
+          {title}
+        </span>
       </h2>
-      <p className='text-base md:text-lg text-gray-400'>{subtitle}</p>
+      <p className='text-base text-gray-400 md:text-lg'>{subtitle}</p>
     </header>
   )
 }

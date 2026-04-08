@@ -1,5 +1,7 @@
 import type { ComponentType } from 'react'
+
 import type { ContactIconKey } from '@/lib/content'
+
 import { SectionHeader } from '@/components/ui/section-header'
 
 type SocialItem = {
@@ -41,14 +43,14 @@ export function ContactContent({
     <div className='text-center'>
       <SectionHeader title={title} subtitle='' gradient={gradient} glowColors={glowColors} />
 
-      <p className='text-base md:text-lg text-gray-400 mb-16 max-w-2xl mx-auto -mt-8'>
+      <p className='mx-auto -mt-8 mb-16 max-w-2xl text-base text-gray-400 md:text-lg'>
         {intro} <span className='text-purple-400'>{highlightEmail}</span>
         <br />
         <br />
-        <span className='text-sm text-gray-500'>{note}</span>
+        <span className='text-sm text-gray-400'>{note}</span>
       </p>
 
-      <div className='flex flex-wrap justify-center gap-3 mb-16'>
+      <div className='mb-16 flex flex-wrap justify-center gap-3'>
         {socials.map((social, index) => {
           const Icon = iconMap[social.icon]
 
@@ -58,16 +60,16 @@ export function ContactContent({
               href={social.href}
               target='_blank'
               rel='noopener noreferrer'
-              className='relative group'
+              className='group relative'
               aria-label={`Connect with me on ${social.label}: ${social.username}`}
             >
-              <div className='flex items-center gap-3 px-6 py-4 rounded-2xl transition-all duration-500'>
+              <div className='flex items-center gap-3 rounded-2xl px-6 py-4 transition-all duration-500'>
                 <Icon
-                  className='w-6 h-6 text-purple-400 shrink-0 transition-all duration-500 group-hover:text-pink-400'
+                  className='h-6 w-6 shrink-0 text-purple-400 transition-all duration-500 group-hover:text-pink-400'
                   aria-hidden
                 />
                 <div className='text-left'>
-                  <div className='text-xs text-gray-500 transition-colors duration-500 group-hover:text-gray-400'>
+                  <div className='text-xs text-gray-400 transition-colors duration-500 group-hover:text-gray-300'>
                     {social.label}
                   </div>
                   <div className='text-sm text-gray-300 transition-colors duration-500 group-hover:text-white'>
@@ -80,10 +82,10 @@ export function ContactContent({
         })}
       </div>
 
-      <p className='text-sm text-gray-600'>{techLine}</p>
+      <p className='text-sm text-gray-400'>{techLine}</p>
 
-      <p className='text-xs text-gray-700 mt-4 font-mono hidden md:block'>
-        <span className='opacity-50 hover:opacity-100 transition-opacity cursor-default'>💡 {hint}</span>
+      <p className='mt-4 hidden font-mono text-xs text-gray-500 md:block'>
+        <span className='cursor-default opacity-50 transition-opacity hover:opacity-100'>💡 {hint}</span>
       </p>
     </div>
   )

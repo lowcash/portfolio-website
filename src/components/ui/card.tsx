@@ -1,4 +1,5 @@
 import type { CSSProperties, ReactNode } from 'react'
+
 import type { LucideIcon } from 'lucide-react'
 
 interface CardProps {
@@ -26,15 +27,15 @@ export function Card({
 }: CardProps) {
   return (
     <article
-      className={`rounded-2xl p-8 transition-all duration-500 flex flex-col ${fullHeight ? 'h-full' : ''}`}
+      className={`flex flex-col rounded-2xl p-8 transition-all duration-500 ${fullHeight ? 'h-full' : ''}`}
       style={style}
     >
-      <div className='flex items-start gap-4 mb-4'>
-        {Icon && <Icon className={`w-10 h-10 ${iconColor} shrink-0`} />}
+      <div className='mb-4 flex items-start gap-4'>
+        {Icon && <Icon className={`h-10 w-10 ${iconColor} shrink-0`} />}
         <div className='grow'>
-          <h3 className='text-xl mb-1 text-white'>{title}</h3>
-          {eyebrow && <p className='text-lg text-gray-300 mb-1'>{eyebrow}</p>}
-          {subtitle && <span className='text-sm text-gray-500'>{subtitle}</span>}
+          <h3 className='mb-1 text-xl text-white'>{title}</h3>
+          {eyebrow && <p className='mb-1 text-lg text-gray-300'>{eyebrow}</p>}
+          {subtitle && <span className='text-sm text-gray-400'>{subtitle}</span>}
         </div>
       </div>
       <p className={`text-gray-400 ${children ? 'mb-6' : ''}`}>{description}</p>

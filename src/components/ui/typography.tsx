@@ -1,8 +1,10 @@
+import type { ReactNode } from 'react'
+
 type TextTone = 'default' | 'muted'
 type TextSize = 'sm' | 'base' | 'lg'
 
 interface TextProps {
-  children: React.ReactNode
+  children: ReactNode
   tone?: TextTone
   size?: TextSize
 }
