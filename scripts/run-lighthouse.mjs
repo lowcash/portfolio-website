@@ -1,56 +1,60 @@
+import * as chromeLauncher from 'chrome-launcher'
 import lighthouse from 'lighthouse'
-import { spawn } from 'node:child_process'
 import fs from 'node:fs/promises'
 import path from 'node:path'
 import process from 'node:process'
-import { setTimeout as delay } from 'node:timers/promises'
 import { chromium } from 'playwright'
 
 const mode = process.argv[2] === 'mobile' ? 'mobile' : 'desktop'
 const url = process.env.LIGHTHOUSE_URL ?? 'http://127.0.0.1:3000'
-const port = mode === 'mobile' ? 9223 : 9222
 const outputDir = path.resolve(process.cwd(), 'test-results')
 const outputPath = path.join(outputDir, `lighthouse-${mode}.html`)
 const summaryPath = path.join(outputDir, `lighthouse-${mode}.json`)
+const reportPath = path.join(outputDir, `lighthouse-${mode}.report.json`)
 
-const chromeProcess = spawn(
-  chromium.executablePath(),
-  [
-    '--headless=new',
-    `--remote-debugging-port=${port}`,
-    '--no-sandbox',
-    '--disable-gpu',
-    '--disable-dev-shm-usage',
-    `--user-data-dir=${path.join(outputDir, `.chromium-lighthouse-${mode}`)}`,
-  ],
-  {
-    stdio: 'ignore',
-  },
-)
-
-async function waitForDebugger(retries = 50) {
-  for (let index = 0; index < retries; index += 1) {
-    try {
-      const response = await fetch(`http://127.0.0.1:${port}/json/version`)
-      if (response.ok) {
-        return
-      }
-    } catch {
-      // Ignore until Chromium debugger endpoint becomes available.
-    }
-
-    await delay(200)
+function getCategoryIssues(lhr, categoryId, maxItems = 8) {
+  const category = lhr.categories[categoryId]
+  if (!category) {
+    return []
   }
 
-  throw new Error(`Timed out waiting for Chromium debugger on port ${port}`)
+  return category.auditRefs
+    .map((ref) => {
+      const audit = lhr.audits[ref.id]
+      if (!audit || typeof audit.score !== 'number') {
+        return null
+      }
+
+      return {
+        id: ref.id,
+        title: audit.title,
+        score: audit.score,
+        weight: ref.weight,
+        displayValue: audit.displayValue ?? null,
+      }
+    })
+    .filter((audit) => audit && audit.score < 1)
+    .sort((a, b) => {
+      const weightDelta = b.weight - a.weight
+      if (weightDelta !== 0) {
+        return weightDelta
+      }
+
+      return a.score - b.score
+    })
+    .slice(0, maxItems)
 }
 
-try {
-  await fs.mkdir(outputDir, { recursive: true })
-  await waitForDebugger()
+await fs.mkdir(outputDir, { recursive: true })
 
+const chrome = await chromeLauncher.launch({
+  chromePath: chromium.executablePath(),
+  chromeFlags: ['--headless=new', '--no-sandbox', '--disable-gpu', '--disable-dev-shm-usage'],
+})
+
+try {
   const runnerResult = await lighthouse(url, {
-    port,
+    port: chrome.port,
     output: 'html',
     logLevel: 'info',
     onlyCategories: ['performance', 'accessibility', 'best-practices', 'seo'],
@@ -79,6 +83,7 @@ try {
   }
 
   await fs.writeFile(outputPath, runnerResult.report)
+  await fs.writeFile(reportPath, JSON.stringify(runnerResult.lhr, null, 2))
 
   const categories = runnerResult.lhr.categories
   const formatScore = (key) => Math.round((categories[key]?.score ?? 0) * 100)
@@ -87,11 +92,18 @@ try {
     url,
     outputPath,
     generatedAt: new Date().toISOString(),
+    reportPath,
     scores: {
       performance: formatScore('performance'),
       accessibility: formatScore('accessibility'),
       bestPractices: formatScore('best-practices'),
       seo: formatScore('seo'),
+    },
+    topIssues: {
+      performance: getCategoryIssues(runnerResult.lhr, 'performance'),
+      accessibility: getCategoryIssues(runnerResult.lhr, 'accessibility'),
+      bestPractices: getCategoryIssues(runnerResult.lhr, 'best-practices'),
+      seo: getCategoryIssues(runnerResult.lhr, 'seo'),
     },
   }
 
@@ -99,5 +111,5 @@ try {
 
   console.log(JSON.stringify({ ...summary, summaryPath }, null, 2))
 } finally {
-  chromeProcess.kill('SIGTERM')
+  await chrome.kill()
 }
