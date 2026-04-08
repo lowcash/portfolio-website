@@ -31,6 +31,32 @@ test.describe('Portfolio smoke baseline', () => {
     await expect(hero.getByText('Fullstack Developer', { exact: true })).toBeVisible()
   })
 
+  test('gradient headers remain visible when dark theme is forced', async ({ page }) => {
+    await page.emulateMedia({ colorScheme: 'dark' })
+    await page.evaluate(() => {
+      document.documentElement.classList.add('dark')
+    })
+
+    const heroHeading = page.locator('#hero h1').first()
+    await expect(heroHeading).toBeVisible()
+
+    const sectionHeading = page.locator('#tech-journey h2').first()
+    await expect(sectionHeading).toBeVisible()
+
+    const headingColors = await page.evaluate(() => {
+      const hero = document.querySelector('#hero h1')
+      const section = document.querySelector('#tech-journey h2')
+
+      return {
+        heroColor: hero ? getComputedStyle(hero).color : '',
+        sectionColor: section ? getComputedStyle(section).color : '',
+      }
+    })
+
+    expect(headingColors.heroColor).not.toBe('rgba(0, 0, 0, 0)')
+    expect(headingColors.sectionColor).not.toBe('rgba(0, 0, 0, 0)')
+  })
+
   test('contact section exposes primary external links', async ({ page }) => {
     await page.locator('#contact').scrollIntoViewIfNeeded()
     await page.waitForTimeout(700)
@@ -50,6 +76,7 @@ test.describe('Portfolio smoke baseline', () => {
   })
 
   test('debug console toggles from keyboard without breaking layout', async ({ page }) => {
+    await page.mouse.click(640, 400)
     await page.keyboard.press('d')
     await expect(page.getByRole('region', { name: 'Developer debug console' })).toBeVisible()
 

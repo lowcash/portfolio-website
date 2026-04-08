@@ -25,6 +25,9 @@ test.describe('Content sections baseline', () => {
     await expect(page.locator('#notable-work a[href="https://github.com/lowcash/QuantWise-Demo"]')).toHaveCount(1)
     await expect(page.locator('#notable-work a[href="https://pohlazenipoteleadusi.cz"]')).toHaveCount(1)
     await expect(page.locator('#notable-work a[href="https://pinkladyyachtingservices.com"]')).toHaveCount(1)
+    const ziveSkloLink = page.getByRole('link', { name: /Živé Sklo Site/i })
+    await expect(ziveSkloLink).toHaveAttribute('href', 'https://akce.zivesklo.cz')
+    await expect(ziveSkloLink).toHaveAttribute('target', '_blank')
 
     await page.locator('#beyond-code').scrollIntoViewIfNeeded()
     await page.waitForTimeout(500)
