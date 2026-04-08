@@ -878,7 +878,7 @@ export function DeveloperConsole({ onVisibilityChange, isMobileMenuOpen = false 
               localStorage.setItem('orb_opacity', String(defaults.opacity))
               localStorage.setItem('position_variation', String(defaults.position))
             }}
-            className='w-full rounded border border-gray-700 px-3 py-1.5 text-[10px] text-gray-400 transition-all hover:border-gray-500 hover:text-white'
+            className='w-full cursor-pointer rounded border border-gray-700 px-3 py-1.5 text-[10px] text-gray-400 transition-all hover:border-gray-500 hover:text-white'
           >
             RESET TO DEFAULT
           </button>
@@ -903,7 +903,7 @@ export function DeveloperConsole({ onVisibilityChange, isMobileMenuOpen = false 
                 )
               }
             }}
-            className='w-full rounded border border-red-700 px-3 py-1.5 text-[10px] text-red-400 transition-all hover:border-red-500 hover:text-red-300'
+            className='w-full cursor-pointer rounded border border-red-700 px-3 py-1.5 text-[10px] text-red-400 transition-all hover:border-red-500 hover:text-red-300'
           >
             RESET ACHIEVEMENTS
           </button>

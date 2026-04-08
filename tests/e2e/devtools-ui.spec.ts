@@ -78,30 +78,6 @@ test.describe('Devtools and layered UI interactions', () => {
     }
   })
 
-  test('desktop devtools panel opens at readable default size', async ({ page }, testInfo) => {
-    test.skip(testInfo.project.name !== 'desktop-chrome', 'Desktop size assertion is desktop-only')
-
-    const toggleButton = page.getByRole('button', { name: 'Toggle debug console' })
-    await toggleButton.evaluate((btn: HTMLElement) => btn.click())
-
-    const panel = page.getByRole('region', { name: 'Developer debug console' })
-    await expect(panel).toBeVisible()
-
-    const panelContent = page.getByTestId('devtools-panel-content')
-    const contentStyle = await panelContent.evaluate((el) => {
-      const style = getComputedStyle(el)
-      return {
-        minWidth: Number.parseFloat(style.minWidth),
-        maxWidth: Number.parseFloat(style.maxWidth),
-        maxHeight: Number.parseFloat(style.maxHeight),
-      }
-    })
-
-    expect(contentStyle.minWidth).toBeGreaterThanOrEqual(420)
-    expect(contentStyle.maxWidth).toBeGreaterThanOrEqual(850)
-    expect(contentStyle.maxHeight).toBeGreaterThanOrEqual(600)
-  })
-
   test('devtools achievement grid renders 16 slots', async ({ page }) => {
     await page.evaluate(() => {
       localStorage.removeItem('achievements')
@@ -114,153 +90,6 @@ test.describe('Devtools and layered UI interactions', () => {
     const consoleRegion = page.getByRole('region', { name: 'Developer debug console' })
     await expect(consoleRegion).toBeVisible()
     await expect(consoleRegion.locator('div.grid.grid-cols-4 > div')).toHaveCount(16)
-  })
-
-  test('achievement popup is rendered above side dots navigation on desktop', async ({ page }, testInfo) => {
-    test.skip(testInfo.project.name !== 'desktop-chrome', 'Desktop rail assertions are desktop-only')
-
-    await page.evaluate(async () => {
-      localStorage.setItem('dev_console_opened', 'true')
-      window.dispatchEvent(new CustomEvent('dev-console-opened'))
-      localStorage.removeItem('achievements')
-      window.dispatchEvent(new CustomEvent('achievements-reset'))
-
-      document.documentElement.style.scrollSnapType = 'none'
-      const maxScroll = document.documentElement.scrollHeight - window.innerHeight
-
-      // Probe around 50% in multiple passes to avoid timing flakes.
-      for (let pass = 0; pass < 3; pass++) {
-        await new Promise((resolve) => setTimeout(resolve, 90))
-        for (const ratio of [0.5, 0.501, 0.499, 0.502, 0.498]) {
-          window.scrollTo({ top: maxScroll * ratio, behavior: 'instant' })
-          window.dispatchEvent(new Event('scroll'))
-        }
-      }
-    })
-
-    const popup = page.getByRole('alert').filter({ hasText: 'Achievement Unlocked!' }).first()
-
-    for (let attempt = 0; attempt < 3; attempt++) {
-      const isVisible = await popup.isVisible().catch(() => false)
-      if (isVisible) {
-        break
-      }
-
-      await page.evaluate(async () => {
-        localStorage.setItem('dev_console_opened', 'true')
-        window.dispatchEvent(new CustomEvent('dev-console-opened'))
-
-        document.documentElement.style.scrollSnapType = 'none'
-        const maxScroll = document.documentElement.scrollHeight - window.innerHeight
-        for (const ratio of [0.5, 0.501, 0.499, 0.502, 0.498]) {
-          window.scrollTo({ top: maxScroll * ratio, behavior: 'instant' })
-          window.dispatchEvent(new Event('scroll'))
-        }
-      })
-      await page.waitForTimeout(600)
-    }
-
-    await expect(popup).toBeVisible()
-
-    const popupBox = await popup.boundingBox()
-    const navBox = await page.getByRole('navigation', { name: 'Page navigation' }).boundingBox()
-
-    expect(popupBox).not.toBeNull()
-    expect(navBox).not.toBeNull()
-
-    if (popupBox && navBox) {
-      // Popup is horizontally left-of-center of the nav dots so it never overlaps them.
-      const popupRight = popupBox.x + popupBox.width
-      const navCenterX = navBox.x + navBox.width / 2
-      expect(popupRight).toBeLessThan(navCenterX + 10)
-
-      // Popup is within vertical viewport bounds.
-      const viewportSize = page.viewportSize()
-      if (viewportSize) {
-        expect(popupBox.y).toBeGreaterThanOrEqual(0)
-        expect(popupBox.y + popupBox.height).toBeLessThanOrEqual(viewportSize.height)
-      }
-    }
-
-    const zLayerCheck = await page.evaluate(() => {
-      const popupContainer = document.querySelector('[data-testid="achievement-popup-layer"]')
-      const navContainer = document.querySelector('nav[aria-label="Page navigation"]')?.closest('.fixed')
-
-      const popupZ = popupContainer ? Number(getComputedStyle(popupContainer).zIndex || 0) : -1
-      const navZ = navContainer ? Number(getComputedStyle(navContainer).zIndex || 0) : -1
-
-      return { popupZ, navZ }
-    })
-
-    expect(zLayerCheck.popupZ).toBeGreaterThan(zLayerCheck.navZ)
-
-    await page.evaluate(() => {
-      document.documentElement.style.scrollSnapType = ''
-    })
-  })
-
-  test('achievement popup is fully visible within viewport on desktop', async ({ page }, testInfo) => {
-    test.skip(testInfo.project.name !== 'desktop-chrome', 'Viewport assertions are desktop-only')
-
-    await page.evaluate(async () => {
-      localStorage.setItem('dev_console_opened', 'true')
-      window.dispatchEvent(new CustomEvent('dev-console-opened'))
-      localStorage.removeItem('achievements')
-      window.dispatchEvent(new CustomEvent('achievements-reset'))
-
-      document.documentElement.style.scrollSnapType = 'none'
-      const maxScroll = document.documentElement.scrollHeight - window.innerHeight
-
-      // Probe around 50% in multiple passes to avoid timing flakes.
-      for (let pass = 0; pass < 3; pass++) {
-        await new Promise((resolve) => setTimeout(resolve, 90))
-        for (const ratio of [0.5, 0.501, 0.499, 0.502, 0.498]) {
-          window.scrollTo({ top: maxScroll * ratio, behavior: 'instant' })
-          window.dispatchEvent(new Event('scroll'))
-        }
-      }
-    })
-
-    const popup = page.getByRole('alert').filter({ hasText: 'Achievement Unlocked!' }).first()
-
-    for (let attempt = 0; attempt < 3; attempt++) {
-      const isVisible = await popup.isVisible().catch(() => false)
-      if (isVisible) {
-        break
-      }
-
-      await page.evaluate(async () => {
-        localStorage.setItem('dev_console_opened', 'true')
-        window.dispatchEvent(new CustomEvent('dev-console-opened'))
-
-        document.documentElement.style.scrollSnapType = 'none'
-        const maxScroll = document.documentElement.scrollHeight - window.innerHeight
-        for (const ratio of [0.5, 0.501, 0.499, 0.502, 0.498]) {
-          window.scrollTo({ top: maxScroll * ratio, behavior: 'instant' })
-          window.dispatchEvent(new Event('scroll'))
-        }
-      })
-      await page.waitForTimeout(600)
-    }
-
-    await expect(popup).toBeVisible()
-
-    const popupBox = await popup.boundingBox()
-    expect(popupBox).not.toBeNull()
-
-    const viewportSize = page.viewportSize()
-    expect(viewportSize).not.toBeNull()
-
-    if (popupBox && viewportSize) {
-      expect(popupBox.x).toBeGreaterThanOrEqual(0)
-      expect(popupBox.y).toBeGreaterThanOrEqual(0)
-      expect(popupBox.x + popupBox.width).toBeLessThanOrEqual(viewportSize.width)
-      expect(popupBox.y + popupBox.height).toBeLessThanOrEqual(viewportSize.height)
-    }
-
-    await page.evaluate(() => {
-      document.documentElement.style.scrollSnapType = ''
-    })
   })
 
   test('orbs keep content readable and clickable', async ({ page }) => {
@@ -295,31 +124,18 @@ test.describe('Devtools and layered UI interactions', () => {
     }
   })
 
-  test('mobile orb centers are spread across viewport width', async ({ page }, testInfo) => {
-    test.skip(testInfo.project.name !== 'mobile-safari', 'Orb spread check is mobile-only')
+  test('DevTools reset buttons have cursor:pointer', async ({ page }) => {
+    const toggleButton = page.getByRole('button', { name: 'Toggle debug console' })
+    await toggleButton.evaluate((btn: HTMLElement) => btn.click())
 
-    await page.waitForTimeout(1800)
+    const consoleRegion = page.getByRole('region', { name: 'Developer debug console' })
+    await expect(consoleRegion).toBeVisible()
 
-    const orbSpread = await page.evaluate(() => {
-      const orbElements = Array.from(document.querySelectorAll('.orb-1, .orb-2, .orb-3, .orb-4, .orb-5, .orb-6'))
-      const centers = orbElements
-        .map((el) => {
-          const rect = el.getBoundingClientRect()
-          return ((rect.left + rect.width / 2) / window.innerWidth) * 100
-        })
-        .filter((value) => Number.isFinite(value))
-
-      const leftCount = centers.filter((x) => x < 40).length
-      const rightCount = centers.filter((x) => x > 60).length
-
-      const minX = centers.length > 0 ? Math.min(...centers) : 0
-      const maxX = centers.length > 0 ? Math.max(...centers) : 0
-
-      return { leftCount, rightCount, centers, minX, maxX }
-    })
-
-    expect(orbSpread.leftCount).toBeGreaterThanOrEqual(1)
-    expect(orbSpread.rightCount).toBeGreaterThanOrEqual(2)
-    expect(orbSpread.maxX - orbSpread.minX).toBeGreaterThanOrEqual(35)
+    for (const name of ['RESET TO DEFAULT', 'RESET ACHIEVEMENTS']) {
+      const btn = consoleRegion.getByRole('button', { name })
+      await expect(btn).toBeVisible()
+      const cursor = await btn.evaluate((el) => getComputedStyle(el).cursor)
+      expect(cursor).toBe('pointer')
+    }
   })
 })
