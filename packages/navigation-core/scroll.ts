@@ -28,10 +28,6 @@ export function buildSectionBoundaries(params: {
   return boundaries
 }
 
-export function getTargetTop(params: {
-  sectionTop: number
-  scrollY: number
-  offset: number
-}) {
+export function getTargetTop(params: { sectionTop: number; scrollY: number; offset: number }) {
   return Math.max(0, params.sectionTop + params.scrollY - params.offset)
 }
