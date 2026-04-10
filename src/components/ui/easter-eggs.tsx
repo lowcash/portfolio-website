@@ -178,7 +178,7 @@ export function EasterEggs() {
   const achievementTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const achievementHidingTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const [idleCursor, setIdleCursor] = useState(false)
-  const [particles, setParticles] = useState<Array<{ id: number; x: number; y: number }>>([])
+  const [particles, setParticles] = useState<Array<{ id: number; x: number; y: number; type?: string; color?: string }>>([])
   const [achievementsEnabled, setAchievementsEnabled] = useState(() => {
     if (!canUseStorage) {
       return false
@@ -873,35 +873,59 @@ export function EasterEggs() {
     }
   }, [])
 
-  const renderAchievementCard = (width: string, marginRight?: string) => (
-    <div
-      role='alert'
-      aria-live='polite'
-      className='pointer-events-auto rounded-xl border border-purple-500/50 p-4 shadow-2xl'
-      style={{
-        width,
-        marginRight,
-        animation: isHidingAchievement ? 'slideOutRight 0.5s ease-in forwards' : 'slideInRight 0.5s ease-out forwards',
-        borderColor: 'rgba(var(--orb-r), var(--orb-g), var(--orb-b), 0.6)',
-        boxShadow:
-          '0 0 45px rgba(var(--orb-r), var(--orb-g), var(--orb-b), 0.35), 0 0 90px rgba(var(--orb-r), var(--orb-g), var(--orb-b), 0.18)',
-        backdropFilter: 'blur(16px)',
-        background: 'rgba(10, 10, 20, 0.42)',
-      }}
-    >
-      <div className='flex items-start gap-3'>
-        <div className='text-3xl'>{showAchievement?.icon}</div>
-        <div className='flex-1'>
-          <div className='mb-1 flex items-center gap-2'>
-            <Trophy className='h-4 w-4 text-yellow-400' />
-            <span className='text-sm font-semibold text-yellow-400'>Achievement Unlocked!</span>
+  const renderAchievementCard = (width: string, marginRight?: string) => {
+    const handleAchievementClick = () => {
+      // Trigger confetti explosion on click (especially for Enlightenment)
+      if (showAchievement?.id === 'enlightenment') {
+        for (let i = 0; i < 8; i++) {
+          setTimeout(() => {
+            const newParticles = Array.from({ length: 30 }, (_, idx) => ({
+              id: Date.now() + Math.random() + idx,
+              x: Math.random() * window.innerWidth,
+              y: Math.random() * window.innerHeight,
+              type: ['circle', 'square', 'star'][Math.floor(Math.random() * 3)],
+              color: ['#fbbf24', '#f59e0b', '#ff67b1', '#a855f7'][Math.floor(Math.random() * 4)],
+            }))
+            setParticles((prev) => [...prev, ...newParticles])
+          }, i * 150)
+        }
+      }
+    }
+
+    return (
+      <div
+        onClick={handleAchievementClick}
+        role='alert'
+        aria-live='polite'
+        className={`pointer-events-auto rounded-xl border border-purple-500/50 p-4 shadow-2xl transition-all ${showAchievement?.id === 'enlightenment' ? 'cursor-pointer hover:shadow-[0_0_60px_rgba(251,191,36,0.4)]' : ''}`}
+        style={{
+          width,
+          marginRight,
+          animation: isHidingAchievement ? 'slideOutRight 0.5s ease-in forwards' : 'slideInRight 0.5s ease-out forwards',
+          borderColor: 'rgba(var(--orb-r), var(--orb-g), var(--orb-b), 0.6)',
+          boxShadow:
+            '0 0 45px rgba(var(--orb-r), var(--orb-g), var(--orb-b), 0.35), 0 0 90px rgba(var(--orb-r), var(--orb-g), var(--orb-b), 0.18)',
+          backdropFilter: 'blur(16px)',
+          background: 'rgba(10, 10, 20, 0.42)',
+        }}
+      >
+        <div className='flex items-start gap-3'>
+          <div className={`text-3xl ${showAchievement?.id === 'enlightenment' ? 'animate-pulse' : ''}`}>{showAchievement?.icon}</div>
+          <div className='flex-1'>
+            <div className='mb-1 flex items-center gap-2'>
+              <Trophy className='h-4 w-4 text-yellow-400' />
+              <span className='text-sm font-semibold text-yellow-400'>Achievement Unlocked!</span>
+            </div>
+            <h3 className='font-semibold text-white'>{showAchievement?.name}</h3>
+            <p className='mt-1 text-sm text-gray-300'>{showAchievement?.description}</p>
+            {showAchievement?.id === 'enlightenment' && (
+              <p className='mt-2 text-xs text-[#fbbf24]'>✨ Click for celebration!</p>
+            )}
           </div>
-          <h3 className='font-semibold text-white'>{showAchievement?.name}</h3>
-          <p className='mt-1 text-sm text-gray-300'>{showAchievement?.description}</p>
         </div>
       </div>
-    </div>
-  )
+    )
+  }
 
   return (
     <>
@@ -929,32 +953,51 @@ export function EasterEggs() {
       )}
 
       {/* Particle Effects */}
-      {particles.map((particle) => (
-        <div
-          key={particle.id}
-          className='pointer-events-none fixed'
-          style={{
-            zIndex: 90,
-            left: particle.x,
-            top: particle.y,
-            animation: 'particleExplosion 1s ease-out forwards',
-          }}
-        >
-          <div className='relative'>
-            {[...Array(8)].map((_, i) => (
+      {particles.map((particle) => {
+        const isSquare = particle.type === 'square'
+        const isStar = particle.type === 'star'
+        const color = particle.color || '#a855f7'
+
+        return (
+          <div
+            key={particle.id}
+            className='pointer-events-none fixed'
+            style={{
+              zIndex: 90,
+              left: particle.x,
+              top: particle.y,
+              animation: 'confettiFall 2.5s ease-in forwards',
+            }}
+          >
+            {isSquare ? (
               <div
-                key={i}
-                className='absolute h-2 w-2 rounded-full bg-purple-500'
+                className='h-2 w-2 rounded-sm'
                 style={{
-                  transform: `rotate(${i * 45}deg) translateY(-30px)`,
-                  opacity: 0,
-                  animation: `particleFade 1s ease-out ${i * 0.05}s forwards`,
+                  backgroundColor: color,
+                  animation: 'confettiSpin 2.5s linear forwards',
                 }}
               />
-            ))}
+            ) : isStar ? (
+              <div
+                style={{
+                  fontSize: '16px',
+                  animation: 'confettiSpin 2.5s linear forwards',
+                }}
+              >
+                ✨
+              </div>
+            ) : (
+              <div
+                className='h-2 w-2 rounded-full'
+                style={{
+                  backgroundColor: color,
+                  animation: 'confettiBounce 2.5s ease-in forwards',
+                }}
+              />
+            )}
           </div>
-        </div>
-      ))}
+        )
+      })}
 
       {/* CSS Animations */}
       <style>{`
@@ -977,6 +1020,42 @@ export function EasterEggs() {
           to {
             transform: translateX(24px);
             opacity: 0;
+          }
+        }
+
+        @keyframes confettiFall {
+          0% {
+            opacity: 1;
+            transform: translateY(-20px) rotate(0deg);
+          }
+          100% {
+            opacity: 0;
+            transform: translateY(100px) rotate(720deg);
+          }
+        }
+
+        @keyframes confettiBounce {
+          0% {
+            opacity: 1;
+            transform: translateY(-30px) scale(1);
+          }
+          50% {
+            opacity: 1;
+          }
+          100% {
+            opacity: 0;
+            transform: translateY(120px) scale(0);
+          }
+        }
+
+        @keyframes confettiSpin {
+          0% {
+            opacity: 1;
+            transform: translateY(-30px) rotate(0deg);
+          }
+          100% {
+            opacity: 0;
+            transform: translateY(120px) rotate(720deg);
           }
         }
 
