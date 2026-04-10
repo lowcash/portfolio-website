@@ -865,6 +865,28 @@ export function EasterEggs() {
     localStorage.setItem('visit_count', String(count + 1))
   }, [achievementsEnabled, canUseStorage])
 
+  // Handle Enlightenment click for confetti
+  const handleEnlightenmentClick = useEffectEvent(() => {
+    if (showAchievement?.id === 'enlightenment') {
+      const colors = ['#fbbf24', '#f59e0b', '#ff67b1', '#a855f7']
+      for (let i = 0; i < 8; i++) {
+        setTimeout(() => {
+          const newParticles = Array.from({ length: 30 }, (_, idx) => {
+            const randomColor = colors[Math.floor(Math.random() * colors.length)]
+            return {
+              id: Date.now() + Math.random() + idx,
+              x: Math.random() * window.innerWidth,
+              y: Math.random() * window.innerHeight,
+              type: ['circle', 'square', 'star'][Math.floor(Math.random() * 3)],
+              color: randomColor,
+            }
+          })
+          setParticles((prev) => [...prev, ...newParticles])
+        }, i * 150)
+      }
+    }
+  })
+
   // Cleanup timers on unmount
   useEffect(() => {
     return () => {
@@ -874,27 +896,10 @@ export function EasterEggs() {
   }, [])
 
   const renderAchievementCard = (width: string, marginRight?: string) => {
-    const handleAchievementClick = () => {
-      // Trigger confetti explosion on click (especially for Enlightenment)
-      if (showAchievement?.id === 'enlightenment') {
-        for (let i = 0; i < 8; i++) {
-          setTimeout(() => {
-            const newParticles = Array.from({ length: 30 }, (_, idx) => ({
-              id: Date.now() + Math.random() + idx,
-              x: Math.random() * window.innerWidth,
-              y: Math.random() * window.innerHeight,
-              type: ['circle', 'square', 'star'][Math.floor(Math.random() * 3)],
-              color: ['#fbbf24', '#f59e0b', '#ff67b1', '#a855f7'][Math.floor(Math.random() * 4)],
-            }))
-            setParticles((prev) => [...prev, ...newParticles])
-          }, i * 150)
-        }
-      }
-    }
 
     return (
       <div
-        onClick={handleAchievementClick}
+        onClick={handleEnlightenmentClick}
         role='alert'
         aria-live='polite'
         className={`pointer-events-auto rounded-xl border border-purple-500/50 p-4 shadow-2xl transition-all ${showAchievement?.id === 'enlightenment' ? 'cursor-pointer hover:shadow-[0_0_60px_rgba(251,191,36,0.4)]' : ''}`}
