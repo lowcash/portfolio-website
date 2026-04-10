@@ -1014,7 +1014,7 @@ export function DeveloperConsole({ onVisibilityChange, isMobileMenuOpen = false 
 
                       return (
                         <div
-                          className={`pointer-events-none absolute z-[9999] ${
+                          className={`pointer-events-none absolute z-9999 ${
                             showBelow ? 'top-full mt-2' : '-top-2 -translate-y-full'
                           } ${alignLeft ? 'left-0' : alignRight ? 'right-0' : 'left-1/2 -translate-x-1/2'}`}
                           style={{ animation: 'fadeIn 0.2s ease-out' }}

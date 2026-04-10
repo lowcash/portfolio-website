@@ -132,4 +132,18 @@ test.describe('Mobile navigation baseline', () => {
 
     await expect(drawer).not.toBeVisible()
   })
+
+  test('mobile menu marks the current section as active after manual scroll', async ({ page }) => {
+    await page.locator('#work-experience').scrollIntoViewIfNeeded()
+    await page.waitForTimeout(1200)
+
+    const trigger = page.locator('button[aria-controls="mobile-navigation-menu"]')
+    await trigger.click()
+
+    const drawer = page.getByRole('navigation', { name: 'Mobile navigation' })
+    await expect(drawer).toBeVisible()
+
+    const activeItem = drawer.getByRole('button', { name: 'Work Experience' })
+    await expect(activeItem).toHaveAttribute('aria-current', 'page')
+  })
 })

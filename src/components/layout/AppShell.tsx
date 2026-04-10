@@ -3,6 +3,12 @@
 import { useEffect, useRef, useState } from 'react'
 
 import { siteContent } from '@/lib/content'
+import {
+  resolveActiveSectionIndex,
+  resolveHashSectionIndex,
+  scrollToSectionByIndex,
+  setSectionHashByIndex,
+} from '@/lib/navigation-core-adapter'
 import { subscribeToScrollMetrics } from '@/lib/scroll-metrics'
 
 import { DeveloperConsole } from '@/components/features/DeveloperConsole'
@@ -29,51 +35,17 @@ export function AppShell({ sectionIds }: AppShellProps) {
 
   useEffect(() => {
     const updateCurrentSection = () => {
-      const windowHeight = window.innerHeight
-      const viewportMiddle = windowHeight / 2
-
-      let closestIndex = 0
-      let closestDistance = Number.POSITIVE_INFINITY
-
-      sectionIds.forEach((id, index) => {
-        const element = document.getElementById(id)
-        if (!element) return
-
-        const rect = element.getBoundingClientRect()
-        const sectionMiddle = rect.top + rect.height / 2
-        const distance = Math.abs(sectionMiddle - viewportMiddle)
-
-        if (distance < closestDistance) {
-          closestDistance = distance
-          closestIndex = index
-        }
-      })
-
-      setCurrentSection(closestIndex)
+      setCurrentSection(resolveActiveSectionIndex(sectionIds))
     }
 
     return subscribeToScrollMetrics(() => {
-      if (isMobileMenuOpen || isRestoringScroll || isUserNavigatingRef.current) {
+      if (isRestoringScroll || isUserNavigatingRef.current) {
         return
       }
 
       updateCurrentSection()
     })
-  }, [sectionIds, isMobileMenuOpen, isRestoringScroll])
-
-  const setSectionHash = (index: number) => {
-    const sectionId = sectionIds[index]
-    const nextUrl =
-      index === 0
-        ? `${window.location.pathname}${window.location.search}`
-        : `${window.location.pathname}${window.location.search}#${sectionId}`
-
-    const currentUrl = `${window.location.pathname}${window.location.search}${window.location.hash}`
-
-    if (currentUrl !== nextUrl) {
-      window.history.replaceState(null, '', nextUrl)
-    }
-  }
+  }, [sectionIds, isRestoringScroll])
 
   const scrollToSection = (index: number, behavior: ScrollBehavior = 'smooth', updateHash = true) => {
     if (behavior === 'smooth') {
@@ -87,47 +59,27 @@ export function AppShell({ sectionIds }: AppShellProps) {
       }, 1100)
     }
 
-    const sectionId = sectionIds[index]
-    const element = document.getElementById(sectionId)
-    if (!element) return
+    const didScroll = scrollToSectionByIndex(sectionIds, index, {
+      behavior,
+      updateHash,
+    })
 
-    const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent)
-    if (isIOS) {
-      const elementPosition = element.getBoundingClientRect().top + window.pageYOffset
-      window.scrollTo({
-        top: elementPosition,
-        behavior,
-      })
-      if (updateHash) {
-        setSectionHash(index)
-      }
+    if (!didScroll && behavior === 'smooth') {
+      isUserNavigatingRef.current = false
       return
-    }
-
-    element.scrollIntoView({ behavior, block: 'start' })
-
-    if (updateHash) {
-      setSectionHash(index)
     }
   }
 
   useEffect(() => {
     const restoreHashSection = () => {
-      const hashId = window.location.hash.replace('#', '')
-
-      if (!hashId) {
-        hasInitializedHash.current = true
-        return
-      }
-
-      const sectionIndex = sectionIds.indexOf(hashId)
-      if (sectionIndex === -1) {
+      const sectionIndex = resolveHashSectionIndex(sectionIds)
+      if (sectionIndex === null) {
         hasInitializedHash.current = true
         return
       }
 
       setIsRestoringScroll(true)
-      scrollToSection(sectionIndex, 'auto', false)
+      scrollToSectionByIndex(sectionIds, sectionIndex, { behavior: 'auto', updateHash: false })
       setCurrentSection(sectionIndex)
 
       if (hashRestoreTimeoutRef.current !== null) {
@@ -161,7 +113,7 @@ export function AppShell({ sectionIds }: AppShellProps) {
       return
     }
 
-    setSectionHash(currentSection)
+    setSectionHashByIndex(sectionIds, currentSection)
   }, [currentSection, isRestoringScroll, sectionIds])
 
   return (
