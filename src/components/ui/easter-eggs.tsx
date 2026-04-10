@@ -148,6 +148,13 @@ const ACHIEVEMENTS: Achievement[] = [
     icon: '🏠',
     unlocked: false,
   },
+  {
+    id: 'enlightenment',
+    name: 'Enlightenment',
+    description: 'Unlocked all 16 other achievements',
+    icon: '✨',
+    unlocked: false,
+  },
 ]
 
 export function EasterEggs() {
@@ -257,6 +264,42 @@ export function EasterEggs() {
       return
     }
     localStorage.setItem('achievements', JSON.stringify(achievements))
+
+    // Check if all 16 base achievements are unlocked and auto-unlock Enlightenment
+    const baseAchievements = achievements.filter((a) => a.id !== 'enlightenment')
+    const enlightenmentAch = achievements.find((a) => a.id === 'enlightenment')
+    const allBaseUnlocked = baseAchievements.length === 16 && baseAchievements.every((a) => a.unlocked)
+
+    if (allBaseUnlocked && enlightenmentAch && !enlightenmentAch.unlocked) {
+      // Trigger Enlightenment unlock with mega celebration
+      setTimeout(() => {
+        unlockAchievement('enlightenment')
+
+        // Mega celebration: trigger multiple confetti explosions
+        for (let i = 0; i < 5; i++) {
+          setTimeout(
+            () => {
+              const newParticles = Array.from({ length: 20 }, () => ({
+                id: Date.now() + Math.random(),
+                x: Math.random() * window.innerWidth,
+                y: Math.random() * window.innerHeight,
+              }))
+              setParticles((prev) => [...prev, ...newParticles])
+            },
+            i * 200,
+          )
+        }
+
+        console.log(
+          '%c🌟 ENLIGHTENMENT UNLOCKED! 🌟',
+          'color: #fbbf24; font-size: 24px; font-weight: bold; text-shadow: 0 0 20px #fbbf24;',
+        )
+        console.log(
+          '%cYou have discovered the hidden path. You are now one with the code.',
+          'color: #a855f7; font-size: 14px; font-style: italic;',
+        )
+      }, 100)
+    }
 
     // Broadcast to DeveloperConsole component
     window.dispatchEvent(
