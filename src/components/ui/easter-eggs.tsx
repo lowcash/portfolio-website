@@ -11,17 +11,17 @@ import { Trophy } from 'lucide-react'
  * 3. Idle 60 seconds → "Patience is a Virtue"
  * 4. Rapid 10 clicks → "Click Master"
  * 5. Copy text → "Copy Cat"
- * 6. Konami Code → "Classic Gamer"
- * 7. Shake device → "Shake It Off"
- * 8. Scroll 10,000px → "Marathon Runner"
- * 9. Reach bottom <2min → "Speed Reader"
- * 10. Visit 3+ times → "Repeat Visitor"
- * 11. Visit 5 sections → "Section Hopper"
- * 12. Visit all sections → "World Tour"
- * 13. Tweak orb settings 5x → "Settings Tinkerer"
- * 14. Use navigation controls 3x → "Nav Master"
- * 15. Use scroll-to-top shortcut → "Round Trip"
- * 16. Reach contact and return hero → "Back to Origin"
+ * 6. Shake device → "Shake It Off"
+ * 7. Scroll 10,000px → "Marathon Runner"
+ * 8. Reach bottom <2min → "Speed Reader"
+ * 9. Visit 3+ times → "Repeat Visitor"
+ * 10. Visit 5 sections → "Section Hopper"
+ * 11. Visit all sections → "World Tour"
+ * 12. Tweak orb settings 5x → "Settings Tinkerer"
+ * 13. Use navigation controls 3x → "Nav Master"
+ * 14. Use scroll-to-top shortcut → "Round Trip"
+ * 15. Reach contact and return hero → "Back to Origin"
+ * 16. Unlocked all 15 → "Enlightenment" (auto-unlock)
  *
  * Open Dev Console (tap terminal icon bottom-left or press D on desktop) to see all achievements!
  */
@@ -69,13 +69,6 @@ const ACHIEVEMENTS: Achievement[] = [
     name: 'Copy Cat',
     description: 'Copied some text',
     icon: '📋',
-    unlocked: false,
-  },
-  {
-    id: 'konami',
-    name: 'Classic Gamer',
-    description: 'Entered the Konami Code',
-    icon: '🎮',
     unlocked: false,
   },
   {
@@ -151,7 +144,7 @@ const ACHIEVEMENTS: Achievement[] = [
   {
     id: 'enlightenment',
     name: 'Enlightenment',
-    description: 'Unlocked all 16 other achievements',
+    description: 'Unlocked all 15 other achievements',
     icon: '✨',
     unlocked: false,
   },
@@ -196,7 +189,6 @@ export function EasterEggs() {
 
   const idleTimerRef = useRef<NodeJS.Timeout | null>(null)
   const clickTimesRef = useRef<number[]>([])
-  const konamiIndexRef = useRef(0)
   const userHasInteractedRef = useRef(false) // Track if user has actually interacted
   const visitedSectionsRef = useRef(new Set<string>())
   const navClicksRef = useRef(0)
@@ -265,10 +257,10 @@ export function EasterEggs() {
     }
     localStorage.setItem('achievements', JSON.stringify(achievements))
 
-    // Check if all 16 base achievements are unlocked and auto-unlock Enlightenment
+    // Check if all 15 base achievements are unlocked and auto-unlock Enlightenment
     const baseAchievements = achievements.filter((a) => a.id !== 'enlightenment')
     const enlightenmentAch = achievements.find((a) => a.id === 'enlightenment')
-    const allBaseUnlocked = baseAchievements.length === 16 && baseAchievements.every((a) => a.unlocked)
+    const allBaseUnlocked = baseAchievements.length === 15 && baseAchievements.every((a) => a.unlocked)
 
     if (allBaseUnlocked && enlightenmentAch && !enlightenmentAch.unlocked) {
       // Trigger Enlightenment unlock with mega celebration
@@ -277,17 +269,14 @@ export function EasterEggs() {
 
         // Mega celebration: trigger multiple confetti explosions
         for (let i = 0; i < 5; i++) {
-          setTimeout(
-            () => {
-              const newParticles = Array.from({ length: 20 }, () => ({
-                id: Date.now() + Math.random(),
-                x: Math.random() * window.innerWidth,
-                y: Math.random() * window.innerHeight,
-              }))
-              setParticles((prev) => [...prev, ...newParticles])
-            },
-            i * 200,
-          )
+          setTimeout(() => {
+            const newParticles = Array.from({ length: 20 }, () => ({
+              id: Date.now() + Math.random(),
+              x: Math.random() * window.innerWidth,
+              y: Math.random() * window.innerHeight,
+            }))
+            setParticles((prev) => [...prev, ...newParticles])
+          }, i * 200)
         }
 
         console.log(
@@ -562,57 +551,7 @@ export function EasterEggs() {
     return () => document.removeEventListener('copy', handleCopy)
   }, [achievementsEnabled])
 
-  // 6. KONAMI CODE
-  useEffect(() => {
-    if (!achievementsEnabled) {
-      return
-    }
-
-    const konamiCode = [
-      'ArrowUp',
-      'ArrowUp',
-      'ArrowDown',
-      'ArrowDown',
-      'ArrowLeft',
-      'ArrowRight',
-      'ArrowLeft',
-      'ArrowRight',
-      'b',
-      'a',
-    ]
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      const expectedKey = konamiCode[konamiIndexRef.current]
-      const pressedKey = e.key.toLowerCase()
-
-      if (pressedKey === expectedKey.toLowerCase()) {
-        konamiIndexRef.current++
-
-        if (konamiIndexRef.current === konamiCode.length) {
-          unlockAchievement('konami')
-          konamiIndexRef.current = 0
-
-          console.log(
-            '%c🎮 KONAMI CODE ACTIVATED!',
-            'color: #10b981; font-size: 20px; font-weight: bold; text-shadow: 0 0 10px #10b981;',
-          )
-          console.log('%c↑ ↑ ↓ ↓ ← → ← → B A', 'color: #6ee7b7; font-size: 14px;')
-
-          document.body.style.animation = 'konamiFlash 0.5s ease-in-out'
-          setTimeout(() => {
-            document.body.style.animation = ''
-          }, 500)
-        }
-      } else {
-        konamiIndexRef.current = 0
-      }
-    }
-
-    window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [achievementsEnabled])
-
-  // 7. SHAKE DETECTION (mobile) + RAPID MOUSE MOVEMENT (desktop)
+  // 6. SHAKE DETECTION (mobile) + RAPID MOUSE MOVEMENT (desktop)
   useEffect(() => {
     if (!achievementsEnabled) {
       return
@@ -777,7 +716,7 @@ export function EasterEggs() {
     }
   }, [achievementsEnabled])
 
-  // 9. ORB SETTINGS TINKERER
+  // 11. ORB SETTINGS TINKERER
   useEffect(() => {
     if (!achievementsEnabled) {
       return
@@ -797,7 +736,7 @@ export function EasterEggs() {
     }
   }, [achievementsEnabled])
 
-  // 10. NAVIGATION INTERACTIONS
+  // 12. NAVIGATION INTERACTIONS
   useEffect(() => {
     if (!achievementsEnabled) {
       return
@@ -833,7 +772,7 @@ export function EasterEggs() {
     }
   }, [achievementsEnabled])
 
-  // 11. MARATHON RUNNER (10,000 pixels scrolled)
+  // 7. MARATHON RUNNER (10,000 pixels scrolled)
   useEffect(() => {
     if (!achievementsEnabled) {
       return
@@ -866,7 +805,7 @@ export function EasterEggs() {
     }
   }, [achievementsEnabled])
 
-  // 12. SPEED READER (reach bottom in under 2 minutes)
+  // 14. SPEED READER (reach bottom in under 2 minutes)
   useEffect(() => {
     if (!achievementsEnabled) {
       return
@@ -905,7 +844,7 @@ export function EasterEggs() {
     }
   }, [achievementsEnabled])
 
-  // 13. REPEAT VISITOR (3+ visits)
+  // 15. REPEAT VISITOR (3+ visits)
   useEffect(() => {
     if (!canUseStorage || !achievementsEnabled) {
       return
