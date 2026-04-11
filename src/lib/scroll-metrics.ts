@@ -1,4 +1,4 @@
-export interface ScrollMetrics {
+interface ScrollMetrics {
   scrollY: number
   maxScroll: number
   progress: number
