@@ -11,7 +11,6 @@ import type { Achievement } from '@/components/ui/easter-eggs'
  * Only available in development mode or when manually enabled
  */
 
-// Achievement hints (how to unlock)
 const ACHIEVEMENT_HINTS: Record<string, string> = {
   'triple-click': 'Triple-click the hero heading',
   'perfectly-balanced': 'Scroll to exactly 50% of the page',
@@ -19,7 +18,7 @@ const ACHIEVEMENT_HINTS: Record<string, string> = {
   'rapid-clicker': 'Click 10 times in 2 seconds',
   'copy-cat': 'Copy some text from the page',
   konami: 'Enter the Konami Code',
-  shake: 'Shake your device or move mouse rapidly',
+  shake: 'Scroll rapidly (mobile) or move mouse fast (desktop)',
   'marathon-runner': 'Scroll a total of 10,000 pixels',
   'speed-reader': 'Reach the bottom in under 2 minutes',
   'repeat-visitor': 'Visit the site 3+ times',
@@ -593,7 +592,7 @@ export function DeveloperConsole({ onVisibilityChange, isMobileMenuOpen = false 
               <span className='text-lg'>{tooltip.achievement.icon}</span>
               <div className='flex-1'>
                 <div
-                  className={`text-[10px] font-semibold ${
+                  className={`text-[12px] font-semibold ${
                     tooltip.achievement.unlocked ? 'text-yellow-400' : 'text-gray-400'
                   }`}
                 >
@@ -601,10 +600,12 @@ export function DeveloperConsole({ onVisibilityChange, isMobileMenuOpen = false 
                 </div>
               </div>
             </div>
-            <div className='mt-1 text-[9px] text-gray-400'>
+            <div className='mt-1 text-[11px] text-gray-400'>
               {tooltip.achievement.unlocked
                 ? tooltip.achievement.description
-                : ACHIEVEMENT_HINTS[tooltip.achievement.id] || 'Keep exploring...'}
+                : tooltip.achievement.id === 'shake'
+                  ? 'Move mouse rapidly to shuffle colors'
+                  : ACHIEVEMENT_HINTS[tooltip.achievement.id] || 'Keep exploring...'}
             </div>
             {/* Arrow */}
             {tooltip.showBelow ? (
@@ -698,13 +699,13 @@ export function DeveloperConsole({ onVisibilityChange, isMobileMenuOpen = false 
 
         {/* CONTROLS SECTION */}
         <div className='space-y-3'>
-          <div className='text-xs tracking-wider text-gray-500 uppercase'>⚙️ Controls</div>
+          <div className='text-sm tracking-wider text-gray-500 uppercase'>⚙️ Controls</div>
 
           {/* Animation Speed Slider */}
           <div>
             <div className='mb-1 flex items-center justify-between'>
-              <span className='text-[10px] text-gray-400'>ANIMATION SPEED:</span>
-              <span className='text-[10px] text-white tabular-nums'>{animationSpeed.toFixed(1)}x</span>
+              <span className='text-[12px] text-gray-400'>ANIMATION SPEED:</span>
+              <span className='text-[12px] text-white tabular-nums'>{animationSpeed.toFixed(1)}x</span>
             </div>
             <input
               type='range'
@@ -723,8 +724,8 @@ export function DeveloperConsole({ onVisibilityChange, isMobileMenuOpen = false 
           {/* Color Variation Slider */}
           <div>
             <div className='mb-1 flex items-center justify-between'>
-              <span className='text-[10px] text-gray-400'>COLOR VARIATION:</span>
-              <span className='text-[10px] text-white tabular-nums'>{colorVariation.toFixed(0)}%</span>
+              <span className='text-[12px] text-gray-400'>COLOR VARIATION:</span>
+              <span className='text-[12px] text-white tabular-nums'>{colorVariation.toFixed(0)}%</span>
             </div>
             <input
               type='range'
@@ -743,8 +744,8 @@ export function DeveloperConsole({ onVisibilityChange, isMobileMenuOpen = false 
           {/* Position Variation Slider */}
           <div>
             <div className='mb-1 flex items-center justify-between'>
-              <span className='text-[10px] text-gray-400'>POSITION SPREAD:</span>
-              <span className='text-[10px] text-white tabular-nums'>{(positionVariation * 100).toFixed(0)}%</span>
+              <span className='text-[12px] text-gray-400'>POSITION SPREAD:</span>
+              <span className='text-[12px] text-white tabular-nums'>{(positionVariation * 100).toFixed(0)}%</span>
             </div>
             <input
               type='range'
@@ -763,8 +764,8 @@ export function DeveloperConsole({ onVisibilityChange, isMobileMenuOpen = false 
           {/* Orb Size Slider */}
           <div>
             <div className='mb-1 flex items-center justify-between'>
-              <span className='text-[10px] text-gray-400'>ORB SIZE:</span>
-              <span className='text-[10px] text-white tabular-nums'>{orbSize.toFixed(1)}x</span>
+              <span className='text-[12px] text-gray-400'>ORB SIZE:</span>
+              <span className='text-[12px] text-white tabular-nums'>{orbSize.toFixed(1)}x</span>
             </div>
             <input
               type='range'
@@ -784,8 +785,8 @@ export function DeveloperConsole({ onVisibilityChange, isMobileMenuOpen = false 
           {!isMobile && (
             <div>
               <div className='mb-1 flex items-center justify-between'>
-                <span className='text-[10px] text-gray-400'>ORB BLUR:</span>
-                <span className='text-[10px] text-white tabular-nums'>{orbBlur.toFixed(1)}x</span>
+                <span className='text-[12px] text-gray-400'>ORB BLUR:</span>
+                <span className='text-[12px] text-white tabular-nums'>{orbBlur.toFixed(1)}x</span>
               </div>
               <input
                 type='range'
@@ -805,8 +806,8 @@ export function DeveloperConsole({ onVisibilityChange, isMobileMenuOpen = false 
           {/* Orb Opacity Slider */}
           <div>
             <div className='mb-1 flex items-center justify-between'>
-              <span className='text-[10px] text-gray-400'>ORB OPACITY:</span>
-              <span className='text-[10px] text-white tabular-nums'>{(orbOpacity * 100).toFixed(0)}%</span>
+              <span className='text-[12px] text-gray-400'>ORB OPACITY:</span>
+              <span className='text-[12px] text-white tabular-nums'>{(orbOpacity * 100).toFixed(0)}%</span>
             </div>
             <input
               type='range'
@@ -826,8 +827,8 @@ export function DeveloperConsole({ onVisibilityChange, isMobileMenuOpen = false 
           {!isMobile && (
             <div>
               <div className='mb-1 flex items-center justify-between'>
-                <span className='text-[10px] text-gray-400'>CONSOLE SCALE:</span>
-                <span className='text-[10px] text-white tabular-nums'>{((scale / 0.8) * 100).toFixed(0)}%</span>
+                <span className='text-[12px] text-gray-400'>CONSOLE SCALE:</span>
+                <span className='text-[12px] text-white tabular-nums'>{((scale / 0.8) * 100).toFixed(0)}%</span>
               </div>
               <input
                 type='range'
@@ -878,7 +879,7 @@ export function DeveloperConsole({ onVisibilityChange, isMobileMenuOpen = false 
               localStorage.setItem('orb_opacity', String(defaults.opacity))
               localStorage.setItem('position_variation', String(defaults.position))
             }}
-            className='w-full cursor-pointer rounded border border-gray-700 px-3 py-1.5 text-[10px] text-gray-400 transition-all hover:border-gray-500 hover:text-white'
+            className='w-full cursor-pointer rounded border border-gray-700 px-3 py-1.5 text-[12px] text-gray-400 transition-all hover:border-gray-500 hover:text-white'
           >
             RESET TO DEFAULT
           </button>
@@ -903,7 +904,7 @@ export function DeveloperConsole({ onVisibilityChange, isMobileMenuOpen = false 
                 )
               }
             }}
-            className='w-full cursor-pointer rounded border border-red-700 px-3 py-1.5 text-[10px] text-red-400 transition-all hover:border-red-500 hover:text-red-300'
+            className='w-full cursor-pointer rounded border border-red-700 px-3 py-1.5 text-[12px] text-red-400 transition-all hover:border-red-500 hover:text-red-300'
           >
             RESET ACHIEVEMENTS
           </button>
@@ -919,8 +920,8 @@ export function DeveloperConsole({ onVisibilityChange, isMobileMenuOpen = false 
         <div className='space-y-2'>
           <div className='flex items-center gap-2'>
             <Trophy className='h-3 w-3 text-yellow-400' />
-            <span className='text-xs tracking-wider text-gray-500 uppercase'>Achievements</span>
-            <span className='text-[10px] text-gray-600'>
+            <span className='text-sm tracking-wider text-gray-500 uppercase'>Achievements</span>
+            <span className='text-[11px] text-gray-600'>
               {achievements.filter((a) => a.unlocked).length}/{achievements.length}
             </span>
           </div>
@@ -936,11 +937,12 @@ export function DeveloperConsole({ onVisibilityChange, isMobileMenuOpen = false 
                   }}
                 >
                   <div
-                    className={`flex aspect-square cursor-pointer items-center justify-center rounded border-2 text-2xl transition-all ${
+                    className={`flex aspect-square cursor-pointer items-center justify-center rounded border-2 transition-all ${
                       achievement.unlocked
                         ? 'border-yellow-400/50 bg-yellow-400/10'
                         : 'border-gray-700 bg-gray-800/30 opacity-30 grayscale'
                     } ${!isMobile && achievement.id === 'enlightenment' && achievement.unlocked ? 'ring-1 ring-yellow-400/40 ring-offset-1 ring-offset-black' : ''}`}
+                    style={{ fontSize: isMobile ? 'clamp(1.5rem, 6.5vw, 2.75rem)' : '1.875rem' }}
                     title={
                       !isMobile && achievement.id === 'enlightenment' && achievement.unlocked
                         ? '✨ Click to celebrate!'
@@ -1004,31 +1006,39 @@ export function DeveloperConsole({ onVisibilityChange, isMobileMenuOpen = false 
                     {achievement.unlocked ? achievement.icon : '🔒'}
                   </div>
 
-                  {/* Mobile-only absolute tooltip — desktop uses fixed positioning at component root */}
+                  {/* Mobile fixed-position tooltip — prevents clipping by overflow container */}
                   {isMobile &&
                     tooltip?.achievement.id === achievement.id &&
                     (() => {
                       const itemEl = achievementRefs.current[achievement.id]
-                      let showBelow = false
-                      let alignLeft = false
-                      let alignRight = false
+                      let fixedX = 0
+                      let fixedY = 0
 
                       if (itemEl) {
                         const rect = itemEl.getBoundingClientRect()
                         const tooltipHeight = 120
                         const tooltipWidth = 220
-                        showBelow = rect.top < tooltipHeight + 20
+
+                        // Calculate fixed position
                         const itemCenterX = rect.left + rect.width / 2
-                        if (itemCenterX < tooltipWidth / 2) alignLeft = true
-                        else if (window.innerWidth - itemCenterX < tooltipWidth / 2) alignRight = true
+                        fixedX = Math.max(
+                          10,
+                          Math.min(itemCenterX - tooltipWidth / 2, window.innerWidth - tooltipWidth - 10),
+                        )
+                        fixedY = rect.top < tooltipHeight + 20 ? rect.bottom + 8 : rect.top - tooltipHeight - 8
                       }
 
                       return (
                         <div
-                          className={`pointer-events-none absolute z-9999 ${
-                            showBelow ? 'top-full mt-2' : '-top-2 -translate-y-full'
-                          } ${alignLeft ? 'left-0' : alignRight ? 'right-0' : 'left-1/2 -translate-x-1/2'}`}
-                          style={{ animation: 'fadeIn 0.2s ease-out' }}
+                          className='pointer-events-none'
+                          style={{
+                            position: 'fixed',
+                            zIndex: 9999,
+                            left: `${fixedX}px`,
+                            top: `${fixedY}px`,
+                            width: '220px',
+                            animation: 'fadeIn 0.2s ease-out',
+                          }}
                         >
                           <div
                             className='max-w-60 min-w-50 rounded-lg border-2 bg-gray-900 p-2 shadow-2xl'
@@ -1045,7 +1055,7 @@ export function DeveloperConsole({ onVisibilityChange, isMobileMenuOpen = false 
                               <span className='text-lg'>{tooltip.achievement.icon}</span>
                               <div className='flex-1'>
                                 <div
-                                  className={`text-[10px] font-semibold ${
+                                  className={`text-[12px] font-semibold ${
                                     tooltip.achievement.unlocked ? 'text-yellow-400' : 'text-gray-400'
                                   }`}
                                 >
@@ -1053,10 +1063,12 @@ export function DeveloperConsole({ onVisibilityChange, isMobileMenuOpen = false 
                                 </div>
                               </div>
                             </div>
-                            <div className='mt-1 text-[9px] text-gray-400'>
+                            <div className='mt-1 text-[11px] text-gray-400'>
                               {tooltip.achievement.unlocked
                                 ? tooltip.achievement.description
-                                : ACHIEVEMENT_HINTS[tooltip.achievement.id] || 'Keep exploring...'}
+                                : tooltip.achievement.id === 'shake'
+                                  ? 'Scroll rapidly to shuffle colors'
+                                  : ACHIEVEMENT_HINTS[tooltip.achievement.id] || 'Keep exploring...'}
                             </div>
                           </div>
                         </div>
@@ -1066,12 +1078,12 @@ export function DeveloperConsole({ onVisibilityChange, isMobileMenuOpen = false 
               ))}
             </div>
           ) : (
-            <div className='py-2 text-center text-[10px] text-gray-600'>No achievements yet. Keep exploring!</div>
+            <div className='py-2 text-center text-[11px] text-gray-600'>No achievements yet. Keep exploring!</div>
           )}
         </div>
 
         {/* Hint */}
-        <div className='border-t border-gray-800 pt-2 text-center text-[9px] text-gray-500'>
+        <div className='border-t border-gray-800 pt-2 text-center text-[11px] text-gray-500'>
           <div className='hidden md:block'>Press 'D' to toggle</div>
         </div>
       </>

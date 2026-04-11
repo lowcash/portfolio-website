@@ -639,62 +639,65 @@ export function EasterEggs() {
     return () => document.removeEventListener('copy', handleCopy)
   }, [achievementsEnabled])
 
-  // 6. SHAKE DETECTION (mobile) + RAPID MOUSE MOVEMENT (desktop)
+  // 6. RAPID SCROLL (mobile) + RAPID MOUSE MOVEMENT (desktop)
   useEffect(() => {
     if (!achievementsEnabled) {
       return
     }
 
-    let lastX = 0
-    let lastY = 0
-    let lastZ = 0
-    let shakeCount = 0
-    let shakeTimer: NodeJS.Timeout
+    // Detect if on mobile/touch device
+    const isMobileDevice = () => {
+      return (
+        typeof window !== 'undefined' &&
+        (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+          (navigator.maxTouchPoints !== undefined && navigator.maxTouchPoints > 2))
+      )
+    }
 
-    const handleDeviceMotion = (e: DeviceMotionEvent) => {
-      const acc = e.accelerationIncludingGravity
-      if (!acc) return
+    const mobileMode = isMobileDevice()
+    let scrollTimer: NodeJS.Timeout | undefined
+    let mouseTimer: NodeJS.Timeout | undefined
 
-      const { x = 0, y = 0, z = 0 } = acc
+    // MOBILE: Scroll detection
+    let scrollEvents: Array<{ time: number; scrollY: number }> = []
 
-      const safeX = x ?? 0
-      const safeY = y ?? 0
-      const safeZ = z ?? 0
+    const handleScroll = () => {
+      if (!mobileMode) return
 
-      const deltaX = Math.abs(safeX - lastX)
-      const deltaY = Math.abs(safeY - lastY)
-      const deltaZ = Math.abs(safeZ - lastZ)
+      const now = Date.now()
+      const currentScroll = window.scrollY
 
-      const totalDelta = deltaX + deltaY + deltaZ
+      scrollEvents.push({ time: now, scrollY: currentScroll })
+      scrollEvents = scrollEvents.filter((e) => now - e.time < 1000)
 
-      if (totalDelta > 30) {
-        shakeCount++
+      // Calculate total scroll distance in the last 1 second
+      if (scrollEvents.length >= 2) {
+        const firstEvent = scrollEvents[0]
+        const lastEvent = scrollEvents[scrollEvents.length - 1]
+        const scrollDistance = Math.abs(lastEvent.scrollY - firstEvent.scrollY)
 
-        clearTimeout(shakeTimer)
-        shakeTimer = setTimeout(() => {
-          shakeCount = 0
-        }, 1000)
-
-        if (shakeCount >= 3) {
+        if (scrollDistance > 500) {
+          if (scrollTimer) clearTimeout(scrollTimer)
           unlockAchievement('shake')
-          shakeCount = 0
+          scrollEvents = []
 
           const root = document.documentElement
           const randomVariation = Math.random() * 100
           root.style.setProperty('--color-variation', String(randomVariation / 100))
 
-          console.log('%c📱 Device shake detected! Colors shuffled!', 'color: #ec4899; font-size: 14px;')
+          console.log('%c📜 Rapid scroll detected! Colors shuffled!', 'color: #ec4899; font-size: 14px;')
         }
       }
-
-      lastX = safeX
-      lastY = safeY
-      lastZ = safeZ
     }
 
+    // DESKTOP: Mouse movement detection (keep existing logic)
+    let lastX = 0
+    let lastY = 0
     let mouseMovements: Array<{ time: number; distance: number }> = []
 
     const handleMouseMove = (e: MouseEvent) => {
+      if (mobileMode) return
+
       const now = Date.now()
       const deltaX = Math.abs(e.clientX - lastX)
       const deltaY = Math.abs(e.clientY - lastY)
@@ -708,6 +711,7 @@ export function EasterEggs() {
           const totalDistance = mouseMovements.reduce((sum, m) => sum + m.distance, 0)
 
           if (totalDistance > 2000) {
+            if (mouseTimer) clearTimeout(mouseTimer)
             unlockAchievement('shake')
             mouseMovements = []
 
@@ -724,13 +728,20 @@ export function EasterEggs() {
       lastY = e.clientY
     }
 
-    window.addEventListener('devicemotion', handleDeviceMotion)
-    window.addEventListener('mousemove', handleMouseMove)
+    if (mobileMode) {
+      window.addEventListener('scroll', handleScroll, { passive: true })
+    } else {
+      window.addEventListener('mousemove', handleMouseMove)
+    }
 
     return () => {
-      window.removeEventListener('devicemotion', handleDeviceMotion)
-      window.removeEventListener('mousemove', handleMouseMove)
-      clearTimeout(shakeTimer)
+      if (mobileMode) {
+        window.removeEventListener('scroll', handleScroll)
+        if (scrollTimer) clearTimeout(scrollTimer)
+      } else {
+        window.removeEventListener('mousemove', handleMouseMove)
+        if (mouseTimer) clearTimeout(mouseTimer)
+      }
     }
   }, [achievementsEnabled])
 
@@ -1073,12 +1084,12 @@ export function EasterEggs() {
         style={{ zIndex: 200, width: '100%', height: '100%' }}
       />
 
-      {/* Achievement Popup - above desktop side nav, top-right on mobile. */}
+      {/* Achievement Popup - above all overlays including devTools (z:130). Positioned context-aware for all breakpoints. */}
       {showAchievement && (
         <>
           <div
             data-testid='achievement-popup-layer'
-            className='pointer-events-none fixed inset-x-0 z-80 hidden lg:block'
+            className='pointer-events-none fixed inset-x-0 z-9999 hidden lg:block'
             style={{ bottom: 'calc(50% + 12.5rem)' }}
           >
             <div className='mx-auto flex max-w-6xl justify-end pr-2 pl-6'>
@@ -1088,7 +1099,7 @@ export function EasterEggs() {
 
           <div
             data-testid='achievement-popup-layer-mobile'
-            className='pointer-events-none fixed right-4 left-4 z-80 flex justify-end lg:hidden'
+            className='pointer-events-none fixed right-4 left-4 z-9999 flex justify-end lg:hidden'
             style={{ top: 'calc(5.5rem + env(safe-area-inset-top))' }}
           >
             {renderAchievementCard('min(20rem, calc(100vw - 2rem))')}

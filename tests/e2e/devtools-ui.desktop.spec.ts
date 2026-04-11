@@ -128,4 +128,52 @@ test.describe('Desktop devtools and overlays', () => {
       document.documentElement.style.scrollSnapType = ''
     })
   })
+
+  test('achievement popup remains visible above devtools when console is open', async ({ page }) => {
+    // Open devtools first
+    const toggleButton = page.getByRole('button', { name: 'Toggle debug console' })
+    await toggleButton.evaluate((btn: HTMLElement) => btn.click())
+
+    const consoleRegion = page.getByRole('region', { name: 'Developer debug console' })
+    await expect(consoleRegion).toBeVisible()
+
+    // Trigger achievement while devtools is open
+    await triggerMidpointAchievement(page)
+
+    const popup = await waitForAchievementPopup(page)
+    await expect(popup).toBeVisible()
+
+    // Verify popup is still visible and positioned correctly
+    const popupBox = await popup.boundingBox()
+    expect(popupBox).not.toBeNull()
+
+    if (popupBox) {
+      const viewportSize = page.viewportSize()
+      expect(viewportSize).not.toBeNull()
+
+      // Popup should be within viewport
+      expect(popupBox.x).toBeGreaterThanOrEqual(0)
+      expect(popupBox.y).toBeGreaterThanOrEqual(0)
+
+      if (viewportSize) {
+        expect(popupBox.x + popupBox.width).toBeLessThanOrEqual(viewportSize.width)
+        expect(popupBox.y + popupBox.height).toBeLessThanOrEqual(viewportSize.height)
+      }
+    }
+
+    // Verify achievement was recorded in console
+    const unlockedCount = await consoleRegion.evaluate(() => {
+      const buttons = Array.from(document.querySelectorAll('[role="region"] button[class*="border-yellow"]'))
+      return buttons.filter((btn) => {
+        const style = getComputedStyle(btn)
+        return style.opacity === '1' || !style.opacity
+      }).length
+    })
+
+    expect(unlockedCount).toBeGreaterThan(0)
+
+    await page.evaluate(() => {
+      document.documentElement.style.scrollSnapType = ''
+    })
+  })
 })
