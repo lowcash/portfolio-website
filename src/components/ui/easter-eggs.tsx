@@ -1,5 +1,6 @@
 import { useEffect, useEffectEvent, useRef, useState } from 'react'
 
+import confetti from 'canvas-confetti'
 import { Trophy } from 'lucide-react'
 
 /**
@@ -25,6 +26,100 @@ import { Trophy } from 'lucide-react'
  *
  * Open Dev Console (tap terminal icon bottom-left or press D on desktop) to see all achievements!
  */
+
+/** Module-level holder for the canvas-bound confetti function — set after canvas mounts */
+let _canvasFire: ((opts: confetti.Options) => Promise<null> | null) | null = null
+
+/** Realistic dual-cannon + top-shower casino confetti burst via canvas-confetti */
+function fireCasinoConfetti() {
+  const fire = (opts: confetti.Options) => (_canvasFire ? _canvasFire(opts) : confetti(opts))
+  const COLORS = ['#fbbf24', '#f59e0b', '#ef4444', '#22c55e', '#3b82f6', '#a855f7', '#e5e7eb']
+
+  // Cannon burst — both sides simultaneously
+  fire({
+    particleCount: 140,
+    angle: 60,
+    spread: 70,
+    startVelocity: 60,
+    decay: 0.92,
+    gravity: 1.1,
+    ticks: 350,
+    origin: { x: 0, y: 0.78 },
+    colors: COLORS,
+  })
+  fire({
+    particleCount: 140,
+    angle: 120,
+    spread: 70,
+    startVelocity: 60,
+    decay: 0.92,
+    gravity: 1.1,
+    ticks: 350,
+    origin: { x: 1, y: 0.78 },
+    colors: COLORS,
+  })
+
+  // Top shower
+  setTimeout(() => {
+    fire({
+      particleCount: 100,
+      spread: 150,
+      startVelocity: 30,
+      decay: 0.9,
+      gravity: 0.7,
+      ticks: 400,
+      origin: { x: 0.5, y: 0 },
+      colors: COLORS,
+      scalar: 1.2,
+    })
+  }, 220)
+
+  // Gold second wave
+  setTimeout(() => {
+    fire({
+      particleCount: 90,
+      angle: 60,
+      spread: 60,
+      startVelocity: 50,
+      origin: { x: 0, y: 0.88 },
+      colors: ['#fbbf24', '#f59e0b'],
+      ticks: 300,
+    })
+    fire({
+      particleCount: 90,
+      angle: 120,
+      spread: 60,
+      startVelocity: 50,
+      origin: { x: 1, y: 0.88 },
+      colors: ['#fbbf24', '#f59e0b'],
+      ticks: 300,
+    })
+  }, 500)
+
+  // Final shimmer
+  setTimeout(() => {
+    fire({
+      particleCount: 60,
+      spread: 180,
+      startVelocity: 20,
+      decay: 0.88,
+      gravity: 0.5,
+      ticks: 350,
+      origin: { x: Math.random(), y: 0.2 },
+      colors: COLORS,
+      scalar: 0.9,
+    })
+  }, 900)
+}
+
+interface Sparkle {
+  id: number
+  x: number // vw percentage
+  duration: number
+  size: number
+  color: string
+  symbol: string
+}
 
 export interface Achievement {
   id: string
@@ -177,8 +272,12 @@ export function EasterEggs() {
   const [isHidingAchievement, setIsHidingAchievement] = useState(false)
   const achievementTimeoutRef = useRef<NodeJS.Timeout | null>(null)
   const achievementHidingTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const confettiCanvasRef = useRef<HTMLCanvasElement>(null)
+  const [sparkles, setSparkles] = useState<Sparkle[]>([])
   const [idleCursor, setIdleCursor] = useState(false)
-  const [particles, setParticles] = useState<Array<{ id: number; x: number; y: number; type?: string; color?: string }>>([])
+  const [particles, setParticles] = useState<
+    Array<{ id: number; x: number; y: number; type?: string; color?: string; drift?: number }>
+  >([])
   const [achievementsEnabled, setAchievementsEnabled] = useState(() => {
     if (!canUseStorage) {
       return false
@@ -266,18 +365,7 @@ export function EasterEggs() {
       // Trigger Enlightenment unlock with mega celebration
       setTimeout(() => {
         unlockAchievement('enlightenment')
-
-        // Mega celebration: trigger multiple confetti explosions
-        for (let i = 0; i < 5; i++) {
-          setTimeout(() => {
-            const newParticles = Array.from({ length: 20 }, () => ({
-              id: Date.now() + Math.random(),
-              x: Math.random() * window.innerWidth,
-              y: Math.random() * window.innerHeight,
-            }))
-            setParticles((prev) => [...prev, ...newParticles])
-          }, i * 200)
-        }
+        fireCasinoConfetti()
 
         console.log(
           '%c🌟 ENLIGHTENMENT UNLOCKED! 🌟',
@@ -868,22 +956,7 @@ export function EasterEggs() {
   // Handle Enlightenment click for confetti
   const handleEnlightenmentClick = useEffectEvent(() => {
     if (showAchievement?.id === 'enlightenment') {
-      const colors = ['#fbbf24', '#f59e0b', '#ff67b1', '#a855f7']
-      for (let i = 0; i < 8; i++) {
-        setTimeout(() => {
-          const newParticles = Array.from({ length: 30 }, (_, idx) => {
-            const randomColor = colors[Math.floor(Math.random() * colors.length)]
-            return {
-              id: Date.now() + Math.random() + idx,
-              x: Math.random() * window.innerWidth,
-              y: Math.random() * window.innerHeight,
-              type: ['circle', 'square', 'star'][Math.floor(Math.random() * 3)],
-              color: randomColor,
-            }
-          })
-          setParticles((prev) => [...prev, ...newParticles])
-        }, i * 150)
-      }
+      fireCasinoConfetti()
     }
   })
 
@@ -895,8 +968,62 @@ export function EasterEggs() {
     }
   }, [])
 
-  const renderAchievementCard = (width: string, marginRight?: string) => {
+  // Prevent SSR/client hydration mismatch — premium overlay depends on localStorage
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => setMounted(true), [])
 
+  // Derive enlightenment unlock state for premium UI — only after mount
+  const enlightenmentUnlocked = mounted && (achievements.find((a) => a.id === 'enlightenment')?.unlocked ?? false)
+
+  // Sync premium state to document root when enlightenment is unlocked
+  useEffect(() => {
+    if (enlightenmentUnlocked) {
+      document.documentElement.setAttribute('data-enlightened', 'true')
+    } else {
+      document.documentElement.removeAttribute('data-enlightened')
+    }
+  }, [enlightenmentUnlocked])
+
+  // Bind canvas-confetti to our dedicated canvas so confetti renders above all overlays (DevConsole z:130)
+  useEffect(() => {
+    if (!confettiCanvasRef.current) return
+    const instance = confetti.create(confettiCanvasRef.current, { resize: true, useWorker: false })
+    _canvasFire = instance
+    return () => {
+      instance.reset()
+      _canvasFire = null
+    }
+  }, [])
+
+  // Replenish floating sparkles while enlightened
+  useEffect(() => {
+    const SYMBOLS = ['\u2726', '\u2727', '\u22c6', '\u25c6'] as const
+    const COLORS = ['#fbbf24', '#f59e0b', '#fde68a'] as const
+    if (!enlightenmentUnlocked) {
+      setSparkles([])
+      return
+    }
+    const spawn = (): Sparkle => ({
+      id: Date.now() + Math.random(),
+      x: 5 + Math.random() * 90,
+      duration: 7 + Math.random() * 5,
+      size: 14 + Math.random() * 18,
+      color: COLORS[Math.floor(Math.random() * COLORS.length)],
+      symbol: SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)],
+    })
+    setSparkles(Array.from({ length: 14 }, spawn))
+    const iv = setInterval(() => setSparkles((prev) => [...prev.slice(-18), spawn()]), 1200)
+    return () => clearInterval(iv)
+  }, [enlightenmentUnlocked])
+
+  // Listen for enlightenment-clicked event dispatched by DevConsole for casino confetti
+  useEffect(() => {
+    const handleConsoleCelebrate = () => fireCasinoConfetti()
+    window.addEventListener('enlightenment-clicked', handleConsoleCelebrate)
+    return () => window.removeEventListener('enlightenment-clicked', handleConsoleCelebrate)
+  }, [])
+
+  const renderAchievementCard = (width: string, marginRight?: string) => {
     return (
       <div
         onClick={handleEnlightenmentClick}
@@ -906,7 +1033,9 @@ export function EasterEggs() {
         style={{
           width,
           marginRight,
-          animation: isHidingAchievement ? 'slideOutRight 0.5s ease-in forwards' : 'slideInRight 0.5s ease-out forwards',
+          animation: isHidingAchievement
+            ? 'slideOutRight 0.5s ease-in forwards'
+            : 'slideInRight 0.5s ease-out forwards',
           borderColor: 'rgba(var(--orb-r), var(--orb-g), var(--orb-b), 0.6)',
           boxShadow:
             '0 0 45px rgba(var(--orb-r), var(--orb-g), var(--orb-b), 0.35), 0 0 90px rgba(var(--orb-r), var(--orb-g), var(--orb-b), 0.18)',
@@ -915,7 +1044,9 @@ export function EasterEggs() {
         }}
       >
         <div className='flex items-start gap-3'>
-          <div className={`text-3xl ${showAchievement?.id === 'enlightenment' ? 'animate-pulse' : ''}`}>{showAchievement?.icon}</div>
+          <div className={`text-3xl ${showAchievement?.id === 'enlightenment' ? 'animate-pulse' : ''}`}>
+            {showAchievement?.icon}
+          </div>
           <div className='flex-1'>
             <div className='mb-1 flex items-center gap-2'>
               <Trophy className='h-4 w-4 text-yellow-400' />
@@ -934,6 +1065,14 @@ export function EasterEggs() {
 
   return (
     <>
+      {/* Dedicated confetti canvas — fixed above all overlays including mobile DevConsole (z:130) */}
+      <canvas
+        ref={confettiCanvasRef}
+        aria-hidden='true'
+        className='pointer-events-none fixed inset-0'
+        style={{ zIndex: 200, width: '100%', height: '100%' }}
+      />
+
       {/* Achievement Popup - above desktop side nav, top-right on mobile. */}
       {showAchievement && (
         <>
@@ -971,12 +1110,12 @@ export function EasterEggs() {
               zIndex: 90,
               left: particle.x,
               top: particle.y,
-              animation: 'confettiFall 2.5s ease-in forwards',
+              animation: `${particle.drift === -1 ? 'confettiFallLeft' : particle.drift === 1 ? 'confettiFallRight' : 'confettiFall'} 2.5s ease-in forwards`,
             }}
           >
             {isSquare ? (
               <div
-                className='h-2 w-2 rounded-sm'
+                className='h-4 w-4 rounded-sm'
                 style={{
                   backgroundColor: color,
                   animation: 'confettiSpin 2.5s linear forwards',
@@ -985,7 +1124,7 @@ export function EasterEggs() {
             ) : isStar ? (
               <div
                 style={{
-                  fontSize: '16px',
+                  fontSize: '28px',
                   animation: 'confettiSpin 2.5s linear forwards',
                 }}
               >
@@ -993,7 +1132,7 @@ export function EasterEggs() {
               </div>
             ) : (
               <div
-                className='h-2 w-2 rounded-full'
+                className='h-4 w-4 rounded-full'
                 style={{
                   backgroundColor: color,
                   animation: 'confettiBounce 2.5s ease-in forwards',
@@ -1004,98 +1143,99 @@ export function EasterEggs() {
         )
       })}
 
-      {/* CSS Animations */}
-      <style>{`
-        @keyframes slideInRight {
-          from {
-            transform: translateX(24px);
-            opacity: 0;
-          }
-          to {
-            transform: translateX(0);
-            opacity: 1;
-          }
-        }
+      {/* Floating gold sparkles — ambient atmosphere when enlightened */}
+      {enlightenmentUnlocked &&
+        sparkles.map((s) => (
+          <div
+            key={s.id}
+            className='pointer-events-none fixed'
+            aria-hidden='true'
+            style={{
+              left: `${s.x}%`,
+              bottom: 0,
+              zIndex: 3,
+              fontSize: `${s.size}px`,
+              color: s.color,
+              opacity: 0,
+              animation: `sparkleRise ${s.duration}s ease-out forwards`,
+            }}
+          >
+            {s.symbol}
+          </div>
+        ))}
 
-        @keyframes slideOutRight {
-          from {
-            transform: translateX(0);
-            opacity: 1;
-          }
-          to {
-            transform: translateX(24px);
-            opacity: 0;
-          }
-        }
+      {/* Premium golden vignette frame — visible once all achievements are unlocked */}
+      {enlightenmentUnlocked && (
+        <>
+          {/* Golden sweeping hairline — animated gleam at very top of viewport */}
+          <div
+            className='pointer-events-none fixed inset-x-0 top-0'
+            aria-hidden='true'
+            style={{
+              zIndex: 4,
+              height: '2px',
+              background:
+                'linear-gradient(90deg, transparent 0%, #fbbf24 30%, #fde68a 50%, #fbbf24 70%, transparent 100%)',
+              backgroundSize: '200% 100%',
+              animation: 'goldenBeam 3s ease-in-out infinite alternate',
+            }}
+          />
 
-        @keyframes confettiFall {
-          0% {
-            opacity: 1;
-            transform: translateY(-20px) rotate(0deg);
-          }
-          100% {
-            opacity: 0;
-            transform: translateY(100px) rotate(720deg);
-          }
-        }
-
-        @keyframes confettiBounce {
-          0% {
-            opacity: 1;
-            transform: translateY(-30px) scale(1);
-          }
-          50% {
-            opacity: 1;
-          }
-          100% {
-            opacity: 0;
-            transform: translateY(120px) scale(0);
-          }
-        }
-
-        @keyframes confettiSpin {
-          0% {
-            opacity: 1;
-            transform: translateY(-30px) rotate(0deg);
-          }
-          100% {
-            opacity: 0;
-            transform: translateY(120px) rotate(720deg);
-          }
-        }
-
-        @keyframes particleExplosion {
-          0% {
-            transform: scale(0);
-          }
-          50% {
-            transform: scale(1.5);
-          }
-          100% {
-            transform: scale(1);
-          }
-        }
-
-        @keyframes particleFade {
-          0% {
-            opacity: 1;
-            transform: rotate(var(--rotation)) translateY(0);
-          }
-          100% {
-            opacity: 0;
-            transform: rotate(var(--rotation)) translateY(-60px);
-          }
-        }
-
-        @keyframes konamiFlash {
-          0%, 100% {
-            filter: none;
-          }
-          50% {
-            filter: hue-rotate(180deg) brightness(1.2);
-          }
-        }
-      `}</style>
+          {/* Top gold glow */}
+          <div
+            className='pointer-events-none fixed inset-x-0 top-0'
+            aria-hidden='true'
+            style={{
+              zIndex: 1,
+              height: '35vh',
+              background: 'linear-gradient(to bottom, rgba(251,191,36,0.13) 0%, transparent 100%)',
+              animation: 'enlightenedPulse 5s ease-in-out infinite',
+            }}
+          />
+          {/* Bottom gold glow */}
+          <div
+            className='pointer-events-none fixed inset-x-0 bottom-0'
+            aria-hidden='true'
+            style={{
+              zIndex: 1,
+              height: '30vh',
+              background: 'linear-gradient(to top, rgba(251,191,36,0.10) 0%, transparent 100%)',
+              animation: 'enlightenedPulse 5s ease-in-out infinite 2.5s',
+            }}
+          />
+          {/* Left gold glow */}
+          <div
+            className='pointer-events-none fixed inset-y-0 left-0'
+            aria-hidden='true'
+            style={{
+              zIndex: 1,
+              width: '20vw',
+              background: 'linear-gradient(to right, rgba(251,191,36,0.07) 0%, transparent 100%)',
+              animation: 'enlightenedSidePulse 7s ease-in-out infinite',
+            }}
+          />
+          {/* Right gold glow */}
+          <div
+            className='pointer-events-none fixed inset-y-0 right-0'
+            aria-hidden='true'
+            style={{
+              zIndex: 1,
+              width: '20vw',
+              background: 'linear-gradient(to left, rgba(251,191,36,0.07) 0%, transparent 100%)',
+              animation: 'enlightenedSidePulse 7s ease-in-out infinite 3.5s',
+            }}
+          />
+          {/* Inset frame shadow */}
+          <div
+            className='pointer-events-none fixed inset-0'
+            aria-hidden='true'
+            style={{
+              zIndex: 1,
+              boxShadow: 'inset 0 0 80px rgba(251,191,36,0.08), inset 0 0 160px rgba(251,191,36,0.04)',
+            }}
+          />
+        </>
+      )}
     </>
   )
 }

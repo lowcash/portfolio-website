@@ -940,7 +940,12 @@ export function DeveloperConsole({ onVisibilityChange, isMobileMenuOpen = false 
                       achievement.unlocked
                         ? 'border-yellow-400/50 bg-yellow-400/10'
                         : 'border-gray-700 bg-gray-800/30 opacity-30 grayscale'
-                    }`}
+                    } ${!isMobile && achievement.id === 'enlightenment' && achievement.unlocked ? 'ring-1 ring-yellow-400/40 ring-offset-1 ring-offset-black' : ''}`}
+                    title={
+                      !isMobile && achievement.id === 'enlightenment' && achievement.unlocked
+                        ? '✨ Click to celebrate!'
+                        : undefined
+                    }
                     onMouseEnter={() => {
                       if (isMobile) return
                       const el = achievementRefs.current[achievement.id]
@@ -987,6 +992,12 @@ export function DeveloperConsole({ onVisibilityChange, isMobileMenuOpen = false 
                             setTooltip(null)
                           }, 3000)
                         }
+                        // Also fire confetti on mobile for enlightenment
+                        if (achievement.id === 'enlightenment' && achievement.unlocked) {
+                          window.dispatchEvent(new CustomEvent('enlightenment-clicked'))
+                        }
+                      } else if (achievement.id === 'enlightenment' && achievement.unlocked) {
+                        window.dispatchEvent(new CustomEvent('enlightenment-clicked'))
                       }
                     }}
                   >
