@@ -21,7 +21,8 @@ async function triggerMidpointAchievement(page: import('@playwright/test').Page)
 }
 
 async function waitForAchievementPopup(page: import('@playwright/test').Page) {
-  const popup = page.locator('[data-testid="achievement-popup-layer-mobile"]').first()
+  // On tablet (iPad Pro = 1024px), lg: breakpoint activates so the desktop layer shows
+  const popup = page.locator('[data-testid="achievement-popup-layer"]').first()
 
   for (let attempt = 0; attempt < 3; attempt++) {
     const isVisible = await popup.isVisible().catch(() => false)
@@ -39,7 +40,7 @@ async function waitForAchievementPopup(page: import('@playwright/test').Page) {
 test.describe('Tablet devtools and overlays', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/')
-    await page.waitForLoadState('networkidle')
+    await page.waitForLoadState('load')
   })
 
   test('achievement icons are proportionally sized on tablet (md:text-4xl)', async ({ page }) => {
@@ -52,12 +53,8 @@ test.describe('Tablet devtools and overlays', () => {
     // Trigger several achievements
     await triggerMidpointAchievement(page)
 
-    const achievementIcons = consoleRegion
-      .locator('[role="presentation"] .text-2xl, [role="presentation"] .text-4xl, [role="presentation"] button')
-      .filter({ has: page.locator('text=/[🏆🎯🚀]/') })
-
     // On tablet (md:text-4xl), icons should be visibly larger than on mobile
-    const firstIcon = consoleRegion.locator('[data-testid*="achievement"] button').first()
+    const firstIcon = consoleRegion.locator('[class*="aspect-square"]').first()
     const iconBox = await firstIcon.boundingBox()
 
     if (iconBox) {
@@ -82,7 +79,7 @@ test.describe('Tablet devtools and overlays', () => {
 
     // Verify popup is above console by checking z-index
     const zLayerCheck = await page.evaluate(() => {
-      const popupContainer = document.querySelector('[data-testid="achievement-popup-layer-mobile"]')
+      const popupContainer = document.querySelector('[data-testid="achievement-popup-layer"]')
       const consoleContainer = document.querySelector('[role="region"][aria-label="Developer debug console"]')
 
       const popupZ = popupContainer ? Number.parseInt(getComputedStyle(popupContainer).zIndex || '0', 10) : -1
@@ -123,14 +120,18 @@ test.describe('Tablet devtools and overlays', () => {
         await page.waitForTimeout(150)
       }
 
-      // Check if settings-tinkerer achievement was unlocked
-      const achievementButton = consoleRegion.locator('[title*="Tweak"]').first()
-      const unlocked = await achievementButton
-        .evaluate((el: HTMLButtonElement) => {
-          const style = getComputedStyle(el)
-          return !style.opacity || style.opacity === '1'
-        })
-        .catch(() => false)
+      // Check if settings-tinkerer achievement was unlocked via localStorage
+      // (achievement slots use JS tooltips, not title attributes)
+      const unlocked = await page.evaluate(() => {
+        const saved = localStorage.getItem('achievements')
+        if (!saved) return false
+        try {
+          const list = JSON.parse(saved) as Array<{ id: string; unlocked: boolean }>
+          return list.find((a) => a.id === 'settings-tinkerer')?.unlocked === true
+        } catch {
+          return false
+        }
+      })
 
       if (unlocked) {
         // Achievement was unlocked, verify popup appeared
@@ -153,16 +154,16 @@ test.describe('Tablet devtools and overlays', () => {
     // Trigger achievements
     await triggerMidpointAchievement(page)
 
-    // Get all achievement buttons
-    const achievementGrid = consoleRegion.locator('[class*="grid"][class*="gap"]').filter({ hasText: 'Achievements' })
-    const firstButton = achievementGrid.locator('button').first()
-    const lastButton = achievementGrid.locator('button').last()
+    // Achievement slots are divs with aspect-square, not <button> elements
+    const achievementGrid = consoleRegion.locator('[class*="grid-cols-4"]')
+    const firstSlot = achievementGrid.locator('[class*="aspect-square"]').first()
+    const lastSlot = achievementGrid.locator('[class*="aspect-square"]').last()
 
-    const firstBox = await firstButton.boundingBox()
-    const lastBox = await lastButton.boundingBox()
+    const firstBox = await firstSlot.boundingBox()
+    const lastBox = await lastSlot.boundingBox()
 
     if (firstBox && lastBox) {
-      // Buttons should be consistently sized (aspect-square)
+      // Slots should be consistently sized (aspect-square)
       expect(firstBox.width).toBeCloseTo(firstBox.height, 2)
       expect(lastBox.width).toBeCloseTo(lastBox.height, 2)
 

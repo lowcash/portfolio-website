@@ -1,5 +1,5 @@
 // style-boundary-ignore-file: dynamic orbR/orbG/orbB RGB values computed from React state — inline styles are unavoidable here
-import { useEffect, useEffectEvent, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 import { Terminal, Trophy, X } from 'lucide-react'
 
@@ -124,18 +124,6 @@ export function DeveloperConsole({ onVisibilityChange, isMobileMenuOpen = false 
     return parseFloat(localStorage.getItem('position_variation') || '1.0')
   })
 
-  const toggleVisibility = useEffectEvent(() => {
-    const nextValue = !isVisible
-
-    setIsVisible(nextValue)
-
-    if (nextValue) {
-      localStorage.setItem('dev_console_opened', 'true')
-      window.dispatchEvent(new CustomEvent('dev-console-opened'))
-      console.log('%c🎮 Achievement system activated!', 'color: #10b981; font-size: 12px; font-weight: bold;')
-    }
-  })
-
   // Apply settings to CSS custom properties
   useEffect(() => {
     const root = document.documentElement
@@ -169,9 +157,8 @@ export function DeveloperConsole({ onVisibilityChange, isMobileMenuOpen = false 
     }, 400)
   }, [orbBrightness, animationSpeed, colorVariation, orbSize, orbBlur, orbOpacity, positionVariation])
 
-  // Toggle visibility with "D" key
+  // Show console hint once on load
   useEffect(() => {
-    // Show console hint on first load
     const hasSeenHint = sessionStorage.getItem('debug_hint_shown')
     if (!hasSeenHint) {
       console.log('%c🎮 Easter Egg Found!', 'color: #ec4899; font-size: 16px; font-weight: bold;')
@@ -181,6 +168,22 @@ export function DeveloperConsole({ onVisibilityChange, isMobileMenuOpen = false 
         'color: #8b5cf6; font-size: 11px;',
       )
       sessionStorage.setItem('debug_hint_shown', 'true')
+    }
+  }, [])
+
+  // Toggle via "D" key and 4-finger tap — local toggleVisibility keeps isVisible in deps, so listener always has fresh closure
+  useEffect(() => {
+    const toggleVisibility = () => {
+      const nextValue = !isVisible
+      setIsVisible(nextValue)
+      if (nextValue) {
+        localStorage.setItem('dev_console_opened', 'true')
+        window.dispatchEvent(new CustomEvent('dev-console-opened'))
+        console.log('%c🎮 Achievement system activated!', 'color: #10b981; font-size: 12px; font-weight: bold;')
+      } else {
+        localStorage.removeItem('dev_console_opened')
+        window.dispatchEvent(new CustomEvent('dev-console-closed'))
+      }
     }
 
     const handleKeyPress = (e: KeyboardEvent) => {
@@ -211,7 +214,7 @@ export function DeveloperConsole({ onVisibilityChange, isMobileMenuOpen = false 
       window.removeEventListener('keydown', handleKeyPress)
       window.removeEventListener('touchstart', handleTouchStart)
     }
-  }, [])
+  }, [isVisible])
 
   // Track scroll and orb colors
   useEffect(() => {

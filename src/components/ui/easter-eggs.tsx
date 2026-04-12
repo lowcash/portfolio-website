@@ -1,4 +1,4 @@
-import { useEffect, useEffectEvent, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 
 import confetti from 'canvas-confetti'
 import { Trophy } from 'lucide-react'
@@ -293,6 +293,10 @@ export function EasterEggs() {
   const navClicksRef = useRef(0)
   const orbSettingsChangesRef = useRef(0)
   const hasReachedContactRef = useRef(false)
+  // Sync achievementsEnabled into a ref so unlockAchievement can read the latest value
+  // without being listed as a dependency in event-listener effects
+  const achievementsEnabledRef = useRef(achievementsEnabled)
+  achievementsEnabledRef.current = achievementsEnabled
 
   useEffect(() => {
     if (!canUseStorage) {
@@ -317,6 +321,56 @@ export function EasterEggs() {
       window.removeEventListener('storage', handleStorage)
     }
   }, [canUseStorage])
+
+  // Unlock achievement helper — called via ref so effects don't need it in their deps arrays.
+  // The ref is always up-to-date (assigned every render below), so event listeners
+  // remain registered across re-renders without triggering re-registration.
+  const unlockAchievementRef = useRef<(id: string) => void>(() => {})
+  const unlockAchievement = (id: string) => {
+    if (!canUseStorage || !achievementsEnabledRef.current) {
+      return
+    }
+
+    setAchievements((prev) => {
+      const achievement = prev.find((a) => a.id === id)
+      if (!achievement || achievement.unlocked) {
+        return prev
+      }
+
+      const updated = prev.map((a) => (a.id === id ? { ...a, unlocked: true, unlockedAt: Date.now() } : a))
+
+      // Show achievement popup
+      const unlockedAchievement = updated.find((a) => a.id === id)
+      if (unlockedAchievement) {
+        // Clear any pending timers
+        if (achievementTimeoutRef.current) clearTimeout(achievementTimeoutRef.current)
+        if (achievementHidingTimeoutRef.current) clearTimeout(achievementHidingTimeoutRef.current)
+
+        // Show popup immediately
+        setShowAchievement(unlockedAchievement)
+        setIsHidingAchievement(false)
+
+        // Trigger exit animation after 4 seconds (visible time)
+        achievementTimeoutRef.current = setTimeout(() => {
+          setIsHidingAchievement(true)
+
+          // Remove from DOM after exit animation completes (0.5s)
+          achievementHidingTimeoutRef.current = setTimeout(() => {
+            setShowAchievement(null)
+            setIsHidingAchievement(false)
+          }, 500)
+        }, 4000)
+
+        // Console message
+        console.log(`%c🏆 Achievement Unlocked!`, 'color: #fbbf24; font-size: 16px; font-weight: bold;')
+        console.log(`%c${unlockedAchievement.icon} ${unlockedAchievement.name}`, 'color: #a855f7; font-size: 14px;')
+        console.log(`%c${unlockedAchievement.description}`, 'color: #9ca3af; font-size: 12px;')
+      }
+
+      return updated
+    })
+  }
+  unlockAchievementRef.current = unlockAchievement
 
   // SHOW ACHIEVEMENT LIST ON PAGE LOAD (only after dev console opened)
   useEffect(() => {
@@ -364,7 +418,7 @@ export function EasterEggs() {
     if (allBaseUnlocked && enlightenmentAch && !enlightenmentAch.unlocked) {
       // Trigger Enlightenment unlock with mega celebration
       setTimeout(() => {
-        unlockAchievement('enlightenment')
+        unlockAchievementRef.current('enlightenment')
         fireCasinoConfetti()
 
         console.log(
@@ -400,52 +454,6 @@ export function EasterEggs() {
     }
   }, [])
 
-  // Unlock achievement helper
-  const unlockAchievement = useEffectEvent((id: string) => {
-    if (!canUseStorage || !achievementsEnabled) {
-      return
-    }
-
-    setAchievements((prev) => {
-      const achievement = prev.find((a) => a.id === id)
-      if (!achievement || achievement.unlocked) {
-        return prev
-      }
-
-      const updated = prev.map((a) => (a.id === id ? { ...a, unlocked: true, unlockedAt: Date.now() } : a))
-
-      // Show achievement popup
-      const unlockedAchievement = updated.find((a) => a.id === id)
-      if (unlockedAchievement) {
-        // Clear any pending timers
-        if (achievementTimeoutRef.current) clearTimeout(achievementTimeoutRef.current)
-        if (achievementHidingTimeoutRef.current) clearTimeout(achievementHidingTimeoutRef.current)
-
-        // Show popup immediately
-        setShowAchievement(unlockedAchievement)
-        setIsHidingAchievement(false)
-
-        // Trigger exit animation after 4 seconds (visible time)
-        achievementTimeoutRef.current = setTimeout(() => {
-          setIsHidingAchievement(true)
-
-          // Remove from DOM after exit animation completes (0.5s)
-          achievementHidingTimeoutRef.current = setTimeout(() => {
-            setShowAchievement(null)
-            setIsHidingAchievement(false)
-          }, 500)
-        }, 4000)
-
-        // Console message
-        console.log(`%c🏆 Achievement Unlocked!`, 'color: #fbbf24; font-size: 16px; font-weight: bold;')
-        console.log(`%c${unlockedAchievement.icon} ${unlockedAchievement.name}`, 'color: #a855f7; font-size: 14px;')
-        console.log(`%c${unlockedAchievement.description}`, 'color: #9ca3af; font-size: 12px;')
-      }
-
-      return updated
-    })
-  })
-
   // 1. TRIPLE-CLICK ON LOGO
   useEffect(() => {
     if (!achievementsEnabled) {
@@ -463,7 +471,7 @@ export function EasterEggs() {
         clickCount++
 
         if (clickCount === 3) {
-          unlockAchievement('triple-click')
+          unlockAchievementRef.current('triple-click')
           clickCount = 0
         }
 
@@ -501,7 +509,7 @@ export function EasterEggs() {
 
         // Keep this forgiving to avoid flaky precision around section/layout rounding.
         if (Math.abs(percent - 50) < 2.5) {
-          unlockAchievement('perfectly-balanced')
+          unlockAchievementRef.current('perfectly-balanced')
 
           // Special console message with explanation
           console.log('%c⚖ PERFECTLY BALANCED!', 'color: #10b981; font-size: 16px; font-weight: bold;')
@@ -523,7 +531,7 @@ export function EasterEggs() {
     }
   }, [achievementsEnabled])
 
-  // 3. IDLE DETECTION (60 seconds) - FIXED: Only start after user interaction
+  // 3. PATIENCE IS A VIRTUE (idle for 60 seconds)
   useEffect(() => {
     if (!achievementsEnabled) {
       return
@@ -544,7 +552,7 @@ export function EasterEggs() {
       if (userHasInteractedRef.current) {
         idleTimerRef.current = setTimeout(() => {
           setIdleCursor(true)
-          unlockAchievement('patience')
+          unlockAchievementRef.current('patience')
 
           // Whisper message in console
           console.log(
@@ -599,7 +607,7 @@ export function EasterEggs() {
       clickTimesRef.current = clickTimesRef.current.filter((time) => now - time < 2000)
 
       if (clickTimesRef.current.length >= 10) {
-        unlockAchievement('rapid-clicker')
+        unlockAchievementRef.current('rapid-clicker')
 
         // Create particle effect at click position
         const newParticle = { id: Date.now(), x: e.clientX, y: e.clientY }
@@ -624,7 +632,7 @@ export function EasterEggs() {
     }
 
     const handleCopy = () => {
-      unlockAchievement('copy-cat')
+      unlockAchievementRef.current('copy-cat')
 
       // Add custom message to clipboard
       const selection = window.getSelection()?.toString()
@@ -678,7 +686,7 @@ export function EasterEggs() {
 
         if (scrollDistance > 500) {
           if (scrollTimer) clearTimeout(scrollTimer)
-          unlockAchievement('shake')
+          unlockAchievementRef.current('shake')
           scrollEvents = []
 
           const root = document.documentElement
@@ -712,7 +720,7 @@ export function EasterEggs() {
 
           if (totalDistance > 2000) {
             if (mouseTimer) clearTimeout(mouseTimer)
-            unlockAchievement('shake')
+            unlockAchievementRef.current('shake')
             mouseMovements = []
 
             const root = document.documentElement
@@ -791,11 +799,11 @@ export function EasterEggs() {
       visitedSectionsRef.current.add(activeSection)
 
       if (visitedSectionsRef.current.size >= 5) {
-        unlockAchievement('section-hopper')
+        unlockAchievementRef.current('section-hopper')
       }
 
       if (visitedSectionsRef.current.size === sectionIds.length) {
-        unlockAchievement('world-tour')
+        unlockAchievementRef.current('world-tour')
       }
 
       if (activeSection === 'contact') {
@@ -803,7 +811,7 @@ export function EasterEggs() {
       }
 
       if (hasReachedContactRef.current && activeSection === 'hero' && window.scrollY < 220) {
-        unlockAchievement('back-to-origin')
+        unlockAchievementRef.current('back-to-origin')
       }
     }
 
@@ -824,7 +832,7 @@ export function EasterEggs() {
     const handleSettingsChange = () => {
       orbSettingsChangesRef.current += 1
       if (orbSettingsChangesRef.current >= 5) {
-        unlockAchievement('settings-tinkerer')
+        unlockAchievementRef.current('settings-tinkerer')
       }
     }
 
@@ -850,7 +858,7 @@ export function EasterEggs() {
       }
 
       if (triggerButton.matches('button[aria-label="Scroll to top of page"]')) {
-        unlockAchievement('round-trip')
+        unlockAchievementRef.current('round-trip')
       }
 
       const isDesktopNav = triggerButton.matches('button[aria-label^="Navigate to "]')
@@ -859,7 +867,7 @@ export function EasterEggs() {
       if (isDesktopNav || isMobileNav) {
         navClicksRef.current += 1
         if (navClicksRef.current >= 3) {
-          unlockAchievement('nav-master')
+          unlockAchievementRef.current('nav-master')
         }
       }
     }
@@ -886,7 +894,7 @@ export function EasterEggs() {
       previousScrollY = currentScrollY
 
       if (totalScroll >= 10000) {
-        unlockAchievement('marathon-runner')
+        unlockAchievementRef.current('marathon-runner')
 
         console.log(
           '%c🏃 MARATHON RUNNER! You scrolled a total of 10,000 pixels!',
@@ -924,7 +932,7 @@ export function EasterEggs() {
 
         if (duration < 120) {
           // 2 minutes
-          unlockAchievement('speed-reader')
+          unlockAchievementRef.current('speed-reader')
 
           console.log(
             '%c📚 SPEED READER! You reached the bottom in under 2 minutes!',
@@ -952,7 +960,7 @@ export function EasterEggs() {
     const count = visitCount ? parseInt(visitCount, 10) : 0
 
     if (count >= 3) {
-      unlockAchievement('repeat-visitor')
+      unlockAchievementRef.current('repeat-visitor')
 
       console.log(
         '%c🔄 REPEAT VISITOR! You visited the site 3+ times!',
@@ -965,11 +973,11 @@ export function EasterEggs() {
   }, [achievementsEnabled, canUseStorage])
 
   // Handle Enlightenment click for confetti
-  const handleEnlightenmentClick = useEffectEvent(() => {
+  const handleEnlightenmentClick = () => {
     if (showAchievement?.id === 'enlightenment') {
       fireCasinoConfetti()
     }
-  })
+  }
 
   // Cleanup timers on unmount
   useEffect(() => {

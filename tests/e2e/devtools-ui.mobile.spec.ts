@@ -23,7 +23,7 @@ async function triggerMidpointAchievement(page: import('@playwright/test').Page)
 test.describe('Mobile devtools visuals', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/')
-    await page.waitForLoadState('networkidle')
+    await page.waitForLoadState('load')
   })
 
   test('mobile orb centers are spread across viewport width', async ({ page }) => {
@@ -70,8 +70,8 @@ test.describe('Mobile devtools visuals', () => {
     if (hasPopup) {
       await expect(mobilePopup).toBeVisible()
 
-      // Verify popup content
-      const achievementText = mobilePopup.locator('text=/Achievement Unlocked|.+/')
+      // Verify popup content — use exact text to avoid strict mode violation across 4 child elements
+      const achievementText = mobilePopup.getByText('Achievement Unlocked!')
       await expect(achievementText).toBeVisible()
     }
 

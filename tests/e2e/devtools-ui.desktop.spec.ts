@@ -161,16 +161,9 @@ test.describe('Desktop devtools and overlays', () => {
       }
     }
 
-    // Verify achievement was recorded in console
-    const unlockedCount = await consoleRegion.evaluate(() => {
-      const buttons = Array.from(document.querySelectorAll('[role="region"] button[class*="border-yellow"]'))
-      return buttons.filter((btn) => {
-        const style = getComputedStyle(btn)
-        return style.opacity === '1' || !style.opacity
-      }).length
-    })
-
-    expect(unlockedCount).toBeGreaterThan(0)
+    // Verify achievement was recorded in console — wait for the grid to reflect the unlock
+    const unlockedSlot = consoleRegion.locator('div[class*="border-yellow"]').first()
+    await expect(unlockedSlot).toBeVisible({ timeout: 5000 })
 
     await page.evaluate(() => {
       document.documentElement.style.scrollSnapType = ''

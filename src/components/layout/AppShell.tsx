@@ -59,6 +59,16 @@ export function AppShell({ sectionIds }: AppShellProps) {
       }, 1100)
     }
 
+    // Section 0 (hero) is always at y=0. Force instant behavior: a smooth scroll
+    // across the entire page takes 3-4s and can be aborted if scroll metrics
+    // fire mid-animation and replaceState updates the URL hash to a non-hero
+    // section, which Chromium interprets as a scroll target.
+    if (index === 0) {
+      window.scrollTo({ top: 0, behavior: 'instant' })
+      if (updateHash) setSectionHashByIndex(sectionIds, 0)
+      return
+    }
+
     const didScroll = scrollToSectionByIndex(sectionIds, index, {
       behavior,
       updateHash,
