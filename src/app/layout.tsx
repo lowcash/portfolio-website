@@ -1,5 +1,4 @@
 import type { Metadata } from 'next'
-import Script from 'next/script'
 
 import { Analytics } from '@vercel/analytics/next'
 
@@ -66,7 +65,6 @@ export const metadata: Metadata = {
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
-  const gaTrackingId = process.env.NEXT_PUBLIC_GA_TRACKING_ID
   const enableVercelAnalytics = Boolean(process.env.VERCEL || process.env.VERCEL_ENV || process.env.VERCEL_URL)
 
   return (
@@ -78,17 +76,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
 
         <script type='application/ld+json' dangerouslySetInnerHTML={{ __html: JSON.stringify(personJsonLd) }} />
         {enableVercelAnalytics ? <Analytics /> : null}
-        {gaTrackingId ? (
-          <>
-            <Script src={`https://www.googletagmanager.com/gtag/js?id=${gaTrackingId}`} strategy='lazyOnload' />
-            <Script id='gtag-init' strategy='lazyOnload'>{`
-              window.dataLayer = window.dataLayer || [];
-              function gtag(){dataLayer.push(arguments);}
-              gtag('js', new Date());
-              gtag('config', '${gaTrackingId}');
-            `}</Script>
-          </>
-        ) : null}
       </body>
     </html>
   )

@@ -26,3 +26,4 @@ Current versions in use (update line items as your project upgrades):
 ## Repository Notes
 
 - React Compiler is enabled (`reactCompiler: true` in `next.config.mjs`); `babel-plugin-react-compiler` must stay in devDependencies.
+- This is intentionally a lean site-level instruction stack. Do not pull in larger fullstack data or persistence guidance unless the repository actually grows into those concerns.
