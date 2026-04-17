@@ -10,7 +10,7 @@ Personal developer portfolio with scroll-based navigation, parallax effects, dyn
 | React        | 19      | UI layer (React Compiler enabled) |
 | TypeScript   | 5       | Type safety                       |
 | Tailwind CSS | 4       | Utility-first styling             |
-| Lucide React | —       | Icons                             |
+| Lucide React | 0.487   | Icons                             |
 | Knip         | 6       | Dead code detection               |
 | Playwright   | 1       | End-to-end tests                  |
 | Lighthouse   | 12      | Performance baseline              |

@@ -15,42 +15,7 @@
 **TypeScript**: 5+ — currently 5.9.3  
 **Styling**: Tailwind CSS 4+ + CSS custom properties
 
----
-
-## Architectural Principles (Framework-Agnostic)
-
-These principles apply whether you're using Next.js App Router, Vite, or other frameworks:
-
-### 1. **Component Layering**
-
-Organize components into layers to prevent mixing concerns:
-
-- **UI Layer**: Base styled components, zero business logic (buttons, cards, positioning containers)
-- **Feature Layer**: Content modules composed from UI primitives (sections, feature cards)
-- **Shared Layer**: Utilities and effects used across features (background animations, parallax)
-- **Layout Layer**: Structure wrappers with no raw styling (containers, spacing helpers)
-
-### 2. **State Boundaries**
-
-Clear separation of state ownership:
-
-- **Server state**: Content, metadata, non-interactive data (rendered on page load)
-- **Interactive state**: User interactions, scroll position, UI toggles (client-side only)
-- **Persistent state**: Achievements, preferences (localStorage)
-
-### 3. **Styling Strategy**
-
-Consistent approach to styling layers:
-
-- **Global styles**: CSS resets, animations, scroll behavior (one canonical file)
-- **Component styles**: Tailwind utilities + scoped CSS when necessary
-- **Dynamic values**: CSS custom properties for runtime changes (colors, opacity, metrics)
-
-### 4. **Performance-First Defaults**
-
-- **No layout shift**: Dimensions and spacing defined upfront
-- **CSS over JavaScript**: Animations and dynamic properties via CSS vars (no React re-renders)
-- **Lazy/deferred interaction**: Non-critical features (dev console, achievements) loaded on user interaction
+Architectural principles and component layering guidelines are documented in [`.github/instructions/architecture.instructions.md`](./.github/instructions/architecture.instructions.md).
 
 ---
 
