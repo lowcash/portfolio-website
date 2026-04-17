@@ -2,39 +2,26 @@
 
 ## Overview
 
-**Portfolio Website** is a high-performance single-page portfolio built with **Next.js 16+ (App Router)**, featuring:
-
-- Server-side rendering (RSC) with minimal client JavaScript
-- Scroll-based section navigation with smooth transitions
-- Dynamic achievement system ("easter eggs")
-- Performance-optimized animations via CSS variables
-- Responsive design (mobile-first, tablet/desktop enhancements)
-
-**Framework**: Next.js 16+ (App Router) — currently 16.2.2  
-**React**: 19+ — currently 19.2.4  
-**TypeScript**: 5+ — currently 5.9.3  
-**Styling**: Tailwind CSS 4+ + CSS custom properties
-
-Architectural principles and component layering guidelines are documented in [`.github/instructions/architecture.instructions.md`](./.github/instructions/architecture.instructions.md).
+**Portfolio Website** is a high-performance personal portfolio built with **Next.js 16+ (App Router)**, featuring server-side rendering with minimal client JavaScript, scroll-based section navigation, a dynamic achievement system ("easter eggs"), and performance-optimized animations via CSS variables.
 
 ---
 
-## Directory Structure (Next.js App Router)
+## Directory Structure
 
 ```
 src/
 ├── app/
-│   ├── layout.tsx              # Document shell (html, head, body)
-│   └── page.tsx                # Server assembly (sections, content)
+│   ├── layout.tsx              # Document shell
+│   └── page.tsx                # Server-side section assembly
 ├── components/
-│   ├── features/               # Feature modules (WhoIAm, TechJourney, etc.)
+│   ├── features/               # Content modules (WhoIAm, TechJourney, NotableWork, etc.)
 │   │   └── devtools/
 │   │       └── DeveloperConsole.tsx    # Easter egg debug tool
 │   ├── shared/                 # Cross-feature utilities (AnimatedBackground)
-│   ├── ui/                     # Base styled components, parallax section, navigation controls
-│   └── layout/                 # AppShell orchestration boundary
-├── lib/                        # Utilities, constants, navigation helpers
-└── styles/                     # Global CSS entrypoint and style modules
+│   ├── ui/                     # Base styled components (navigation, scroll progress, etc.)
+│   └── layout/                 # AppShell client orchestration
+├── lib/                        # Utilities, navigation helpers, constants
+└── styles/                     # Global CSS (themes, animations, typography)
 ```
 
 ---
@@ -45,413 +32,41 @@ src/
 
 **Implementation**: `src/components/layout/AppShell.tsx` + `src/components/ui/scroll-navigation.tsx`
 
-**How it works**:
+Listens to `window.scroll` events, debounced with `requestAnimationFrame` (60 FPS max). Calculates active section index by comparing scroll position to section boundaries, updates nav dots and mobile drawer highlight. When user clicks a nav dot, monitors the target section element until it enters viewport (within 4px of top), then releases the navigation lock to resume normal scrolling.
 
-1. Client component listens to `window.scroll` events
-2. Debounced with `requestAnimationFrame` (60 FPS max, prevents jank)
-3. Calculates `currentSection` index by comparing scroll position to section boundaries
-4. Updates active nav dot + desktop drawer highlight
-5. Mobile: Custom drawer with keyboard shortcut support (Escape to close)
-
-**Example**:
-
-```typescript
-// src/components/layout/AppShell.tsx
-const [currentSection, setCurrentSection] = useState(0)
-useEffect(() => {
-  const handleScroll = () => {
-    // Calculate which section is in viewport
-    const newSection = detectCurrentSection(...)
-    setCurrentSection(newSection)
-  }
-  window.addEventListener('scroll', handleScroll)
-})
-```
+**Key code**: `monitorNavigationTarget(index)` uses RAF to check `bounding rect.top ≈ 0`; 5-second fallback timeout if section doesn't reach viewport.
 
 ### 2. Achievement System ("Easter Eggs")
 
 **Implementation**: `src/components/ui/easter-eggs.tsx`
 
-**Mechanics**:
+Detects user actions (scroll position, keyboard shortcuts) and unlocks achievements. State persists to `localStorage` (`achievements:unlocked`). When unlocked, popup appears above side-nav dots with a border color derived from the current section's CSS variable (`--orb-r`, `--orb-g`, `--orb-b`).
 
-- Triggers detected on client (scroll position, keyboard shortcuts, user actions)
-- State persisted to `localStorage` (`achievements:unlocked`)
-- Popup appears above side-nav dots when triggered, derives border color from current section's CSS variable (`--orb-r`, `--orb-g`, `--orb-b`)
-- Animations: CSS transitions + backdrop blur (no heavy libraries)
-
-**Example triggers**:
-
-- Scroll to exactly 50% of page height → "Perfectly Balanced" achievement
-- Use the scroll-to-top shortcut → "Round Trip" achievement
-- Unlock every base achievement → "Enlightenment" achievement
+**Example triggers**: Scroll to exactly 50% of page → "Perfectly Balanced"; use scroll-to-top shortcut → "Round Trip"; unlock every base achievement → "Enlightenment".
 
 ### 3. Animations & Visual Effects
 
-**CSS Variables Drive Dynamic Styling**:
+**Implementation**: CSS custom properties + Tailwind utilities
 
-```css
-/* Set by JavaScript based on currentSection */
---orb-r: 255; /* Red component */
---orb-g: 100; /* Green component */
---orb-b: 50; /* Blue component */
+Section colors drive dynamic styling: JavaScript sets `--orb-r`, `--orb-g`, `--orb-b` CSS variables based on `currentSection`, and components consume them with `rgb(var(--orb-r), var(--orb-g), var(--orb-b))`. This approach avoids React re-renders when colors change; CSS handles GPU-accelerated transitions.
 
-/* Consumed by components */
-color: rgb(var(--orb-r), var(--orb-g), var(--orb-b));
-```
-
-**Benefits**:
-
-- No React re-renders when section color changes
-- GPU-accelerated CSS updates
-- Smooth transitions with `transition: --orb-r 300ms ease-out`
-
-**ParallaxSection** (scroll-linked effect):
-
-- Sets CSS class based on distance from viewport center
-- Class toggles opacity, spacing via Tailwind utilities
-- Alternative to expensive `onScroll` transform calculations
-
-**AnimatedBackground** (orbs):
-
-- Positioned absolutely, layered with `z-index`
-- Colors derive from current section
-- Opacity controlled via CSS variable: `--animation-speed`
+**AnimatedBackground** layers orbs positioned absolutely; **ParallaxSection** toggles opacity/spacing based on distance from viewport center using Tailwind utilities.
 
 ---
 
-## Component Architecture (Next.js Specific)
+## Tech Stack Decisions
 
-### App Router Boundaries
+- **Next.js App Router with RSC**: Server components render all section content upfront; only `AppShell` client component handles scroll interactivity (~15–20 KB gzipped vs. full SPA 100+ KB). Minimizes hydration cost and JavaScript execution.
 
-**`app/layout.tsx` — Document Shell**
+- **CSS Variables over React State**: Dynamic colors set once on load; CSS handles transitions and GPU acceleration. No `setState` on every scroll event.
 
-```typescript
-// Server-rendered, no interactivity
-export default function RootLayout({ children }) {
-  return (
-    <html>
-      <head>
-        {/* Metadata, JSON-LD schema, Open Graph */}
-      </head>
-      <body>
-        {children}
-        {/* Global styles imported here */}
-      </body>
-    </html>
-  )
-}
-```
+- **Tailwind CSS v4 + Modular CSS Structure**: Utility-first styling with organized modules (theme, typography, animations). Each file has one concern; Tailwind purges unused styles in production.
 
-- Defines `<html>`, `<head>`, `<body>` structure
-- Sets global metadata (title, description, social preview)
-- Imports `src/index.css` (global animations + Tailwind)
-- No hooks, no state, no event listeners
-
-**`app/page.tsx` — Server Assembly**
-
-```typescript
-// Pure server component, maps data to features
-export default function Home() {
-  return (
-    <>
-      <WhoIAm id="who-i-am" aria-label="About me" />
-      <TechStack id="tech-stack" aria-label="Tech stack" />
-      {/* ... */}
-    </>
-  )
-}
-```
-
-- Composes feature components (WhoIAm, TechStack, NotableWork, etc.)
-- Wraps each in layout helper (ParallaxSection, SectionWrapper)
-- Provides unique `id` and `aria-label` per section (nav targeting, accessibility)
-- No `'use client'` directive; pure server-side rendering
-
-**`app/client-chrome.tsx` — Client Orchestrator (Single Boundary)**
-
-```typescript
-'use client'
-export default function ClientChrome() {
-  const [currentSection, setCurrentSection] = useState(0)
-  const [devConsoleOpen, setDevConsoleOpen] = useState(false)
-
-  return (
-    <>
-      <ScrollProgress currentSection={currentSection} />
-      <ScrollNavigation currentSection={currentSection} />
-      <ScrollToTop />
-      <DeveloperConsole />
-      <EasterEggs currentSection={currentSection} />
-      <AnimatedBackground currentSection={currentSection} />
-    </>
-  )
-}
-```
-
-- **Single `'use client'` boundary** for entire app
-- Manages all interactive state:
-  - `currentSection`: Index of active section
-  - `devConsoleOpen`: Debug tool toggle
-  - `menuOpen`: Mobile drawer state
-- Mounts client-aware components (requires scroll listeners, state)
-- Orchestrates scroll event forwarding via `requestAnimationFrame` debouncing
-
-**Why single boundary?**
-
-- Minimizes client JavaScript (hydration cost lower)
-- Clear state ownership (all client-side state in one place)
-- Prevents "scattered `'use client'` directives" anti-pattern
-- Easier to reason about data flow
-
-### Component Layers
-
-**UI Layer** (`src/components/ui/`): Styled primitives
-
-- `button.tsx`, `card.tsx`, `container.tsx` — Tailwind + className props
-- `floating-rail.tsx` — Position wrapper for fixed elements (scroll-up button, side-nav dots)
-- `scroll-navigation.tsx` — Navigation dots + mobile drawer
-- `scroll-progress.tsx` — Progress bar element
-- `easter-eggs.tsx` — Achievement popup
-- **Rule**: No business logic, pure presentation
-
-**Feature Layer** (`src/components/features/`): Content modules
-
-- `WhoIAm.tsx` — About section (skills, background)
-- `TechJourney.tsx` — Tech overview (tools, frameworks)
-- `NotableWork.tsx` — Portfolio projects
-- `devtools/DeveloperConsole.tsx` — Easter egg debug interface
-- **Rule**: Compose UI primitives only; no raw `className` styling
-
-**Shared Layer** (`src/components/shared/`): Cross-feature utilities
-
-- `AnimatedBackground.tsx` — Scrolling orb effect
-- **Rule**: May be styled/stateful; prevent duplication
-
-**Layout Layer** (`src/components/layout/`): Structure wrappers
-
-- `AppShell.tsx` — Client orchestration boundary for navigation and overlays
-- **Rule**: Pure composition, no raw styling
-
----
-
-## Styling Organization
-
-### Global CSS Structure (`src/styles/`)
-
-**Modular, Tailwind v4+ compatible architecture**:
-
-```
-globals.css          ← Entry point: @imports all modules in order
-├── theme.css        ← Design tokens, color palette, CSS variables, @theme mapping
-├── typography.css   ← Font scale, heading styles, text element defaults
-├── base.css         ← HTML/body reset, scroll behavior, accessibility helpers
-├── accessibility.css ← Focus indicators, skip-to-content, sr-only utilities
-└── animations.css   ← All @keyframes, animation utilities, scroll-based component styles
-```
-
-**Why modular CSS?**
-
-- **Maintainability**: Each file has a single concern (colors, typography, animations)
-- **Clarity**: Navigate to relevant file based on what you're updating
-- **Performance**: Tailwind purges unused styles in production; modular organization doesn't affect bundle size
-- **Framework-agnostic**: Same structure works in Vite, Svelte, Next.js, etc.
-
-**Workflow**:
-
-```bash
-npm run dev   # Tailwind watches src/styles/*.css, processes into single stylesheet
-npm run build # Production: CSS purged, minified; no unused styles
-```
-
-**Import Flow** (from `app/layout.tsx`):
-
-```typescript
-import '../styles/globals.css'
-
-// Entry point; cascades to all submodules
-```
-
-### Component Styles
-
-**Tailwind Utilities** (default approach):
-
-```tsx
-// ✅ GOOD: UI primitives use className
-export function Button({ children }) {
-  return <button className='rounded-lg bg-blue-500 px-4 py-2 text-white'>{children}</button>
-}
-
-// ✅ GOOD: Features compose UI primitives
-export function MySection() {
-  return (
-    <Card className='p-6'>
-      <Button>Click</Button>
-    </Card>
-  )
-}
-
-// ❌ BAD: Features defining raw styling
-export function MySection() {
-  return <div className='rounded-lg border bg-white p-6 shadow'>...</div>
-}
-```
-
-**CSS Custom Properties** (dynamic runtime values):
-
-```css
-/* src/styles/theme.css — Global initialization */
-:root {
-  --orb-r: 255;
-  --orb-g: 100;
-  --orb-b: 50;
-}
-
-/* src/styles/animations.css — Component consumption */
-.scroll-nav-dot-active {
-  background-color: rgb(var(--orb-r), var(--orb-g), var(--orb-b));
-  box-shadow: 0 0 12px rgba(var(--orb-r), var(--orb-g), var(--orb-b), 0.8);
-}
-```
-
-**Why CSS variables instead of React state?**
-
-- No re-renders when values change (no performance hit)
-- GPU-accelerated transitions: `transition: --orb-r 300ms ease-out`
-- Simpler code: Set once on page load, CSS handles animations
-
-### Removed Dead Code
-
-- `src/index.css` (generated Tailwind output, deprecated)
-- Old `src/styles/globals.css` (20 KB monolith, migrated to modular structure)
-
----
-
-## Performance & Optimization
-
-### 1. Server-Side Rendering (RSC)
-
-**Benefit**: Initial HTML includes all section content; avoids "flash of empty page"
-
-```html
-<!-- Sent to browser immediately -->
-<html>
-  <body>
-    <section id="who-i-am">...</section>
-    <section id="tech-stack">...</section>
-  </body>
-</html>
-```
-
-### 2. Minimal Client JavaScript
-
-**Only** `app/client-chrome.tsx` is client-rendered:
-
-- Scroll listener
-- Nav state updates
-- Hidden easter egg console
-- ~15–20 KB gzipped (vs. full SPA: 100+ KB)
-
-### 3. CSS Variables vs. React State
-
-**Without CSS vars** (❌ wasteful):
-
-```jsx
-const [color, setColor] = useState('rgb(255, 100, 50)')
-/* onScroll → setColor(...) → re-render */
-```
-
-**With CSS vars** (✅ performant):
-
-```jsx
-useEffect(() => {
-  document.documentElement.style.setProperty('--orb-r', 255)
-  /* onScroll → inline style update → GPU handles it */
-}, [])
-```
-
-### 4. Scroll Listener Debouncing
-
-```javascript
-let rafId = null
-window.addEventListener('scroll', () => {
-  if (rafId) cancelAnimationFrame(rafId)
-  rafId = requestAnimationFrame(() => {
-    setCurrentSection(calculateNewSection())
-  })
-})
-```
-
-**Result**: At most 1 state update per frame (60 FPS max), prevents jank
-
-### 5. Dynamic Imports (Future)
-
-For non-critical features:
-
-```typescript
-const DeveloperConsole = dynamic(() => import('@/components/features/DeveloperConsole'), { ssr: false })
-```
-
----
-
-## Extensibility & Framework Adaption
-
-### Next.js to Vite Migration (If Needed)
-
-The architecture translates well:
-
-| Next.js                                  | Vite Equivalent                         |
-| ---------------------------------------- | --------------------------------------- |
-| `app/layout.tsx`                         | `index.html` + main layout component    |
-| `app/page.tsx` → `app/client-chrome.tsx` | Root App component with scroll listener |
-| RSC Server → Vite static data            | Static import or API call               |
-| CSS vars + Tailwind                      | Same setup applicable                   |
-
-**Key difference**: Vite forces everything to client by default, so:
-
-1. Move scroll logic into a single "root orchestrator" component (like `client-chrome`)
-2. Pass state down as props (no RSC convenience)
-3. Use code splitting for non-critical features
-
-### Why Not Svelte/Vue?
-
-The principles remain the same:
-
-- **Component layering**: UI → Features → Shared → Layout (language-agnostic)
-- **State boundaries**: Centralize interactive state, keep UI dumb
-- **CSS strategy**: Tailwind + CSS vars work in any framework
-
-If you ever need Svelte, the conceptual model is identical; only the syntax changes.
-
----
-
-## Development Workflow
-
-### Building & Type Checking
-
-```bash
-npm run dev              # Start dev server + Tailwind watch
-npm run build            # Next.js prod build + TypeScript check
-npm run lint             # ESLint + Prettier format check
-npm run format           # Auto-format code
-```
-
-### Testing
-
-```bash
-npm run test:e2e         # Playwright focused suite (scroll nav, devtools, mobile)
-npm run test:e2e:ui      # Open Playwright Inspector
-```
-
-### Knip Unused Code Analysis
-
-```bash
-npm run analyze:unused   # Check for unused exports, imports, types
-```
+- **Single `'use client'` Boundary** (AppShell): All interactive state lives in one component—section tracking, menu state, easter egg console. Prevents scattered client boundaries and simplifies data flow.
 
 ---
 
 ## References
 
-- **Component Guidelines**: See `.github/instructions/architecture.instructions.md` (RSC/client boundaries, composition rules)
+- **General Principles**: See `.github/instructions/architecture.instructions.md` (component layering, ownership boundaries)
 - **Import & Code Standards**: `.github/instructions/clean-code.instructions.md`, `imports.instructions.md`
-- **Project Structure**: `.github/instructions/project-structure.instructions.md`

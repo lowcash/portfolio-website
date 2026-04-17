@@ -26,9 +26,6 @@ npm install
 npm run dev    # http://localhost:3000
 ```
 
-No environment variables are required for local development.
-Vercel Analytics is optional and activates only when the app runs in a Vercel environment.
-
 ## Commands
 
 | Command                            | Purpose                              |
