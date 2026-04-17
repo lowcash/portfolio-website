@@ -17,7 +17,7 @@ Personal developer portfolio with scroll-based navigation, parallax effects, dyn
 
 ## Architecture
 
-High-level structure, component ownership, and runtime notes live in [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md).
+High-level structure, key systems, and architectural decisions live in [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md).
 
 ## Development Setup
 
