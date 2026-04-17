@@ -631,16 +631,6 @@
   }
 }
 
-@keyframes konamiFlash {
-  0%,
-  100% {
-    filter: none;
-  }
-  50% {
-    filter: hue-rotate(180deg) brightness(1.2);
-  }
-}
-
 @keyframes enlightenedPulse {
   0%,
   100% {

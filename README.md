@@ -15,26 +15,9 @@ Personal developer portfolio with scroll-based navigation, parallax effects, dyn
 | Playwright   | 1       | End-to-end tests                  |
 | Lighthouse   | 12      | Performance baseline              |
 
-## Project Structure
+## Architecture
 
-```
-src/
-  app/                  # Next.js App Router (layout, page)
-  components/
-    shared/             # Reusable components (DevTools, ScrollNav …)
-    ui/                 # Base UI primitives
-  hooks/                # Custom React hooks
-  lib/                  # Utilities and constants
-  styles/               # Modular CSS architecture
-    globals.css         # Entry point (orchestrates all modules)
-    theme.css           # Design tokens and CSS variables
-    typography.css      # Font scale and heading styles
-    base.css            # HTML/body reset, scroll behavior
-    accessibility.css   # Focus styles, skip-to-content
-    animations.css      # Keyframes and animation utilities
-  assets/               # Static assets
-tests/e2e/              # Playwright end-to-end tests
-```
+High-level structure, component ownership, and runtime notes live in [docs/ARCHITECTURE.md](./docs/ARCHITECTURE.md).
 
 ## Development Setup
 
@@ -44,7 +27,7 @@ npm run dev    # http://localhost:3000
 ```
 
 No environment variables are required for local development.
-This project uses Vercel Analytics, which activates automatically on Vercel deployments.
+Vercel Analytics is optional and activates only when the app runs in a Vercel environment.
 
 ## Commands
 
@@ -72,10 +55,10 @@ npm run test:e2e
 npm run test:e2e:ui   # interactive UI mode
 ```
 
-## Deployment
+## Production
 
-Deployed on Vercel. Push to `main` triggers automatic deployment.
-Live URL: [https://lowcash.dev](https://lowcash.dev)
+Production URL: [https://lowcash.dev](https://lowcash.dev)
+Current deployment target: Vercel
 
 ---
 

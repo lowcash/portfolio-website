@@ -11,7 +11,7 @@ import {
 } from '@/lib/navigation-core-adapter'
 import { subscribeToScrollMetrics } from '@/lib/scroll-metrics'
 
-import { DeveloperConsole } from '@/components/features/DeveloperConsole'
+import { DeveloperConsole } from '@/components/features/devtools/DeveloperConsole'
 import { AnimatedBackground } from '@/components/shared/AnimatedBackground'
 import { EasterEggs } from '@/components/ui/easter-eggs'
 import { ScrollNavigation } from '@/components/ui/scroll-navigation'
@@ -31,7 +31,59 @@ export function AppShell({ sectionIds }: AppShellProps) {
   const hasInitializedHash = useRef(false)
   const hashRestoreTimeoutRef = useRef<number | null>(null)
   const isUserNavigatingRef = useRef(false)
-  const userNavTimeoutRef = useRef<number | null>(null)
+  const navigationMonitorFrameRef = useRef<number | null>(null)
+  const navigationMonitorTimeoutRef = useRef<number | null>(null)
+
+  const clearNavigationMonitor = () => {
+    if (navigationMonitorFrameRef.current !== null) {
+      window.cancelAnimationFrame(navigationMonitorFrameRef.current)
+      navigationMonitorFrameRef.current = null
+    }
+
+    if (navigationMonitorTimeoutRef.current !== null) {
+      window.clearTimeout(navigationMonitorTimeoutRef.current)
+      navigationMonitorTimeoutRef.current = null
+    }
+  }
+
+  const releaseNavigationLock = (nextSectionIndex?: number) => {
+    clearNavigationMonitor()
+    isUserNavigatingRef.current = false
+    setCurrentSection(typeof nextSectionIndex === 'number' ? nextSectionIndex : resolveActiveSectionIndex(sectionIds))
+  }
+
+  const monitorNavigationTarget = (index: number) => {
+    const targetElement = document.getElementById(sectionIds[index])
+
+    if (!targetElement) {
+      releaseNavigationLock()
+      return
+    }
+
+    const startedAt = performance.now()
+
+    const checkTarget = () => {
+      const distanceToTarget = Math.abs(targetElement.getBoundingClientRect().top)
+
+      if (distanceToTarget <= 4) {
+        releaseNavigationLock(index)
+        return
+      }
+
+      if (performance.now() - startedAt >= 5000) {
+        releaseNavigationLock()
+        return
+      }
+
+      navigationMonitorFrameRef.current = window.requestAnimationFrame(checkTarget)
+    }
+
+    clearNavigationMonitor()
+    navigationMonitorFrameRef.current = window.requestAnimationFrame(checkTarget)
+    navigationMonitorTimeoutRef.current = window.setTimeout(() => {
+      releaseNavigationLock()
+    }, 5200)
+  }
 
   useEffect(() => {
     const updateCurrentSection = () => {
@@ -51,22 +103,6 @@ export function AppShell({ sectionIds }: AppShellProps) {
     if (behavior === 'smooth') {
       setCurrentSection(index)
       isUserNavigatingRef.current = true
-      if (userNavTimeoutRef.current !== null) {
-        window.clearTimeout(userNavTimeoutRef.current)
-      }
-      userNavTimeoutRef.current = window.setTimeout(() => {
-        isUserNavigatingRef.current = false
-      }, 1100)
-    }
-
-    // Section 0 (hero) is always at y=0. Force instant behavior: a smooth scroll
-    // across the entire page takes 3-4s and can be aborted if scroll metrics
-    // fire mid-animation and replaceState updates the URL hash to a non-hero
-    // section, which Chromium interprets as a scroll target.
-    if (index === 0) {
-      window.scrollTo({ top: 0, behavior: 'instant' })
-      if (updateHash) setSectionHashByIndex(sectionIds, 0)
-      return
     }
 
     const didScroll = scrollToSectionByIndex(sectionIds, index, {
@@ -75,13 +111,21 @@ export function AppShell({ sectionIds }: AppShellProps) {
     })
 
     if (!didScroll && behavior === 'smooth') {
-      isUserNavigatingRef.current = false
+      releaseNavigationLock()
+      return
+    }
+
+    if (didScroll && behavior === 'smooth') {
+      monitorNavigationTarget(index)
       return
     }
   }
 
   useEffect(() => {
     const restoreHashSection = () => {
+      clearNavigationMonitor()
+      isUserNavigatingRef.current = false
+
       const sectionIndex = resolveHashSectionIndex(sectionIds)
       if (sectionIndex === null) {
         hasInitializedHash.current = true
@@ -112,9 +156,7 @@ export function AppShell({ sectionIds }: AppShellProps) {
       if (hashRestoreTimeoutRef.current !== null) {
         window.clearTimeout(hashRestoreTimeoutRef.current)
       }
-      if (userNavTimeoutRef.current !== null) {
-        window.clearTimeout(userNavTimeoutRef.current)
-      }
+      clearNavigationMonitor()
     }
   }, [sectionIds])
 

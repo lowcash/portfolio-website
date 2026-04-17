@@ -10,8 +10,8 @@
 - Performance-optimized animations via CSS variables
 - Responsive design (mobile-first, tablet/desktop enhancements)
 
-**Framework**: Next.js 15+ (App Router) — currently 15.5.4  
-**React**: 18+ — currently 18.3.1  
+**Framework**: Next.js 16+ (App Router) — currently 16.2.2  
+**React**: 19+ — currently 19.2.4  
 **TypeScript**: 5+ — currently 5.9.3  
 **Styling**: Tailwind CSS 4+ + CSS custom properties
 
@@ -57,30 +57,19 @@ Consistent approach to styling layers:
 ## Directory Structure (Next.js App Router)
 
 ```
-app/
-├── layout.tsx              # Document shell (html, head, body)
-├── page.tsx                # Server assembly (sections, content)
-└── client-chrome.tsx       # Single client boundary (scroll state, UI orchestration)
-
 src/
+├── app/
+│   ├── layout.tsx              # Document shell (html, head, body)
+│   └── page.tsx                # Server assembly (sections, content)
 ├── components/
-│   ├── features/           # Feature modules (WhoIAm, TechStack, etc.)
-│   │   └── DeveloperConsole.tsx    # Easter egg debug tool
-│   ├── shared/             # Utilities (AnimatedBackground, ParallexSection)
-│   ├── ui/                 # Base styled components (Button, Card, FloatingRail, etc.)
-│   └── layout/             # Structure wrappers (Container, SectionWrapper)
-├── hooks/                  # Custom React hooks (useScrollPosition, etc.)
-├── lib/                    # Utilities, constants, schemas
-│   ├── content.ts          # Section data, metadata
-│   └── utils.ts            # Helper functions
-├── styles/
-│   ├── globals.css         # Entry point (@imports all submodules)
-│   ├── theme.css           # Design tokens, color palette, CSS variables
-│   ├── typography.css      # Font scales, heading styles, typography rules
-│   ├── base.css            # HTML/body reset, scroll behavior, accessibility helpers
-│   ├── accessibility.css   # Focus indicators, skip-to-content, sr-only
-│   └── animations.css      # All @keyframes, animation utilities, scroll-based styles
-└── types/                  # TypeScript type definitions
+│   ├── features/               # Feature modules (WhoIAm, TechJourney, etc.)
+│   │   └── devtools/
+│   │       └── DeveloperConsole.tsx    # Easter egg debug tool
+│   ├── shared/                 # Cross-feature utilities (AnimatedBackground)
+│   ├── ui/                     # Base styled components, parallax section, navigation controls
+│   └── layout/                 # AppShell orchestration boundary
+├── lib/                        # Utilities, constants, navigation helpers
+└── styles/                     # Global CSS entrypoint and style modules
 ```
 
 ---
@@ -89,7 +78,7 @@ src/
 
 ### 1. Scroll Navigation & Section Tracking
 
-**Implementation**: `app/client-chrome.tsx` + `src/components/ui/scroll-navigation.tsx`
+**Implementation**: `src/components/layout/AppShell.tsx` + `src/components/ui/scroll-navigation.tsx`
 
 **How it works**:
 
@@ -102,7 +91,7 @@ src/
 **Example**:
 
 ```typescript
-// app/client-chrome.tsx
+// src/components/layout/AppShell.tsx
 const [currentSection, setCurrentSection] = useState(0)
 useEffect(() => {
   const handleScroll = () => {
@@ -128,8 +117,8 @@ useEffect(() => {
 **Example triggers**:
 
 - Scroll to exactly 50% of page height → "Perfectly Balanced" achievement
-- Hidden dropdown menu → "Dev Tools" achievement
-- Future: Custom patterns (Konami code, click sequences)
+- Use the scroll-to-top shortcut → "Round Trip" achievement
+- Unlock every base achievement → "Enlightenment" achievement
 
 ### 3. Animations & Visual Effects
 
@@ -263,21 +252,19 @@ export default function ClientChrome() {
 **Feature Layer** (`src/components/features/`): Content modules
 
 - `WhoIAm.tsx` — About section (skills, background)
-- `TechStack.tsx` — Tech overview (tools, frameworks)
+- `TechJourney.tsx` — Tech overview (tools, frameworks)
 - `NotableWork.tsx` — Portfolio projects
-- `DeveloperConsole.tsx` — Easter egg debug interface
+- `devtools/DeveloperConsole.tsx` — Easter egg debug interface
 - **Rule**: Compose UI primitives only; no raw `className` styling
 
 **Shared Layer** (`src/components/shared/`): Cross-feature utilities
 
 - `AnimatedBackground.tsx` — Scrolling orb effect
-- `ParallaxSection.tsx` — Scroll-linked class application
 - **Rule**: May be styled/stateful; prevent duplication
 
 **Layout Layer** (`src/components/layout/`): Structure wrappers
 
-- `Container.tsx` — Max-width wrapper
-- `SectionWrapper.tsx` — Padding + spacing scaffold
+- `AppShell.tsx` — Client orchestration boundary for navigation and overlays
 - **Rule**: Pure composition, no raw styling
 
 ---

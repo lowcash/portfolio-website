@@ -17,7 +17,6 @@ const ACHIEVEMENT_HINTS: Record<string, string> = {
   patience: 'Stay idle for 60 seconds',
   'rapid-clicker': 'Click 10 times in 2 seconds',
   'copy-cat': 'Copy some text from the page',
-  konami: 'Enter the Konami Code',
   shake: 'Scroll rapidly (mobile) or move mouse fast (desktop)',
   'marathon-runner': 'Scroll a total of 10,000 pixels',
   'speed-reader': 'Reach the bottom in under 2 minutes',
@@ -28,6 +27,7 @@ const ACHIEVEMENT_HINTS: Record<string, string> = {
   'nav-master': 'Use navigation controls 3 times',
   'round-trip': 'Use the scroll-to-top shortcut',
   'back-to-origin': 'Reach contact and return to hero',
+  enlightenment: 'Unlock every other achievement',
 }
 
 interface DeveloperConsoleProps {
