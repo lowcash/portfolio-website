@@ -22,6 +22,7 @@ export function Contact() {
         highlightEmail={content.highlightEmail}
         note={content.note}
         techLine={content.techLine}
+        analyticsDisclosure={content.analyticsDisclosure}
         hint={content.hint}
         socials={content.socials}
         iconMap={iconMap}

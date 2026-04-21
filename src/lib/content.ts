@@ -33,6 +33,8 @@ export const siteContent = {
     highlightEmail: 'lukas.lowcash@gmail.com',
     note: 'Currently focusing on Forex ML project, but open to interesting opportunities.',
     techLine: 'Built with React, TypeScript, Tailwind CSS, and Motion',
+    analyticsDisclosure:
+      'This site uses anonymous Vercel Web Analytics for aggregate visit statistics. No advertising cookies are used.',
     hint: "Hint for devs: Check the console or press 'D'",
     socials: [
       {

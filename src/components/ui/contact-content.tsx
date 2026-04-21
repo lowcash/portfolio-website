@@ -17,6 +17,7 @@ interface ContactContentProps {
   highlightEmail: string
   note: string
   techLine: string
+  analyticsDisclosure: string
   hint: string
   socials: readonly SocialItem[]
   iconMap: Record<ContactIconKey, ComponentType<{ className?: string; 'aria-hidden'?: boolean }>>
@@ -33,6 +34,7 @@ export function ContactContent({
   highlightEmail,
   note,
   techLine,
+  analyticsDisclosure,
   hint,
   socials,
   iconMap,
@@ -83,6 +85,8 @@ export function ContactContent({
       </div>
 
       <p className='text-sm text-gray-400'>{techLine}</p>
+
+      <p className='mx-auto mt-4 max-w-2xl text-xs leading-relaxed text-gray-500'>{analyticsDisclosure}</p>
 
       <p className='mt-4 hidden font-mono text-xs text-gray-500 md:block'>
         <span className='cursor-default opacity-50 transition-opacity hover:opacity-100'>💡 {hint}</span>
