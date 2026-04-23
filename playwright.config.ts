@@ -17,6 +17,9 @@ export default defineConfig({
     stdout: 'ignore',
     stderr: 'pipe',
     timeout: 240000,
+    env: {
+      SITE_ENV: 'production',
+    },
   },
   projects: [
     {

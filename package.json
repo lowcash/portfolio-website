@@ -25,8 +25,8 @@
     "analyze:clean-code:strict": "npm run analyze:unused:strict && npm run analyze:style-boundary:strict",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
-    "test:e2e:baseline": "playwright test tests/e2e/smoke.spec.ts tests/e2e/navigation.spec.ts",
-    "test:e2e:baseline:ci": "mkdir -p ./test-results && playwright test tests/e2e/smoke.spec.ts tests/e2e/navigation.spec.ts --reporter=json > ./test-results/playwright-baseline.json",
+    "test:e2e:baseline": "playwright test tests/e2e/smoke.spec.ts tests/e2e/navigation.spec.ts tests/e2e/seo.spec.ts",
+    "test:e2e:baseline:ci": "mkdir -p ./test-results && playwright test tests/e2e/smoke.spec.ts tests/e2e/navigation.spec.ts tests/e2e/seo.spec.ts --reporter=json > ./test-results/playwright-baseline.json",
     "test:e2e:headed": "playwright test --headed",
     "test:e2e:debug": "playwright test --debug",
     "perf:lighthouse": "npm run perf:lighthouse:desktop && npm run perf:lighthouse:mobile",
@@ -40,7 +40,8 @@
     "lucide-react": "^0.487.0",
     "next": "^16.2.2",
     "react": "^19.2.4",
-    "react-dom": "^19.2.4"
+    "react-dom": "^19.2.4",
+    "schema-dts": "^2.0.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.1",

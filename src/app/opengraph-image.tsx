@@ -1,13 +1,10 @@
 import { ImageResponse } from 'next/og'
 
-export const alt = 'Lukáš Machala - Fullstack Developer & AI Architect'
-export const contentType = 'image/png'
-export const size = {
-  width: 1200,
-  height: 630,
-}
+import { OPEN_GRAPH_IMAGE } from '@/lib/site-config'
 
-const techItems = ['TypeScript', 'React 19', 'Next.js 16', 'AI Workflows']
+export const alt = OPEN_GRAPH_IMAGE.alt
+export const contentType = 'image/png'
+export const size = OPEN_GRAPH_IMAGE.size
 
 export default function OpenGraphImage() {
   return new ImageResponse(
@@ -64,7 +61,7 @@ export default function OpenGraphImage() {
               color: '#aab8d2',
             }}
           >
-            lowcash.dev
+            {OPEN_GRAPH_IMAGE.siteLabel}
           </div>
 
           <div
@@ -78,7 +75,7 @@ export default function OpenGraphImage() {
               color: '#f8fafc',
             }}
           >
-            Lukáš Machala
+            {OPEN_GRAPH_IMAGE.headline}
           </div>
 
           <div
@@ -91,7 +88,7 @@ export default function OpenGraphImage() {
               color: '#f472b6',
             }}
           >
-            Fullstack Developer & AI Architect
+            {OPEN_GRAPH_IMAGE.subheadline}
           </div>
 
           <div
@@ -104,14 +101,13 @@ export default function OpenGraphImage() {
               color: '#dbe4f0',
             }}
           >
-            Building modern web products with TypeScript, React, Next.js, and AI-assisted workflows for deliberate,
-            high-velocity delivery.
+            {OPEN_GRAPH_IMAGE.description}
           </div>
         </div>
 
         <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
           <div style={{ display: 'flex', columnGap: 12, rowGap: 16, flexWrap: 'wrap' }}>
-            {techItems.map((item) => (
+            {OPEN_GRAPH_IMAGE.techItems.map((item) => (
               <div
                 key={item}
                 style={{
@@ -139,8 +135,8 @@ export default function OpenGraphImage() {
               color: '#9eb0ca',
             }}
           >
-            <div style={{ display: 'flex' }}>Portfolio • Systems • Product Thinking</div>
-            <div style={{ display: 'flex', color: '#e2e8f0' }}>lowcash.dev</div>
+            <div style={{ display: 'flex' }}>{OPEN_GRAPH_IMAGE.footerLabel}</div>
+            <div style={{ display: 'flex', color: '#e2e8f0' }}>{OPEN_GRAPH_IMAGE.siteLabel}</div>
           </div>
         </div>
       </div>

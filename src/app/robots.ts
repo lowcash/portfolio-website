@@ -1,9 +1,11 @@
 import type { MetadataRoute } from 'next'
 
-import { getProductionSiteUrl, isProductionLikeEnvironment } from './seo-env'
+import { SITE_IDENTITY } from '@/lib/site-config'
+
+import { getCanonicalSiteUrl, isProductionLikeEnvironment } from './seo-env'
 
 export default function robots(): MetadataRoute.Robots {
-  const siteUrl = getProductionSiteUrl('https://lowcash.dev')
+  const siteUrl = getCanonicalSiteUrl(SITE_IDENTITY.url)
   const isProductionLike = isProductionLikeEnvironment()
 
   return {
