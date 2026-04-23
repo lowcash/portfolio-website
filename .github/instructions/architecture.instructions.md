@@ -13,12 +13,12 @@ Use framework-specific instruction files (for example `next-app-router.instructi
 
 Organize components into logical layers to prevent mixing concerns:
 
-| Layer | Unit | Purpose | Constraints |
-|-------|------|---------|-------------|
-| **UI Layer** | `src/components/ui/` | Base styled components (buttons, cards, containers) | Zero business logic; pure presentation |
-| **Feature Layer** | `src/components/features/` | Content modules (sections, pages) | Compose UI primitives; no raw className styling |
-| **Shared Layer** | `src/components/shared/` | Cross-feature utilities and effects | May be stateful; avoid duplicating feature logic |
-| **Layout Layer** | `src/components/layout/` | Structure wrappers and orchestration boundaries | Pure composition; no feature-specific styling |
+| Layer             | Unit                       | Purpose                                             | Constraints                                      |
+| ----------------- | -------------------------- | --------------------------------------------------- | ------------------------------------------------ |
+| **UI Layer**      | `src/components/ui/`       | Base styled components (buttons, cards, containers) | Zero business logic; pure presentation           |
+| **Feature Layer** | `src/components/features/` | Content modules (sections, pages)                   | Compose UI primitives; no raw className styling  |
+| **Shared Layer**  | `src/components/shared/`   | Cross-feature utilities and effects                 | May be stateful; avoid duplicating feature logic |
+| **Layout Layer**  | `src/components/layout/`   | Structure wrappers and orchestration boundaries     | Pure composition; no feature-specific styling    |
 
 **Rule**: Features compose UI primitives. Never define raw styling in features.
 
@@ -26,12 +26,12 @@ Organize components into logical layers to prevent mixing concerns:
 
 Clear separation of state ownership:
 
-| State Type | Owner | Example |
-|----------|-------|---------|
-| **Server state** | Data fetching layer | Page content, metadata |
-| **Engine state** | Client root component | Current section, menu open/closed |
-| **Local state** | Feature component | Form input, dropdown toggled |
-| **Persistent state** | Browser storage | User preferences, achievements |
+| State Type           | Owner                 | Example                           |
+| -------------------- | --------------------- | --------------------------------- |
+| **Server state**     | Data fetching layer   | Page content, metadata            |
+| **Engine state**     | Client root component | Current section, menu open/closed |
+| **Local state**      | Feature component     | Form input, dropdown toggled      |
+| **Persistent state** | Browser storage       | User preferences, achievements    |
 
 **Best Practice**: Centralize engine state in one client orchestrator and pass state downward.
 

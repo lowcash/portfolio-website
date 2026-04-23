@@ -11,9 +11,9 @@ export function SectionLink({ href, children }: SectionLinkProps) {
       href={href}
       target='_blank'
       rel='noopener noreferrer'
-      className='group inline-flex items-center gap-2 text-sm section-link'
+      className='group section-link inline-flex items-center gap-2 text-sm'
     >
-      <ExternalLink className='w-4 h-4' />
+      <ExternalLink className='h-4 w-4' />
       <span>{children}</span>
     </a>
   )

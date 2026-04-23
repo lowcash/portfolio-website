@@ -14,18 +14,18 @@ export function NavDot({ isActive, label, onClick }: NavDotProps) {
           onClick()
         }
       }}
-      className='group relative cursor-pointer flex items-center justify-center w-3 h-3'
+      className='group relative flex h-3 w-3 cursor-pointer items-center justify-center'
       aria-label={`Navigate to ${label}`}
       aria-current={isActive ? 'true' : 'false'}
     >
       <div
         className={`rounded-full transition-all duration-300 ${
-          isActive ? 'scroll-nav-dot-active w-3 h-3' : 'scroll-nav-dot-inactive w-2 h-2'
+          isActive ? 'scroll-nav-dot-active h-3 w-3' : 'scroll-nav-dot-inactive h-2 w-2'
         }`}
         aria-hidden='true'
       />
       <div
-        className='absolute right-6 top-1/2 -translate-y-1/2 bg-black/90 backdrop-blur-sm rounded px-2 py-1 text-xs text-gray-300 opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap pointer-events-none'
+        className='pointer-events-none absolute top-1/2 right-6 -translate-y-1/2 rounded bg-black/90 px-2 py-1 text-xs whitespace-nowrap text-gray-300 opacity-0 backdrop-blur-sm transition-opacity duration-200 group-hover:opacity-100'
         aria-hidden='true'
       >
         {label}
