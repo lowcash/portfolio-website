@@ -41,7 +41,9 @@ export function SectionHeader({
         </span>
       </h2>
       {formattedSubtitle ? (
-        <p className='text-base font-normal leading-relaxed text-zinc-300 sm:text-lg'>{formattedSubtitle}</p>
+        <p className='mx-auto max-w-lg text-sm font-normal leading-relaxed text-zinc-300 sm:text-base'>
+          {formattedSubtitle}
+        </p>
       ) : null}
     </header>
   )

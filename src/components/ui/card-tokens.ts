@@ -13,7 +13,7 @@ export const CARD_MONO_LABEL_CLASS = 'font-mono text-xs tracking-wider text-zinc
 
 /** Status / timeline badges. */
 export const CARD_BADGE_CLASS =
-  'inline-flex shrink-0 items-center whitespace-nowrap rounded border border-zinc-700/40 bg-zinc-800/50 px-2 py-0.5 font-mono text-[11px] text-zinc-400'
+  'inline-flex shrink-0 items-center whitespace-nowrap rounded border border-zinc-700/40 bg-zinc-800/60 px-2 py-0.5 font-mono text-[11px] text-zinc-400'
 
 /** Tech pills. */
 export const CARD_TECH_PILL_CLASS =
