@@ -54,7 +54,8 @@ export const siteContent = {
           },
           {
             label: 'Strategy Simulation',
-            description: 'Backtesting engine modeling realistic slippage, fee structures, and execution risk constraints.',
+            description:
+              'Backtesting engine modeling realistic slippage, fee structures, and execution risk constraints.',
           },
         ],
         tech: ['Python', 'Data Pipelines', 'Time-Series', 'Machine Learning'],

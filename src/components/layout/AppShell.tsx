@@ -3,10 +3,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { siteContent } from '@/lib/content'
-import { useActiveSection } from '@/hooks/use-active-section'
 import {
-  resolveHashSectionIndex,
   resolveActiveSectionIndex,
+  resolveHashSectionIndex,
   scrollToSectionByIndex,
   setSectionHashByIndex,
 } from '@/lib/navigation-core-adapter'
@@ -17,6 +16,8 @@ import { EasterEggs } from '@/components/ui/easter-eggs'
 import { ScrollNavigation } from '@/components/ui/scroll-navigation'
 import { ScrollProgress } from '@/components/ui/scroll-progress'
 import { ScrollToTop } from '@/components/ui/scroll-to-top'
+
+import { useActiveSection } from '@/hooks/use-active-section'
 
 type AppShellProps = {
   sectionIds: string[]
@@ -33,10 +34,7 @@ export function AppShell({ sectionIds }: AppShellProps) {
   const navigationMonitorFrameRef = useRef<number | null>(null)
   const navigationMonitorTimeoutRef = useRef<number | null>(null)
 
-  const isScrollSpyPaused = useCallback(
-    () => isUserNavigatingRef.current || isMobileMenuOpen,
-    [isMobileMenuOpen],
-  )
+  const isScrollSpyPaused = useCallback(() => isUserNavigatingRef.current || isMobileMenuOpen, [isMobileMenuOpen])
   const [currentSection, setCurrentSection] = useActiveSection(sectionIds, {
     isRestoringScroll,
     isPaused: isScrollSpyPaused,

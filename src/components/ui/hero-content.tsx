@@ -40,10 +40,10 @@ export function HeroContent({ heading, role, summary, gradient, glowColors }: He
       </header>
 
       <div>
-        <p className='mx-auto mb-4 max-w-lg text-sm font-normal leading-relaxed text-zinc-300 sm:text-base'>
+        <p className='mx-auto mb-4 max-w-lg text-sm leading-relaxed font-normal text-zinc-300 sm:text-base'>
           {formattedRole}
         </p>
-        <p className='mx-auto max-w-lg text-pretty text-sm font-normal leading-relaxed tracking-wide text-zinc-300 sm:text-base'>
+        <p className='mx-auto max-w-lg text-sm leading-relaxed font-normal tracking-wide text-pretty text-zinc-300 sm:text-base'>
           {formattedSummary}
         </p>
       </div>

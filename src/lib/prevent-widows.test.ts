@@ -4,9 +4,7 @@ import { formatTypography } from '@/lib/prevent-widows'
 
 describe('formatTypography', () => {
   it('binds short prepositions and conjunctions so they cannot end a line', () => {
-    const result = formatTypography(
-      'platform for yacht clearance, and client interface for a private studio.',
-    )
+    const result = formatTypography('platform for yacht clearance, and client interface for a private studio.')
     expect(result).toContain('for\u00A0yacht')
     expect(result).toContain('and\u00A0client')
     expect(result).toContain('for\u00A0a\u00A0private')

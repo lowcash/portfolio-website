@@ -633,15 +633,12 @@ export function DeveloperConsole({ onVisibilityChange, isMobileMenuOpen = false 
           </div>
         </div>
       )}
-
     </>
   )
 
   function renderAchievementTooltip(achievement: Achievement, align: TooltipAlign) {
-    const alignClassName =
-      align === 'left' ? 'left-0' : align === 'right' ? 'right-0' : 'left-1/2 -translate-x-1/2'
-    const arrowClassName =
-      align === 'left' ? 'left-6' : align === 'right' ? 'right-6' : 'left-1/2 -translate-x-1/2'
+    const alignClassName = align === 'left' ? 'left-0' : align === 'right' ? 'right-0' : 'left-1/2 -translate-x-1/2'
+    const arrowClassName = align === 'left' ? 'left-6' : align === 'right' ? 'right-6' : 'left-1/2 -translate-x-1/2'
 
     return (
       <div

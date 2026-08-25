@@ -65,9 +65,7 @@ export function BackgroundExperience() {
                 rel='noreferrer'
                 className='group inline-flex items-center text-zinc-300 transition-colors duration-150 hover:text-white'
               >
-                <span className='font-medium transition-colors duration-150'>
-                  {beyondCodeNote.link.label}
-                </span>
+                <span className='font-medium transition-colors duration-150'>{beyondCodeNote.link.label}</span>
                 <ExternalLinkIcon />
               </a>
             </span>

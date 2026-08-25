@@ -27,9 +27,7 @@ const EXTERNAL_LINK_CLASS =
   'group inline-flex items-center text-zinc-300 transition-colors duration-150 hover:text-white'
 const EXTERNAL_LINK_LABEL_CLASS = 'font-medium transition-colors duration-150'
 
-function isLinkedBullet(
-  bullet: ProjectBullet,
-): bullet is Extract<ProjectBullet, { url: string }> {
+function isLinkedBullet(bullet: ProjectBullet): bullet is Extract<ProjectBullet, { url: string }> {
   return typeof bullet === 'object' && 'url' in bullet
 }
 
@@ -70,12 +68,7 @@ function ProjectBullets({ bullets }: { bullets: readonly ProjectBullet[] }) {
 
         if (isLinkedBullet(bullet)) {
           return (
-            <ClientProjectItem
-              key={bullet.url}
-              title={bullet.name}
-              url={bullet.url}
-              description={bullet.description}
-            />
+            <ClientProjectItem key={bullet.url} title={bullet.name} url={bullet.url} description={bullet.description} />
           )
         }
 

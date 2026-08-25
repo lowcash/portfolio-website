@@ -2,8 +2,8 @@
 
 import { useEffect, useState } from 'react'
 
-import { resolveActiveSectionIndex } from '@/lib/scroll-spy'
 import { subscribeToScrollMetrics } from '@/lib/scroll-metrics'
+import { resolveActiveSectionIndex } from '@/lib/scroll-spy'
 
 type UseActiveSectionOptions = {
   isRestoringScroll?: boolean

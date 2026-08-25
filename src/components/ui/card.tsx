@@ -33,14 +33,7 @@ export function Card({
   fullHeight = false,
 }: CardProps) {
   return (
-    <ContentCard
-      icon={icon}
-      iconColor={iconColor}
-      title={title}
-      badges={badges}
-      fullHeight={fullHeight}
-      style={style}
-    >
+    <ContentCard icon={icon} iconColor={iconColor} title={title} badges={badges} fullHeight={fullHeight} style={style}>
       {eyebrow ? <p className={CARD_BODY_CLASS}>{formatTypography(eyebrow)}</p> : null}
 
       {bullets?.length ? (
@@ -51,9 +44,7 @@ export function Card({
         </ul>
       ) : null}
 
-      {!bullets?.length && description ? (
-        <p className={CARD_BODY_CLASS}>{formatTypography(description)}</p>
-      ) : null}
+      {!bullets?.length && description ? <p className={CARD_BODY_CLASS}>{formatTypography(description)}</p> : null}
 
       {children}
     </ContentCard>

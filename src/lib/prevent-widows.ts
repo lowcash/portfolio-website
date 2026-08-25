@@ -14,15 +14,11 @@ export function formatTypography(str: string): string {
         /&\s+Augmented\s+Reality\s+(\(\d{4}\u00A0\u2013\u00A0\d{4}\))/gi,
         '&\u00A0Augmented\u00A0Reality\u00A0$1',
       )
-      .replace(
-        /&\s+Game\s+Development\s+(\(\d{4}\u00A0\u2013\u00A0\d{4}\))/gi,
-        '&\u00A0Game\u00A0Development\u00A0$1',
-      )
+      .replace(/&\s+Game\s+Development\s+(\(\d{4}\u00A0\u2013\u00A0\d{4}\))/gi, '&\u00A0Game\u00A0Development\u00A0$1')
       // 2. Short connectors/prepositions (incl. runs like "for a") must not end a line
       .replace(
         new RegExp(`(^|\\s)((?:(?:${CONNECTORS})\\s+)+)`, 'gi'),
-        (_, lead: string, chunk: string) =>
-          `${lead}${chunk.trimEnd().replace(/\s+/g, '\u00A0')}\u00A0`,
+        (_, lead: string, chunk: string) => `${lead}${chunk.trimEnd().replace(/\s+/g, '\u00A0')}\u00A0`,
       )
       // 3. Technical compound words (non-breaking hyphens)
       .replace(/\bwalk-forward\b/gi, (match) => match.replace('-', '\u2011'))

@@ -4,8 +4,8 @@ import type { LucideIcon } from 'lucide-react'
 
 import { formatTypography } from '@/lib/prevent-widows'
 
-import { MetadataBadge } from '@/components/ui/metadata-badge'
 import { CARD_SHELL_CLASS, CARD_TITLE_CLASS } from '@/components/ui/card-tokens'
+import { MetadataBadge } from '@/components/ui/metadata-badge'
 
 interface ContentCardProps {
   icon?: LucideIcon
@@ -33,10 +33,7 @@ export function ContentCard({
   children,
 }: ContentCardProps) {
   return (
-    <article
-      className={`${CARD_SHELL_CLASS} ${fullHeight ? 'h-full' : ''} ${articleClassName}`}
-      style={style}
-    >
+    <article className={`${CARD_SHELL_CLASS} ${fullHeight ? 'h-full' : ''} ${articleClassName}`} style={style}>
       <div className={`flex flex-col ${fullHeight ? 'h-full' : ''}`}>
         <div className='mb-3 flex items-start gap-2.5'>
           {Icon ? <Icon className={`mt-0.5 h-5 w-5 shrink-0 ${iconColor}`} aria-hidden /> : null}
@@ -47,9 +44,7 @@ export function ContentCard({
             ))}
           </div>
         </div>
-        <div className={`flex min-w-0 flex-col ${fullHeight ? 'min-h-0 flex-1' : ''}`}>
-          {children}
-        </div>
+        <div className={`flex min-w-0 flex-col ${fullHeight ? 'min-h-0 flex-1' : ''}`}>{children}</div>
       </div>
     </article>
   )

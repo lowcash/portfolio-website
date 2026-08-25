@@ -30,10 +30,7 @@ test.describe('Desktop navigation baseline', () => {
     await page.locator('#experience').scrollIntoViewIfNeeded()
     await page.waitForTimeout(1200)
 
-    await expect(page.getByRole('button', { name: 'Navigate to Experience' })).toHaveAttribute(
-      'aria-current',
-      'true',
-    )
+    await expect(page.getByRole('button', { name: 'Navigate to Experience' })).toHaveAttribute('aria-current', 'true')
   })
 
   test('contact navigation dot activates at bottom of page', async ({ page }) => {

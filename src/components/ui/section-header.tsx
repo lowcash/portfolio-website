@@ -14,13 +14,7 @@ interface SectionHeaderProps {
 const SECTION_TITLE_CLASS =
   'relative mb-3 pb-[2px] text-2xl font-bold tracking-tight text-balance text-zinc-100 sm:text-3xl'
 
-export function SectionHeader({
-  title,
-  subtitle,
-  gradient,
-  glowColors,
-  variant = 'compact',
-}: SectionHeaderProps) {
+export function SectionHeader({ title, subtitle, gradient, glowColors, variant = 'compact' }: SectionHeaderProps) {
   const formattedTitle = formatTypography(title)
   const formattedSubtitle = subtitle ? formatTypography(subtitle) : ''
 
@@ -41,7 +35,7 @@ export function SectionHeader({
         </span>
       </h2>
       {formattedSubtitle ? (
-        <p className='mx-auto max-w-lg text-sm font-normal leading-relaxed text-zinc-300 sm:text-base'>
+        <p className='mx-auto max-w-lg text-sm leading-relaxed font-normal text-zinc-300 sm:text-base'>
           {formattedSubtitle}
         </p>
       ) : null}

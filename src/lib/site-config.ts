@@ -89,8 +89,7 @@ export const SITE_CONFIG = {
     siteLabel: 'lowcash.dev',
     headline: 'Lukáš Machala',
     subheadline: 'Software Engineer',
-    description:
-      'Quantitative data pipelines, time-series systems, and modern web applications.',
+    description: 'Quantitative data pipelines, time-series systems, and modern web applications.',
     techItems: ['Python', 'TypeScript', 'Next.js', 'PostgreSQL'],
     footerLabel: 'Portfolio • Systems • Product Thinking',
   },

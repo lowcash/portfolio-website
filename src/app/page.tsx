@@ -20,12 +20,7 @@ export default function HomePage() {
     <>
       <MainContent>
         {sections.map(({ id, name, Component }, index) => (
-          <ParallaxSection
-            key={id}
-            id={id}
-            role={index === 0 ? 'banner' : 'region'}
-            aria-label={name}
-          >
+          <ParallaxSection key={id} id={id} role={index === 0 ? 'banner' : 'region'} aria-label={name}>
             <Component />
           </ParallaxSection>
         ))}
