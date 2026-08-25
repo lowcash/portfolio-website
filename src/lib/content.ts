@@ -18,7 +18,10 @@ export const siteContent = {
   contact: {
     title: 'Contact',
     email: 'lukas.lowcash@gmail.com',
-    hint: "Press 'D' or tap >_ to open Interactive Dev Console",
+    hint: {
+      mobile: 'Tap >_ to open Dev Console',
+      desktop: "Press 'D' or tap >_ to open Interactive Dev Console",
+    },
     socials: [
       {
         icon: 'github' as ContactIconKey,
@@ -125,6 +128,7 @@ export const siteContent = {
     ],
     education: {
       institution: 'VŠB – Technical University of Ostrava',
+      badge: 'Academic',
       degrees: [
         {
           label: "Master's Degree (Ing.)",

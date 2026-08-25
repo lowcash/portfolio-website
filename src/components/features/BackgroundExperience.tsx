@@ -5,6 +5,7 @@ import { formatTypography } from '@/lib/prevent-widows'
 import { SECTION_STYLES } from '@/lib/section-config'
 
 import { Card } from '@/components/ui/card'
+import { CARD_BODY_CLASS } from '@/components/ui/card-tokens'
 import { ExternalLinkIcon } from '@/components/ui/external-link-icon'
 import { SectionHeader } from '@/components/ui/section-header'
 import { SectionList } from '@/components/ui/section-list'
@@ -37,8 +38,13 @@ export function BackgroundExperience() {
           </Card>
         ))}
 
-        <Card icon={GraduationCap} iconColor={education.iconColor} title={education.institution}>
-          <ul className='list-disc space-y-2 pl-5 text-pretty text-sm font-normal leading-relaxed text-zinc-400'>
+        <Card
+          icon={GraduationCap}
+          iconColor={education.iconColor}
+          title={education.institution}
+          badges={[education.badge]}
+        >
+          <ul className={`list-disc space-y-2 pl-5 ${CARD_BODY_CLASS}`}>
             {education.degrees.map((degree) => (
               <li key={degree.label}>
                 <span className='font-medium text-zinc-100'>{degree.label}:</span>{' '}
@@ -49,7 +55,7 @@ export function BackgroundExperience() {
         </Card>
 
         <div className='px-8 pt-2'>
-          <p className='text-pretty text-left text-sm font-normal text-zinc-400'>
+          <p className={`text-left ${CARD_BODY_CLASS}`}>
             {formatTypography(beyondCodeNote.before)}{' '}
             <span className='whitespace-nowrap'>
               as{' '}

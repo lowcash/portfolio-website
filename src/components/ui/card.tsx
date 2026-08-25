@@ -4,7 +4,8 @@ import type { LucideIcon } from 'lucide-react'
 
 import { formatTypography } from '@/lib/prevent-widows'
 
-import { TwoColumnCard } from '@/components/ui/card-layout'
+import { ContentCard } from '@/components/ui/card-layout'
+import { CARD_BODY_CLASS } from '@/components/ui/card-tokens'
 
 interface CardProps {
   icon?: LucideIcon
@@ -31,10 +32,8 @@ export function Card({
   style,
   fullHeight = false,
 }: CardProps) {
-  const hasFooter = Boolean(children && bullets?.length)
-
   return (
-    <TwoColumnCard
+    <ContentCard
       icon={icon}
       iconColor={iconColor}
       title={title}
@@ -42,12 +41,10 @@ export function Card({
       fullHeight={fullHeight}
       style={style}
     >
-      {eyebrow ? (
-        <p className='text-sm font-normal leading-relaxed text-zinc-400'>{formatTypography(eyebrow)}</p>
-      ) : null}
+      {eyebrow ? <p className={CARD_BODY_CLASS}>{formatTypography(eyebrow)}</p> : null}
 
       {bullets?.length ? (
-        <ul className='list-disc space-y-2 pl-5 text-pretty text-sm font-normal leading-relaxed text-zinc-400'>
+        <ul className={`list-disc space-y-2 pl-5 ${CARD_BODY_CLASS}`}>
           {bullets.map((bullet, index) => (
             <li key={index}>{formatTypography(bullet)}</li>
           ))}
@@ -55,10 +52,10 @@ export function Card({
       ) : null}
 
       {!bullets?.length && description ? (
-        <p className='text-sm font-normal leading-relaxed text-zinc-400'>{formatTypography(description)}</p>
+        <p className={CARD_BODY_CLASS}>{formatTypography(description)}</p>
       ) : null}
 
-      {children ? <div className={hasFooter ? 'mt-auto pt-2' : undefined}>{children}</div> : null}
-    </TwoColumnCard>
+      {children}
+    </ContentCard>
   )
 }

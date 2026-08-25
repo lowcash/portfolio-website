@@ -15,7 +15,10 @@ type SocialItem = {
 interface ContactContentProps {
   title: string
   email: string
-  hint: string
+  hint: {
+    mobile: string
+    desktop: string
+  }
   socials: readonly SocialItem[]
   gradient: string
   glowColors: {
@@ -47,9 +50,11 @@ export function ContactContent({ title, email, hint, socials, gradient, glowColo
 
           return (
             <span key={social.label} className='inline-flex items-center gap-3'>
-              {index > 0 ? <span aria-hidden='true' className='text-gray-600'>
+              {index > 0 ? (
+                <span aria-hidden='true' className='text-gray-600'>
                   ·
-                </span> : null}
+                </span>
+              ) : null}
               <a
                 href={social.href}
                 target='_blank'
@@ -68,9 +73,10 @@ export function ContactContent({ title, email, hint, socials, gradient, glowColo
         })}
       </div>
 
-      <p className='font-mono text-xs text-gray-500'>
-        <span className='cursor-default opacity-50 transition-opacity hover:opacity-100'>
-          💡 {formatTypography(hint)}
+      <p className='mx-auto max-w-xs px-4 text-center font-mono text-xs leading-normal text-zinc-500 sm:max-w-md'>
+        <span className='cursor-default opacity-70 transition-opacity hover:opacity-100'>
+          <span className='sm:hidden'>💡 {formatTypography(hint.mobile)}</span>
+          <span className='hidden sm:inline'>💡 {formatTypography(hint.desktop)}</span>
         </span>
       </p>
     </div>
