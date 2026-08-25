@@ -12,7 +12,7 @@ src/
 │   ├── layout.tsx              # Document shell
 │   └── page.tsx                # Server-side section assembly
 ├── components/
-│   ├── features/               # Content modules (WhoIAm, TechJourney, NotableWork, etc.)
+│   ├── features/               # Content modules (Hero, FeaturedProjects, BackgroundExperience, etc.)
 │   │   └── devtools/
 │   │       └── DeveloperConsole.tsx
 │   ├── shared/                 # Cross-feature utilities

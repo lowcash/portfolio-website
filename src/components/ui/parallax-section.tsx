@@ -5,14 +5,21 @@ interface ParallaxSectionProps extends React.HTMLAttributes<HTMLElement> {
   style?: React.CSSProperties
 }
 
-export function ParallaxSection({ children, id, className, style, ...props }: ParallaxSectionProps) {
+export function ParallaxSection({ children, id, className = '', style, ...props }: ParallaxSectionProps) {
+  const isContact = id === 'contact'
+
   return (
     <section
       id={id}
-      className={`min-h-screen ${className || ''} scroll-snap-section`.trim()}
-      style={{
-        ...style,
-      }}
+      className={[
+        'flex min-h-screen flex-col justify-center py-16 md:min-h-[100dvh] md:py-0',
+        isContact ? 'items-center' : '',
+        'scroll-mt-16 md:scroll-mt-0',
+        className,
+      ]
+        .filter(Boolean)
+        .join(' ')}
+      style={style}
       {...props}
     >
       {children}

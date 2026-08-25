@@ -7,7 +7,7 @@ test.describe('Mobile navigation regressions', () => {
     await page.waitForLoadState('networkidle')
   })
 
-  test('Hey There from drawer returns user to hero', async ({ page }) => {
+  test('Intro from drawer returns user to hero', async ({ page }) => {
     await page.evaluate(() => {
       document.getElementById('contact')?.scrollIntoView({ block: 'start' })
     })
@@ -20,7 +20,7 @@ test.describe('Mobile navigation regressions', () => {
     const drawer = page.getByRole('navigation', { name: 'Mobile navigation' })
     await expect(drawer).toBeVisible()
 
-    const heroButton = drawer.getByRole('button', { name: 'Hey There' })
+    const heroButton = drawer.getByRole('button', { name: 'Intro' })
     await expect(heroButton).toBeVisible()
 
     await heroButton.click()

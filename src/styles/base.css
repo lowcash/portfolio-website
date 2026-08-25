@@ -1,6 +1,6 @@
 /**
  * Base Styles & Reset
- * 
+ *
  * HTML/body reset, scrollbar hiding, and foundational browser defaults.
  */
 
@@ -9,7 +9,7 @@ html {
   overflow-x: hidden;
   -ms-overflow-style: none; /* IE and Edge */
   scrollbar-width: none; /* Firefox */
-  scroll-snap-type: y proximity; /* Desktop: gentle section snapping */
+  scroll-behavior: smooth;
   scroll-padding-top: 0;
   background-color: #030712; /* Dark background - prevents white flash on overscroll */
   overscroll-behavior: none; /* Prevents bounce effect on mobile */
@@ -30,20 +30,6 @@ body {
   scrollbar-width: none;
   background-color: #030712;
   overscroll-behavior: none;
-}
-
-/**
- * Mobile: Use gentle proximity snap (not aggressive mandatory snap)
- * Allows smooth scrolling while nudging sections into alignment
- */
-@media (max-width: 767px) {
-  html {
-    scroll-snap-type: y proximity;
-  }
-
-  .scroll-snap-section {
-    scroll-snap-align: none;
-  }
 }
 
 /**
@@ -73,6 +59,30 @@ body {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
+}
+
+/**
+ * Typographic line balancing for headings and readable body copy.
+ */
+*,
+*::before,
+*::after {
+  hyphens: none !important;
+  -webkit-hyphens: none !important;
+}
+
+h1,
+h2,
+h3 {
+  text-wrap: balance;
+}
+
+p,
+li,
+article p,
+article li,
+.text-pretty {
+  text-wrap: pretty;
 }
 
 /**

@@ -1,15 +1,15 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { siteContent } from '@/lib/content'
+import { useActiveSection } from '@/hooks/use-active-section'
 import {
-  resolveActiveSectionIndex,
   resolveHashSectionIndex,
+  resolveActiveSectionIndex,
   scrollToSectionByIndex,
   setSectionHashByIndex,
 } from '@/lib/navigation-core-adapter'
-import { subscribeToScrollMetrics } from '@/lib/scroll-metrics'
 
 import { DeveloperConsole } from '@/components/features/devtools/DeveloperConsole'
 import { AnimatedBackground } from '@/components/shared/AnimatedBackground'
@@ -24,7 +24,6 @@ type AppShellProps = {
 
 export function AppShell({ sectionIds }: AppShellProps) {
   const sectionMeta = siteContent.navigation.sections
-  const [currentSection, setCurrentSection] = useState(0)
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [, setIsDevConsoleOpen] = useState(false)
   const [isRestoringScroll, setIsRestoringScroll] = useState(false)
@@ -33,6 +32,15 @@ export function AppShell({ sectionIds }: AppShellProps) {
   const isUserNavigatingRef = useRef(false)
   const navigationMonitorFrameRef = useRef<number | null>(null)
   const navigationMonitorTimeoutRef = useRef<number | null>(null)
+
+  const isScrollSpyPaused = useCallback(
+    () => isUserNavigatingRef.current || isMobileMenuOpen,
+    [isMobileMenuOpen],
+  )
+  const [currentSection, setCurrentSection] = useActiveSection(sectionIds, {
+    isRestoringScroll,
+    isPaused: isScrollSpyPaused,
+  })
 
   const clearNavigationMonitor = () => {
     if (navigationMonitorFrameRef.current !== null) {
@@ -84,20 +92,6 @@ export function AppShell({ sectionIds }: AppShellProps) {
       releaseNavigationLock()
     }, 5200)
   }
-
-  useEffect(() => {
-    const updateCurrentSection = () => {
-      setCurrentSection(resolveActiveSectionIndex(sectionIds))
-    }
-
-    return subscribeToScrollMetrics(() => {
-      if (isRestoringScroll || isUserNavigatingRef.current) {
-        return
-      }
-
-      updateCurrentSection()
-    })
-  }, [sectionIds, isRestoringScroll])
 
   const scrollToSection = (index: number, behavior: ScrollBehavior = 'smooth', updateHash = true) => {
     if (behavior === 'smooth') {
@@ -158,7 +152,7 @@ export function AppShell({ sectionIds }: AppShellProps) {
       }
       clearNavigationMonitor()
     }
-  }, [sectionIds])
+  }, [sectionIds, setCurrentSection])
 
   useEffect(() => {
     if (!hasInitializedHash.current || isRestoringScroll) {

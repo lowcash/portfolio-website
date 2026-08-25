@@ -1,5 +1,7 @@
 import { ChevronDown } from 'lucide-react'
 
+import { formatTypography } from '@/lib/prevent-widows'
+
 interface HeroContentProps {
   heading: string
   role: string
@@ -12,30 +14,36 @@ interface HeroContentProps {
 }
 
 export function HeroContent({ heading, role, summary, gradient, glowColors }: HeroContentProps) {
+  const formattedHeading = formatTypography(heading)
+  const formattedRole = formatTypography(role)
+  const formattedSummary = formatTypography(summary)
+
   return (
     <div className='px-4 text-center'>
       <header className='py-8'>
         <h1
-          className='relative mb-6 pb-[5px] text-white'
+          className='relative mb-6 pb-[5px] text-balance text-white'
           style={{
             fontSize: 'clamp(2.5rem, 6.2vw, 4.75rem)',
             lineHeight: 1.05,
             filter: `drop-shadow(0 0 12px ${glowColors.primary}) drop-shadow(0 0 24px ${glowColors.secondary})`,
           }}
         >
-          <span className='relative'>{heading}</span>
+          <span className='relative'>{formattedHeading}</span>
           <span
             aria-hidden='true'
             className={`pointer-events-none absolute inset-0 ${gradient} bg-clip-text text-transparent`}
           >
-            {heading}
+            {formattedHeading}
           </span>
         </h1>
       </header>
 
       <div>
-        <p className='mb-4 text-xl text-gray-300 md:text-2xl'>{role}</p>
-        <p className='mx-auto max-w-2xl text-base text-gray-400 md:text-lg'>{summary}</p>
+        <p className='mx-auto mb-4 max-w-3xl text-xl text-balance text-gray-300 md:text-2xl'>{formattedRole}</p>
+        <p className='mx-auto max-w-2xl text-pretty text-base tracking-wide text-zinc-400 md:text-lg'>
+          {formattedSummary}
+        </p>
       </div>
 
       <div className='mt-16 animate-bounce' aria-hidden='true'>

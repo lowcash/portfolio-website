@@ -30,6 +30,27 @@ const ACHIEVEMENT_HINTS: Record<string, string> = {
   enlightenment: 'Unlock every other achievement',
 }
 
+const ACHIEVEMENT_TOOLTIP_WIDTH = 220
+type TooltipAlign = 'center' | 'left' | 'right'
+
+function resolveTooltipAlignment(tileElement: HTMLElement, boundaryElement?: HTMLElement | null): TooltipAlign {
+  const tileRect = tileElement.getBoundingClientRect()
+  const boundaryRect = boundaryElement?.getBoundingClientRect()
+  const minLeft = (boundaryRect?.left ?? 8) + 8
+  const maxRight = (boundaryRect?.right ?? window.innerWidth) - 8
+  const centerX = tileRect.left + tileRect.width / 2
+
+  if (centerX - ACHIEVEMENT_TOOLTIP_WIDTH / 2 < minLeft) {
+    return 'left'
+  }
+
+  if (centerX + ACHIEVEMENT_TOOLTIP_WIDTH / 2 > maxRight) {
+    return 'right'
+  }
+
+  return 'center'
+}
+
 interface DeveloperConsoleProps {
   onVisibilityChange?: (isVisible: boolean) => void
   isMobileMenuOpen?: boolean
@@ -37,6 +58,8 @@ interface DeveloperConsoleProps {
 
 export function DeveloperConsole({ onVisibilityChange, isMobileMenuOpen = false }: DeveloperConsoleProps = {}) {
   const canUseStorage = typeof window !== 'undefined'
+  const [isMobileViewport, setIsMobileViewport] = useState(false)
+  const [isBelowLgViewport, setIsBelowLgViewport] = useState(false)
   const [isVisible, setIsVisible] = useState(false)
   const [scrollPercent, setScrollPercent] = useState(0)
   const [orbR, setOrbR] = useState(0)
@@ -51,18 +74,10 @@ export function DeveloperConsole({ onVisibilityChange, isMobileMenuOpen = false 
     return saved ? JSON.parse(saved) : []
   })
 
-  // Tooltip state — includes fixed viewport position for desktop (escapes overflow:auto clipping)
-  const [tooltip, setTooltip] = useState<{
-    achievement: Achievement
-    show: boolean
-    fixedX?: number
-    fixedY?: number
-    showBelow?: boolean
-    alignLeft?: boolean
-    alignRight?: boolean
-  } | null>(null)
+  // Tooltip state — anchored to the active achievement tile
+  const [activeTooltipId, setActiveTooltipId] = useState<string | null>(null)
+  const [activeTooltipAlign, setActiveTooltipAlign] = useState<TooltipAlign>('center')
   const tooltipTimeoutRef = useRef<NodeJS.Timeout | null>(null)
-  const achievementRefs = useRef<{ [key: string]: HTMLDivElement | null }>({})
 
   // Drag & drop state
   const [isDragging, setIsDragging] = useState(false)
@@ -71,8 +86,25 @@ export function DeveloperConsole({ onVisibilityChange, isMobileMenuOpen = false 
   // Debounce ref for settings dispatch — counts per drag-session, not per pixel change
   const settingsDispatchTimerRef = useRef<NodeJS.Timeout | null>(null)
 
-  // Panel ref for click outside detection
+  // Panel ref for click outside detection and viewport clamping
   const panelRef = useRef<HTMLDivElement>(null)
+  const panelSurfaceRef = useRef<HTMLDivElement>(null)
+
+  const clampPanelPosition = (nextX: number, nextY: number) => {
+    const panel = panelSurfaceRef.current ?? panelRef.current
+    if (!panel || typeof window === 'undefined') {
+      return { x: nextX, y: nextY }
+    }
+
+    const rect = panel.getBoundingClientRect()
+    const maxX = Math.max(0, window.innerWidth - rect.width)
+    const maxY = Math.max(0, window.innerHeight - rect.height)
+
+    return {
+      x: Math.min(Math.max(0, nextX), maxX),
+      y: Math.min(Math.max(0, nextY), maxY),
+    }
+  }
 
   // Persistent position - TOP LEFT with padding (desktop default)
   const [position, setPosition] = useState(() => {
@@ -84,7 +116,7 @@ export function DeveloperConsole({ onVisibilityChange, isMobileMenuOpen = false 
       const isValidX = parsed.x >= -200 && parsed.x < window.innerWidth
       const isValidY = parsed.y >= -200 && parsed.y < window.innerHeight
       if (isValidX && isValidY) {
-        return parsed
+        return clampPanelPosition(parsed.x, parsed.y)
       }
     }
     // Default or invalid position
@@ -116,13 +148,28 @@ export function DeveloperConsole({ onVisibilityChange, isMobileMenuOpen = false 
     return parseFloat(localStorage.getItem('orb_blur') || '1.0')
   })
   const [orbOpacity, setOrbOpacity] = useState(() => {
-    if (!canUseStorage) return 2.0
-    return parseFloat(localStorage.getItem('orb_opacity') || '2.0') // 200% default
+    if (!canUseStorage) return 0.85
+    return parseFloat(localStorage.getItem('orb_opacity') || '0.85')
   })
-  const [positionVariation, setPositionVariation] = useState(() => {
-    if (!canUseStorage) return 1.0
-    return parseFloat(localStorage.getItem('position_variation') || '1.0')
-  })
+
+  useEffect(() => {
+    const mobileMediaQuery = window.matchMedia('(max-width: 767px)')
+    const belowLgMediaQuery = window.matchMedia('(max-width: 1023px)')
+
+    const syncViewportFlags = () => {
+      setIsMobileViewport(mobileMediaQuery.matches)
+      setIsBelowLgViewport(belowLgMediaQuery.matches)
+    }
+
+    syncViewportFlags()
+    mobileMediaQuery.addEventListener('change', syncViewportFlags)
+    belowLgMediaQuery.addEventListener('change', syncViewportFlags)
+
+    return () => {
+      mobileMediaQuery.removeEventListener('change', syncViewportFlags)
+      belowLgMediaQuery.removeEventListener('change', syncViewportFlags)
+    }
+  }, [])
 
   // Apply settings to CSS custom properties
   useEffect(() => {
@@ -134,7 +181,7 @@ export function DeveloperConsole({ onVisibilityChange, isMobileMenuOpen = false 
       orbSize,
       orbBlur,
       orbOpacity,
-      positionVariation,
+      positionVariation: 1.0,
     }
 
     root.style.setProperty('--orb-brightness', String(orbBrightness))
@@ -143,19 +190,18 @@ export function DeveloperConsole({ onVisibilityChange, isMobileMenuOpen = false 
     root.style.setProperty('--orb-size', String(orbSize))
     root.style.setProperty('--orb-blur', String(orbBlur))
     root.style.setProperty('--orb-opacity', String(orbOpacity))
-    root.style.setProperty('--position-variation', String(positionVariation))
+    root.style.setProperty('--position-variation', '1.0')
     localStorage.setItem('orb_brightness', String(orbBrightness))
     localStorage.setItem('animation_speed', String(animationSpeed))
     localStorage.setItem('color_variation', String(colorVariation))
     localStorage.setItem('orb_size', String(orbSize))
     localStorage.setItem('orb_blur', String(orbBlur))
     localStorage.setItem('orb_opacity', String(orbOpacity))
-    localStorage.setItem('position_variation', String(positionVariation))
     if (settingsDispatchTimerRef.current) clearTimeout(settingsDispatchTimerRef.current)
     settingsDispatchTimerRef.current = setTimeout(() => {
       window.dispatchEvent(new CustomEvent('orb-settings-change', { detail: settingsPayload }))
     }, 400)
-  }, [orbBrightness, animationSpeed, colorVariation, orbSize, orbBlur, orbOpacity, positionVariation])
+  }, [orbBrightness, animationSpeed, colorVariation, orbSize, orbBlur, orbOpacity])
 
   // Show console hint once on load
   useEffect(() => {
@@ -222,9 +268,6 @@ export function DeveloperConsole({ onVisibilityChange, isMobileMenuOpen = false 
       return
     }
 
-    let lastTime = performance.now()
-    let frameCount = 0
-
     const handleScroll = () => {
       const scrollTop = window.scrollY
       const docHeight = document.documentElement.scrollHeight
@@ -234,32 +277,47 @@ export function DeveloperConsole({ onVisibilityChange, isMobileMenuOpen = false 
       const percent = maxScroll > 0 ? (scrollTop / maxScroll) * 100 : 0
       setScrollPercent(percent)
 
-      // Get computed orb colors from CSS variables
       const root = getComputedStyle(document.documentElement)
       setOrbR(parseInt(root.getPropertyValue('--orb-r')) || 0)
       setOrbG(parseInt(root.getPropertyValue('--orb-g')) || 0)
       setOrbB(parseInt(root.getPropertyValue('--orb-b')) || 0)
-
-      // Calculate FPS
-      frameCount++
-      const currentTime = performance.now()
-      if (currentTime >= lastTime + 1000) {
-        setFps(Math.round((frameCount * 1000) / (currentTime - lastTime)))
-        frameCount = 0
-        lastTime = currentTime
-      }
     }
 
     handleScroll()
     window.addEventListener('scroll', handleScroll, { passive: true })
 
-    const fpsInterval = setInterval(() => {
-      handleScroll() // Update FPS regularly
-    }, 100)
-
     return () => {
       window.removeEventListener('scroll', handleScroll)
-      clearInterval(fpsInterval)
+    }
+  }, [isVisible])
+
+  // Smooth FPS via exponential moving average over recent frames
+  useEffect(() => {
+    if (!isVisible) {
+      return
+    }
+
+    const frameWindow = 30
+    const emaAlpha = 2 / (frameWindow + 1)
+    let lastFrameTime = performance.now()
+    let smoothedFps = 60
+    let frameId = 0
+
+    const tick = (now: number) => {
+      const delta = now - lastFrameTime
+      if (delta > 0) {
+        const instantFps = 1000 / delta
+        smoothedFps = smoothedFps * (1 - emaAlpha) + instantFps * emaAlpha
+        setFps(Math.round(smoothedFps))
+      }
+      lastFrameTime = now
+      frameId = window.requestAnimationFrame(tick)
+    }
+
+    frameId = window.requestAnimationFrame(tick)
+
+    return () => {
+      window.cancelAnimationFrame(frameId)
     }
   }, [isVisible])
 
@@ -338,13 +396,9 @@ export function DeveloperConsole({ onVisibilityChange, isMobileMenuOpen = false 
     document.body.style.cursor = 'grabbing'
 
     const handleMouseMove = (e: MouseEvent) => {
-      // Use requestAnimationFrame for smooth 60fps dragging
       requestAnimationFrame(() => {
-        const newX = e.clientX - dragOffset.x
-        const newY = e.clientY - dragOffset.y
-
-        // Update position immediately with no threshold
-        setPosition({ x: newX, y: newY })
+        const nextPosition = clampPanelPosition(e.clientX - dragOffset.x, e.clientY - dragOffset.y)
+        setPosition(nextPosition)
       })
     }
 
@@ -365,6 +419,24 @@ export function DeveloperConsole({ onVisibilityChange, isMobileMenuOpen = false 
       document.body.style.cursor = ''
     }
   }, [isDragging, dragOffset])
+
+  // Keep saved position within viewport after resize or scale changes
+  useEffect(() => {
+    if (isMobileViewport || !isVisible) {
+      return
+    }
+
+    const handleViewportChange = () => {
+      setPosition((current) => clampPanelPosition(current.x, current.y))
+    }
+
+    handleViewportChange()
+    window.addEventListener('resize', handleViewportChange)
+
+    return () => {
+      window.removeEventListener('resize', handleViewportChange)
+    }
+  }, [isVisible, isMobileViewport, scale])
 
   // Save position on drag end
   useEffect(() => {
@@ -388,29 +460,27 @@ export function DeveloperConsole({ onVisibilityChange, isMobileMenuOpen = false 
   // Mobile: Auto-close tooltip on scroll
   useEffect(() => {
     const checkMobile = window.innerWidth < 768
-    if (!checkMobile || !tooltip) return
+    if (!checkMobile || !activeTooltipId) return
 
     const handleScroll = () => {
-      // Clear tooltip timeout and hide tooltip
       if (tooltipTimeoutRef.current) {
         clearTimeout(tooltipTimeoutRef.current)
       }
-      setTooltip(null)
+      setActiveTooltipId(null)
     }
 
-    // Listen to scroll on the console content div (mobile fullscreen modal)
-    const consoleContent = document.querySelector('.overflow-y-auto.overscroll-contain')
+    const consoleContent = document.querySelector('.devtools-mobile-scroll')
     if (consoleContent) {
       consoleContent.addEventListener('scroll', handleScroll, { passive: true })
       return () => {
         consoleContent.removeEventListener('scroll', handleScroll)
       }
     }
-  }, [tooltip])
+  }, [activeTooltipId])
 
   // Check if mobile (before render)
-  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768
-  const isTriggerSuppressed = isMobile && isMobileMenuOpen
+  const isMobile = isMobileViewport
+  const isTriggerSuppressed = isBelowLgViewport && isMobileMenuOpen
   const triggerInsetInline =
     process.env.NODE_ENV === 'development'
       ? 'max(0.875rem, calc(env(safe-area-inset-left) + 0.625rem))'
@@ -444,7 +514,7 @@ export function DeveloperConsole({ onVisibilityChange, isMobileMenuOpen = false 
         style={{
           left: triggerInsetInline,
           bottom: triggerInsetBlock,
-          zIndex: isTriggerSuppressed ? 40 : 120,
+          zIndex: isBelowLgViewport ? 40 : 120,
           pointerEvents: isTriggerSuppressed ? 'none' : 'auto',
           opacity: isTriggerSuppressed ? 0 : 1,
           transition: 'opacity 120ms ease-out',
@@ -464,7 +534,7 @@ export function DeveloperConsole({ onVisibilityChange, isMobileMenuOpen = false 
       {/* Mobile: Fullscreen panel */}
       {isMobile && (
         <div
-          className='pointer-events-auto fixed inset-0'
+          className='pointer-events-auto fixed inset-0 flex flex-col font-mono'
           role='region'
           aria-label='Developer debug console'
           style={{
@@ -473,38 +543,30 @@ export function DeveloperConsole({ onVisibilityChange, isMobileMenuOpen = false 
             backdropFilter: 'blur(10px)',
           }}
         >
-          <div className='flex h-full flex-col'>
-            {/* Header */}
-            <div
-              className='flex shrink-0 items-center justify-between border-b-2 px-4 py-3'
-              style={{
-                borderColor: `rgb(${orbR}, ${orbG}, ${orbB})`,
-                background: `rgba(${orbR}, ${orbG}, ${orbB}, 0.15)`,
-              }}
-            >
-              <div className='flex items-center gap-2'>
-                <Terminal className='h-5 w-5' style={{ color: `rgb(${orbR}, ${orbG}, ${orbB})` }} />
-                <span className='text-white'>DEV.CONSOLE</span>
-              </div>
-              <button
-                onClick={() => setIsVisible(false)}
-                className='flex h-12 w-12 cursor-pointer items-center justify-center rounded-xl border border-white/10 bg-white/6 text-white transition-colors hover:bg-white/12'
-                style={{ width: '3rem', height: '3rem', lineHeight: 1 }}
-                aria-label='Close console'
-              >
-                <X className='h-7 w-7 text-white' aria-hidden='true' strokeWidth={2.5} />
-              </button>
+          <div
+            className='flex shrink-0 items-center justify-between border-b-2 px-4 py-3'
+            style={{
+              borderColor: `rgb(${orbR}, ${orbG}, ${orbB})`,
+              background: `rgba(${orbR}, ${orbG}, ${orbB}, 0.15)`,
+            }}
+          >
+            <div className='flex items-center gap-2'>
+              <Terminal className='h-5 w-5' style={{ color: `rgb(${orbR}, ${orbG}, ${orbB})` }} />
+              <span className='text-white'>DEV.CONSOLE</span>
             </div>
+            <button
+              onClick={() => setIsVisible(false)}
+              className='flex h-12 w-12 cursor-pointer items-center justify-center rounded-xl border border-white/10 bg-white/6 text-white transition-colors hover:bg-white/12'
+              style={{ width: '3rem', height: '3rem', lineHeight: 1 }}
+              aria-label='Close console'
+            >
+              <X className='h-7 w-7 text-white' aria-hidden='true' strokeWidth={2.5} />
+            </button>
+          </div>
 
-            {/* Content - Scrollable */}
-            <div
-              className='flex-1 space-y-3 overflow-y-auto overscroll-contain px-4 py-4'
-              style={{
-                paddingBottom: 'max(1rem, env(safe-area-inset-bottom))',
-              }}
-            >
-              {renderConsoleContent()}
-            </div>
+          <div className='devtools-mobile-scroll min-h-0 flex-1 space-y-6 overflow-y-auto overscroll-contain p-6'>
+            {renderConsoleControls()}
+            {renderAchievementsSection()}
           </div>
         </div>
       )}
@@ -520,16 +582,18 @@ export function DeveloperConsole({ onVisibilityChange, isMobileMenuOpen = false 
             zIndex: 70,
             left: `${position.x}px`,
             top: `${position.y}px`,
-            transform: `scale(${scale})`,
           }}
         >
           {/* Cyber/retro styled panel */}
           <div
+            ref={panelSurfaceRef}
             className='relative overflow-visible rounded-lg border-2 backdrop-blur-xl'
             style={{
               borderColor: `rgb(${orbR}, ${orbG}, ${orbB})`,
               boxShadow: `0 0 20px rgba(${orbR}, ${orbG}, ${orbB}, 0.3), inset 0 0 20px rgba(${orbR}, ${orbG}, ${orbB}, 0.05)`,
               background: 'rgba(3, 7, 18, 0.9)',
+              transform: `scale(${scale})`,
+              transformOrigin: 'top left',
             }}
           >
             {/* Header */}
@@ -557,91 +621,174 @@ export function DeveloperConsole({ onVisibilityChange, isMobileMenuOpen = false 
               </button>
             </div>
 
-            {/* Content */}
+            {/* Content — single scroll container for controls + achievements */}
             <div
               data-testid='devtools-panel-content'
-              className='devtools-scroll-area space-y-2 overflow-y-auto p-4'
-              style={{ minWidth: '420px', maxWidth: 'min(860px, 92vw)', maxHeight: `${Math.round(86 / scale)}vh` }}
+              className='devtools-scroll-area max-h-[85vh] space-y-6 overflow-y-auto p-6'
+              style={{ minWidth: '420px', maxWidth: 'min(860px, 92vw)' }}
             >
-              {renderConsoleContent()}
+              {renderConsoleControls()}
+              {renderAchievementsSection()}
             </div>
           </div>
         </div>
       )}
 
-      {/* Desktop fixed-position tooltip — outside overflow:auto container to prevent clipping */}
-      {!isMobile && tooltip && tooltip.fixedX !== undefined && tooltip.fixedY !== undefined && (
-        <div
-          className='pointer-events-none'
-          style={{
-            position: 'fixed',
-            zIndex: 9999,
-            left: `${tooltip.fixedX}px`,
-            top: `${tooltip.fixedY}px`,
-            width: '220px',
-            animation: 'fadeIn 0.2s ease-out',
-          }}
-        >
-          <div
-            className='relative rounded-lg border-2 bg-gray-900 p-2 shadow-2xl'
-            style={{
-              borderColor: tooltip.achievement.unlocked ? `rgb(${orbR}, ${orbG}, ${orbB})` : 'rgb(107, 114, 128)',
-              boxShadow: tooltip.achievement.unlocked
-                ? `0 0 20px rgba(${orbR}, ${orbG}, ${orbB}, 0.4)`
-                : '0 4px 6px rgba(0, 0, 0, 0.3)',
-            }}
-          >
-            <div className='mb-1 flex items-start gap-2'>
-              <span className='text-lg'>{tooltip.achievement.icon}</span>
-              <div className='flex-1'>
-                <div
-                  className={`text-[12px] font-semibold ${
-                    tooltip.achievement.unlocked ? 'text-yellow-400' : 'text-gray-400'
-                  }`}
-                >
-                  {tooltip.achievement.unlocked ? tooltip.achievement.name : '???'}
-                </div>
-              </div>
-            </div>
-            <div className='mt-1 text-[11px] text-gray-400'>
-              {tooltip.achievement.unlocked
-                ? tooltip.achievement.description
-                : tooltip.achievement.id === 'shake'
-                  ? 'Move mouse rapidly to shuffle colors'
-                  : ACHIEVEMENT_HINTS[tooltip.achievement.id] || 'Keep exploring...'}
-            </div>
-            {/* Arrow */}
-            {tooltip.showBelow ? (
-              <div
-                className={`absolute bottom-full h-0 w-0 ${
-                  tooltip.alignLeft ? 'left-6' : tooltip.alignRight ? 'right-6' : 'left-1/2 -translate-x-1/2'
-                }`}
-                style={{
-                  borderLeft: '6px solid transparent',
-                  borderRight: '6px solid transparent',
-                  borderBottom: `6px solid ${tooltip.achievement.unlocked ? `rgb(${orbR}, ${orbG}, ${orbB})` : 'rgb(107, 114, 128)'}`,
-                }}
-              />
-            ) : (
-              <div
-                className={`absolute top-full h-0 w-0 ${
-                  tooltip.alignLeft ? 'left-6' : tooltip.alignRight ? 'right-6' : 'left-1/2 -translate-x-1/2'
-                }`}
-                style={{
-                  borderLeft: '6px solid transparent',
-                  borderRight: '6px solid transparent',
-                  borderTop: `6px solid ${tooltip.achievement.unlocked ? `rgb(${orbR}, ${orbG}, ${orbB})` : 'rgb(107, 114, 128)'}`,
-                }}
-              />
-            )}
-          </div>
-        </div>
-      )}
     </>
   )
 
-  // Helper function to render console content (shared between mobile and desktop)
-  function renderConsoleContent() {
+  function renderAchievementTooltip(achievement: Achievement, align: TooltipAlign) {
+    const alignClassName =
+      align === 'left' ? 'left-0' : align === 'right' ? 'right-0' : 'left-1/2 -translate-x-1/2'
+    const arrowClassName =
+      align === 'left' ? 'left-6' : align === 'right' ? 'right-6' : 'left-1/2 -translate-x-1/2'
+
+    return (
+      <div
+        className={`pointer-events-none absolute bottom-full z-50 mb-2 w-[220px] animate-[fadeIn_0.2s_ease-out] ${alignClassName}`}
+      >
+        <div
+          className='rounded-lg border-2 bg-gray-900 p-2 shadow-2xl'
+          style={{
+            borderColor: achievement.unlocked ? `rgb(${orbR}, ${orbG}, ${orbB})` : 'rgb(107, 114, 128)',
+            boxShadow: achievement.unlocked
+              ? `0 0 20px rgba(${orbR}, ${orbG}, ${orbB}, 0.4)`
+              : '0 4px 6px rgba(0, 0, 0, 0.3)',
+          }}
+        >
+          <div className='mb-1 flex items-start gap-2'>
+            <span className='text-lg'>{achievement.icon}</span>
+            <div className='flex-1'>
+              <div
+                className={`text-[12px] font-semibold ${achievement.unlocked ? 'text-yellow-400' : 'text-gray-400'}`}
+              >
+                {achievement.unlocked ? achievement.name : '???'}
+              </div>
+            </div>
+          </div>
+          <div className='mt-1 text-[11px] text-gray-400'>
+            {achievement.unlocked
+              ? achievement.description
+              : achievement.id === 'shake'
+                ? isMobile
+                  ? 'Scroll rapidly to shuffle colors'
+                  : 'Move mouse rapidly to shuffle colors'
+                : ACHIEVEMENT_HINTS[achievement.id] || 'Keep exploring...'}
+          </div>
+        </div>
+        <div
+          className={`absolute top-full h-0 w-0 ${arrowClassName}`}
+          style={{
+            borderLeft: '6px solid transparent',
+            borderRight: '6px solid transparent',
+            borderTop: `6px solid ${achievement.unlocked ? `rgb(${orbR}, ${orbG}, ${orbB})` : 'rgb(107, 114, 128)'}`,
+          }}
+        />
+      </div>
+    )
+  }
+
+  function renderAchievementsSection() {
+    return (
+      <>
+        <div
+          className='my-3 border-t-2 border-gray-800'
+          style={{ borderColor: `rgba(${orbR}, ${orbG}, ${orbB}, 0.3)` }}
+        />
+
+        <div className='space-y-2 overflow-visible'>
+          <div className='flex items-center gap-2'>
+            <Trophy className='h-3 w-3 text-yellow-400' />
+            <span className='text-sm tracking-wider text-gray-500 uppercase'>Achievements</span>
+            <span className='text-[11px] text-gray-600'>
+              {achievements.filter((a) => a.unlocked).length}/{achievements.length}
+            </span>
+          </div>
+
+          {achievements.length > 0 ? (
+            <div className='grid grid-cols-4 gap-1.5 overflow-visible pt-2'>
+              {achievements.map((achievement) => (
+                <div
+                  key={achievement.id}
+                  className='relative overflow-visible'
+                  onMouseEnter={(event) => {
+                    if (!isMobile) {
+                      const boundary = panelSurfaceRef.current
+                      setActiveTooltipAlign(resolveTooltipAlignment(event.currentTarget, boundary))
+                      setActiveTooltipId(achievement.id)
+                    }
+                  }}
+                  onMouseLeave={() => {
+                    if (!isMobile) {
+                      if (tooltipTimeoutRef.current) {
+                        clearTimeout(tooltipTimeoutRef.current)
+                      }
+                      setActiveTooltipId(null)
+                    }
+                  }}
+                >
+                  <div
+                    className={`flex aspect-square cursor-pointer items-center justify-center rounded border-2 transition-all ${
+                      achievement.unlocked
+                        ? 'border-yellow-400/50 bg-yellow-400/10'
+                        : 'border-gray-700 bg-gray-800/30 opacity-30 grayscale'
+                    } ${!isMobile && achievement.id === 'enlightenment' && achievement.unlocked ? 'ring-1 ring-yellow-400/40 ring-offset-1 ring-offset-black' : ''}`}
+                    style={{ fontSize: isMobile ? 'clamp(1.5rem, 6.5vw, 2.75rem)' : '1.875rem' }}
+                    title={
+                      !isMobile && achievement.id === 'enlightenment' && achievement.unlocked
+                        ? '✨ Click to celebrate!'
+                        : undefined
+                    }
+                    onClick={(e) => {
+                      if (isMobile) {
+                        e.stopPropagation()
+
+                        if (activeTooltipId === achievement.id) {
+                          setActiveTooltipId(null)
+                        } else {
+                          const tileWrapper = e.currentTarget.parentElement
+                          if (tileWrapper) {
+                            setActiveTooltipAlign(resolveTooltipAlignment(tileWrapper))
+                          }
+                          setActiveTooltipId(achievement.id)
+                          if (tooltipTimeoutRef.current) {
+                            clearTimeout(tooltipTimeoutRef.current)
+                          }
+                          tooltipTimeoutRef.current = setTimeout(() => {
+                            setActiveTooltipId(null)
+                          }, 3000)
+                        }
+
+                        if (achievement.id === 'enlightenment' && achievement.unlocked) {
+                          window.dispatchEvent(new CustomEvent('enlightenment-clicked'))
+                        }
+                      } else if (achievement.id === 'enlightenment' && achievement.unlocked) {
+                        window.dispatchEvent(new CustomEvent('enlightenment-clicked'))
+                      }
+                    }}
+                  >
+                    {achievement.unlocked ? achievement.icon : '🔒'}
+                  </div>
+
+                  {activeTooltipId === achievement.id
+                    ? renderAchievementTooltip(achievement, activeTooltipAlign)
+                    : null}
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className='py-2 text-center text-[11px] text-gray-600'>No achievements yet. Keep exploring!</div>
+          )}
+        </div>
+
+        <div className='border-t border-gray-800 pt-2 text-center text-[11px] text-gray-500'>
+          <div className='hidden md:block'>Press 'D' to toggle</div>
+        </div>
+      </>
+    )
+  }
+
+  function renderConsoleControls() {
     return (
       <>
         {/* Scroll Progress */}
@@ -737,26 +884,6 @@ export function DeveloperConsole({ onVisibilityChange, isMobileMenuOpen = false 
               step='10'
               value={colorVariation}
               onChange={(e) => setColorVariation(parseFloat(e.target.value))}
-              className='h-1.5 w-full cursor-pointer appearance-none rounded-full bg-gray-800'
-              style={{
-                accentColor: `rgb(${orbR}, ${orbG}, ${orbB})`,
-              }}
-            />
-          </div>
-
-          {/* Position Variation Slider */}
-          <div>
-            <div className='mb-1 flex items-center justify-between'>
-              <span className='text-[12px] text-gray-400'>POSITION SPREAD:</span>
-              <span className='text-[12px] text-white tabular-nums'>{(positionVariation * 100).toFixed(0)}%</span>
-            </div>
-            <input
-              type='range'
-              min='0.0'
-              max='3.0'
-              step='0.1'
-              value={positionVariation}
-              onChange={(e) => setPositionVariation(parseFloat(e.target.value))}
               className='h-1.5 w-full cursor-pointer appearance-none rounded-full bg-gray-800'
               style={{
                 accentColor: `rgb(${orbR}, ${orbG}, ${orbB})`,
@@ -861,8 +988,7 @@ export function DeveloperConsole({ onVisibilityChange, isMobileMenuOpen = false 
                 variation: 40,
                 size: 1.2,
                 blur: 1.0,
-                opacity: 2.0, // 200% default
-                position: 1.0,
+                opacity: 0.85,
               }
 
               setOrbBrightness(defaults.brightness)
@@ -871,7 +997,6 @@ export function DeveloperConsole({ onVisibilityChange, isMobileMenuOpen = false 
               setOrbSize(defaults.size)
               setOrbBlur(defaults.blur)
               setOrbOpacity(defaults.opacity)
-              setPositionVariation(defaults.position)
 
               // Force immediate localStorage update
               localStorage.setItem('orb_brightness', String(defaults.brightness))
@@ -880,7 +1005,6 @@ export function DeveloperConsole({ onVisibilityChange, isMobileMenuOpen = false 
               localStorage.setItem('orb_size', String(defaults.size))
               localStorage.setItem('orb_blur', String(defaults.blur))
               localStorage.setItem('orb_opacity', String(defaults.opacity))
-              localStorage.setItem('position_variation', String(defaults.position))
             }}
             className='w-full cursor-pointer rounded border border-gray-700 px-3 py-1.5 text-[12px] text-gray-400 transition-all hover:border-gray-500 hover:text-white'
           >
@@ -911,183 +1035,6 @@ export function DeveloperConsole({ onVisibilityChange, isMobileMenuOpen = false 
           >
             RESET ACHIEVEMENTS
           </button>
-        </div>
-
-        {/* DIVIDER */}
-        <div
-          className='my-3 border-t-2 border-gray-800'
-          style={{ borderColor: `rgba(${orbR}, ${orbG}, ${orbB}, 0.3)` }}
-        />
-
-        {/* ACHIEVEMENTS SECTION */}
-        <div className='space-y-2'>
-          <div className='flex items-center gap-2'>
-            <Trophy className='h-3 w-3 text-yellow-400' />
-            <span className='text-sm tracking-wider text-gray-500 uppercase'>Achievements</span>
-            <span className='text-[11px] text-gray-600'>
-              {achievements.filter((a) => a.unlocked).length}/{achievements.length}
-            </span>
-          </div>
-
-          {achievements.length > 0 ? (
-            <div className='grid grid-cols-4 gap-1.5'>
-              {achievements.map((achievement) => (
-                <div
-                  key={achievement.id}
-                  className='relative' // Add relative for positioning tooltip
-                  ref={(el) => {
-                    achievementRefs.current[achievement.id] = el
-                  }}
-                >
-                  <div
-                    className={`flex aspect-square cursor-pointer items-center justify-center rounded border-2 transition-all ${
-                      achievement.unlocked
-                        ? 'border-yellow-400/50 bg-yellow-400/10'
-                        : 'border-gray-700 bg-gray-800/30 opacity-30 grayscale'
-                    } ${!isMobile && achievement.id === 'enlightenment' && achievement.unlocked ? 'ring-1 ring-yellow-400/40 ring-offset-1 ring-offset-black' : ''}`}
-                    style={{ fontSize: isMobile ? 'clamp(1.5rem, 6.5vw, 2.75rem)' : '1.875rem' }}
-                    title={
-                      !isMobile && achievement.id === 'enlightenment' && achievement.unlocked
-                        ? '✨ Click to celebrate!'
-                        : undefined
-                    }
-                    onMouseEnter={() => {
-                      if (isMobile) return
-                      const el = achievementRefs.current[achievement.id]
-                      if (!el) return
-                      const rect = el.getBoundingClientRect()
-                      const tooltipHeight = 120
-                      const tooltipWidth = 220
-                      const showBelow = rect.top < tooltipHeight + 20
-                      const itemCenterX = rect.left + rect.width / 2
-                      const alignLeft = itemCenterX < tooltipWidth / 2
-                      const alignRight = window.innerWidth - itemCenterX < tooltipWidth / 2
-                      const fixedX = alignLeft
-                        ? rect.left
-                        : alignRight
-                          ? rect.right - tooltipWidth
-                          : itemCenterX - tooltipWidth / 2
-                      const fixedY = showBelow ? rect.bottom + 8 : rect.top - tooltipHeight - 8
-                      setTooltip({ achievement, show: true, fixedX, fixedY, showBelow, alignLeft, alignRight })
-                    }}
-                    onMouseLeave={() => {
-                      // Desktop: hide tooltip on mouse leave
-                      if (!isMobile) {
-                        if (tooltipTimeoutRef.current) {
-                          clearTimeout(tooltipTimeoutRef.current)
-                        }
-                        setTooltip(null)
-                      }
-                    }}
-                    onClick={(e) => {
-                      // Mobile: click to toggle tooltip
-                      // Prevent default to avoid ghost clicks
-                      if (isMobile) {
-                        e.stopPropagation()
-
-                        if (tooltip?.achievement.id === achievement.id) {
-                          setTooltip(null)
-                        } else {
-                          setTooltip({ achievement, show: true })
-                          // Auto-hide after 3 seconds on mobile
-                          if (tooltipTimeoutRef.current) {
-                            clearTimeout(tooltipTimeoutRef.current)
-                          }
-                          tooltipTimeoutRef.current = setTimeout(() => {
-                            setTooltip(null)
-                          }, 3000)
-                        }
-                        // Also fire confetti on mobile for enlightenment
-                        if (achievement.id === 'enlightenment' && achievement.unlocked) {
-                          window.dispatchEvent(new CustomEvent('enlightenment-clicked'))
-                        }
-                      } else if (achievement.id === 'enlightenment' && achievement.unlocked) {
-                        window.dispatchEvent(new CustomEvent('enlightenment-clicked'))
-                      }
-                    }}
-                  >
-                    {achievement.unlocked ? achievement.icon : '🔒'}
-                  </div>
-
-                  {/* Mobile fixed-position tooltip — prevents clipping by overflow container */}
-                  {isMobile &&
-                    tooltip?.achievement.id === achievement.id &&
-                    (() => {
-                      const itemEl = achievementRefs.current[achievement.id]
-                      let fixedX = 0
-                      let fixedY = 0
-
-                      if (itemEl) {
-                        const rect = itemEl.getBoundingClientRect()
-                        const tooltipHeight = 120
-                        const tooltipWidth = 220
-
-                        // Calculate fixed position
-                        const itemCenterX = rect.left + rect.width / 2
-                        fixedX = Math.max(
-                          10,
-                          Math.min(itemCenterX - tooltipWidth / 2, window.innerWidth - tooltipWidth - 10),
-                        )
-                        fixedY = rect.top < tooltipHeight + 20 ? rect.bottom + 8 : rect.top - tooltipHeight - 8
-                      }
-
-                      return (
-                        <div
-                          className='pointer-events-none'
-                          style={{
-                            position: 'fixed',
-                            zIndex: 9999,
-                            left: `${fixedX}px`,
-                            top: `${fixedY}px`,
-                            width: '220px',
-                            animation: 'fadeIn 0.2s ease-out',
-                          }}
-                        >
-                          <div
-                            className='max-w-60 min-w-50 rounded-lg border-2 bg-gray-900 p-2 shadow-2xl'
-                            style={{
-                              borderColor: tooltip.achievement.unlocked
-                                ? `rgb(${orbR}, ${orbG}, ${orbB})`
-                                : 'rgb(107, 114, 128)',
-                              boxShadow: tooltip.achievement.unlocked
-                                ? `0 0 20px rgba(${orbR}, ${orbG}, ${orbB}, 0.4)`
-                                : '0 4px 6px rgba(0, 0, 0, 0.3)',
-                            }}
-                          >
-                            <div className='mb-1 flex items-start gap-2'>
-                              <span className='text-lg'>{tooltip.achievement.icon}</span>
-                              <div className='flex-1'>
-                                <div
-                                  className={`text-[12px] font-semibold ${
-                                    tooltip.achievement.unlocked ? 'text-yellow-400' : 'text-gray-400'
-                                  }`}
-                                >
-                                  {tooltip.achievement.unlocked ? tooltip.achievement.name : '???'}
-                                </div>
-                              </div>
-                            </div>
-                            <div className='mt-1 text-[11px] text-gray-400'>
-                              {tooltip.achievement.unlocked
-                                ? tooltip.achievement.description
-                                : tooltip.achievement.id === 'shake'
-                                  ? 'Scroll rapidly to shuffle colors'
-                                  : ACHIEVEMENT_HINTS[tooltip.achievement.id] || 'Keep exploring...'}
-                            </div>
-                          </div>
-                        </div>
-                      )
-                    })()}
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className='py-2 text-center text-[11px] text-gray-600'>No achievements yet. Keep exploring!</div>
-          )}
-        </div>
-
-        {/* Hint */}
-        <div className='border-t border-gray-800 pt-2 text-center text-[11px] text-gray-500'>
-          <div className='hidden md:block'>Press 'D' to toggle</div>
         </div>
       </>
     )

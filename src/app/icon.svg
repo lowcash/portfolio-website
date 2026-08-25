@@ -1,6 +1,30 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-label="LM monogram">
-  <rect x="8" y="8" width="84" height="84" rx="22" fill="#0f172a" />
-
-  <path d="M24 20 H38 V61 H57 V75 H24 Z" fill="#e2e8f0" />
-  <path d="M43 75 V20 H56 L68 43 L80 20 H92 V75 H79 V43 L68 65 L57 43 V75 Z" fill="#e2e8f0" />
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Code brackets">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#18181b"/>
+      <stop offset="100%" stop-color="#09090b"/>
+    </linearGradient>
+    <linearGradient id="heroPurple" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#c084fc"/>
+      <stop offset="50%" stop-color="#a855f7"/>
+      <stop offset="100%" stop-color="#7c3aed"/>
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="128" fill="url(#bgGrad)"/>
+  <path
+    d="M 195 155 L 95 256 L 195 357"
+    fill="none"
+    stroke="url(#heroPurple)"
+    stroke-width="54"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
+  <path
+    d="M 317 155 L 417 256 L 317 357"
+    fill="none"
+    stroke="url(#heroPurple)"
+    stroke-width="54"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+  />
 </svg>

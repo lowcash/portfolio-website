@@ -1,16 +1,6 @@
 import { expect, test } from '@playwright/test'
 
-const SECTION_IDS = [
-  'hero',
-  'who-i-am',
-  'tech-journey',
-  'notable-work',
-  'work-experience',
-  'education',
-  'beyond-code',
-  'whats-next',
-  'contact',
-] as const
+const SECTION_IDS = ['hero', 'featured-projects', 'experience', 'contact'] as const
 
 test.describe('Portfolio smoke baseline', () => {
   test.beforeEach(async ({ page }) => {
@@ -28,7 +18,12 @@ test.describe('Portfolio smoke baseline', () => {
   test('hero copy is visible on first paint', async ({ page }) => {
     const hero = page.locator('#hero')
     await expect(hero.getByRole('heading', { name: "Hey, I'm Lukáš Machala" })).toBeVisible()
-    await expect(hero.getByText('Fullstack Developer', { exact: true })).toBeVisible()
+    await expect(
+      hero.getByText(
+        'Software Engineer building quantitative data pipelines, time-series systems, and modern web applications.',
+        { exact: true },
+      ),
+    ).toBeVisible()
   })
 
   test('gradient headers remain visible when dark theme is forced', async ({ page }) => {
@@ -40,12 +35,12 @@ test.describe('Portfolio smoke baseline', () => {
     const heroHeading = page.locator('#hero h1').first()
     await expect(heroHeading).toBeVisible()
 
-    const sectionHeading = page.locator('#tech-journey h2').first()
+    const sectionHeading = page.locator('#featured-projects h2').first()
     await expect(sectionHeading).toBeVisible()
 
     const headingColors = await page.evaluate(() => {
       const hero = document.querySelector('#hero h1')
-      const section = document.querySelector('#tech-journey h2')
+      const section = document.querySelector('#featured-projects h2')
 
       return {
         heroColor: hero ? getComputedStyle(hero).color : '',
@@ -63,13 +58,13 @@ test.describe('Portfolio smoke baseline', () => {
 
     await expect(page.getByRole('link', { name: /Connect with me on GitHub/i })).toHaveAttribute(
       'href',
-      'https://github.com/Lowcash',
+      'https://github.com/lowcash',
     )
     await expect(page.getByRole('link', { name: /Connect with me on LinkedIn/i })).toHaveAttribute(
       'href',
       'https://linkedin.com/in/lukáš-machala-00549114a',
     )
-    await expect(page.getByRole('link', { name: /Connect with me on Email/i })).toHaveAttribute(
+    await expect(page.getByRole('link', { name: 'lukas.lowcash@gmail.com' })).toHaveAttribute(
       'href',
       'mailto:lukas.lowcash@gmail.com',
     )

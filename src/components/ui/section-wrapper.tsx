@@ -24,12 +24,13 @@ export function SectionWrapper({
   const resolvedContainerClassName = containerClassName ?? `${WIDTH_CLASS[maxWidth]} mx-auto w-full`
 
   return (
-    <section
+    <div
       data-section={id}
-      className={`relative flex min-h-screen items-center justify-center px-6 py-20 md:px-8 ${fullHeight ? 'h-screen' : ''} ${className}`}
-      style={{ scrollSnapAlign: 'start' }}
+      className={`relative flex w-full flex-1 flex-col justify-center px-4 sm:px-6 md:px-8 ${
+        fullHeight ? 'items-center text-center' : 'items-stretch'
+      } ${className}`}
     >
       <div className={resolvedContainerClassName}>{children}</div>
-    </section>
+    </div>
   )
 }

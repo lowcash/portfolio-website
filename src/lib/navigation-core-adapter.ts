@@ -1,13 +1,13 @@
 import {
-  buildSectionBoundaries,
   buildSectionUrl,
-  computeNearestSection,
   createSectionRegistry,
   normalizeHash,
   resolveScrollBehavior,
   shouldWriteSectionUrl,
 } from '../../packages/navigation-core'
 import type { HashWriteMode, ScrollTargetOptions } from '../../packages/navigation-core'
+
+export { resolveActiveSectionIndex } from './scroll-spy'
 
 function getCurrentUrl() {
   return `${window.location.pathname}${window.location.search}${window.location.hash}`
@@ -81,49 +81,12 @@ export function scrollToSectionByIndex(
     window.matchMedia('(prefers-reduced-motion: reduce)').matches,
   )
   const shouldUpdateHash = options.updateHash ?? true
-  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent)
 
-  if (isIOS) {
-    const elementPosition = element.getBoundingClientRect().top + window.pageYOffset
-    window.scrollTo({
-      top: elementPosition,
-      behavior,
-    })
-  } else {
-    element.scrollIntoView({ behavior, block: 'start' })
-  }
+  element.scrollIntoView({ behavior, block: 'start' })
 
   if (shouldUpdateHash) {
     setSectionHashByIndex(sectionIds, index)
   }
 
   return true
-}
-
-export function resolveActiveSectionIndex(sectionIds: readonly string[]) {
-  const boundaries = buildSectionBoundaries({
-    sectionIds,
-    resolveOffsetTop: (sectionId) => {
-      const section = document.getElementById(sectionId)
-      if (!section) {
-        return null
-      }
-
-      const rect = section.getBoundingClientRect()
-      return rect.top + window.scrollY + rect.height / 2
-    },
-  })
-
-  const activeSectionId = computeNearestSection({
-    scrollY: window.scrollY,
-    sections: boundaries,
-    offset: window.innerHeight / 2,
-  })
-
-  if (!activeSectionId) {
-    return 0
-  }
-
-  const activeSectionIndex = sectionIds.indexOf(activeSectionId)
-  return activeSectionIndex >= 0 ? activeSectionIndex : 0
 }

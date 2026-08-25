@@ -2,44 +2,63 @@ import type { CSSProperties, ReactNode } from 'react'
 
 import type { LucideIcon } from 'lucide-react'
 
+import { formatTypography } from '@/lib/prevent-widows'
+
+import { TwoColumnCard } from '@/components/ui/card-layout'
+
 interface CardProps {
   icon?: LucideIcon
   iconColor?: string
   title: string
   eyebrow?: string
-  subtitle?: string
-  description: string
+  badges?: readonly string[]
+  description?: string
+  bullets?: readonly string[]
   children?: ReactNode
   style?: CSSProperties
   fullHeight?: boolean
 }
 
 export function Card({
-  icon: Icon,
-  iconColor = 'text-gray-400',
+  icon,
+  iconColor = 'text-zinc-400',
   title,
   eyebrow,
-  subtitle,
+  badges = [],
   description,
+  bullets,
   children,
   style,
   fullHeight = false,
 }: CardProps) {
+  const hasFooter = Boolean(children && bullets?.length)
+
   return (
-    <article
-      className={`flex flex-col rounded-2xl p-8 transition-all duration-500 ${fullHeight ? 'h-full' : ''}`}
+    <TwoColumnCard
+      icon={icon}
+      iconColor={iconColor}
+      title={title}
+      badges={badges}
+      fullHeight={fullHeight}
       style={style}
     >
-      <div className='mb-4 flex items-start gap-4'>
-        {Icon && <Icon className={`h-10 w-10 ${iconColor} shrink-0`} />}
-        <div className='grow'>
-          <h3 className='mb-1 text-xl text-white'>{title}</h3>
-          {eyebrow && <p className='mb-1 text-lg text-gray-300'>{eyebrow}</p>}
-          {subtitle && <span className='text-sm text-gray-400'>{subtitle}</span>}
-        </div>
-      </div>
-      <p className={`text-gray-400 ${children ? 'mb-6' : ''}`}>{description}</p>
-      {children}
-    </article>
+      {eyebrow ? (
+        <p className='text-sm font-normal leading-relaxed text-zinc-400'>{formatTypography(eyebrow)}</p>
+      ) : null}
+
+      {bullets?.length ? (
+        <ul className='list-disc space-y-2 pl-5 text-pretty text-sm font-normal leading-relaxed text-zinc-400'>
+          {bullets.map((bullet, index) => (
+            <li key={index}>{formatTypography(bullet)}</li>
+          ))}
+        </ul>
+      ) : null}
+
+      {!bullets?.length && description ? (
+        <p className='text-sm font-normal leading-relaxed text-zinc-400'>{formatTypography(description)}</p>
+      ) : null}
+
+      {children ? <div className={hasFooter ? 'mt-auto pt-2' : undefined}>{children}</div> : null}
+    </TwoColumnCard>
   )
 }

@@ -12,6 +12,8 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "typecheck": "tsc --noEmit -p tsconfig.app.json",
+    "test": "vitest run",
+    "test:unit": "vitest run",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "analyze:unused": "knip --config knip.json --no-exit-code",
@@ -69,6 +71,7 @@
     "start-server-and-test": "^3.0.0",
     "tailwindcss": "^4.2.2",
     "typescript": "^5.9.3",
-    "typescript-eslint": "^8.58.0"
+    "typescript-eslint": "^8.58.0",
+    "vitest": "^3.2.7"
   }
 }

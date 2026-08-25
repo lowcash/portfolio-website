@@ -29,36 +29,51 @@ export function ScrollNavigation({
   const [dragCurrentY, setDragCurrentY] = useState<number | null>(null)
   const drawerRef = useRef<HTMLDivElement>(null)
   const scrollPositionRef = useRef(0)
-  const isNavigatingRef = useRef(false)
+  const pendingNavigationIndexRef = useRef<number | null>(null)
+  const onSectionClickRef = useRef(onSectionClick)
   const htmlStyleRestoreRef = useRef({
     scrollBehavior: '',
     scrollSnapType: '',
   })
+
+  useEffect(() => {
+    onSectionClickRef.current = onSectionClick
+  }, [onSectionClick])
+
+  const setMobileMenuOpenState = (nextOpen: boolean) => {
+    onMenuStateChange?.(nextOpen)
+    setMobileMenuOpen(nextOpen)
+  }
 
   const sections = Array.from({ length: totalSections }, (_, i) => ({
     id: i,
     label: sectionNames[i],
   }))
 
-  const handleMobileClick = (index: number) => {
-    // Signal that we are navigating to a new section
-    isNavigatingRef.current = true
+  const unlockBodyScroll = () => {
+    const html = document.documentElement
+    const body = document.body
+    const scrollY = scrollPositionRef.current
 
-    // Close the menu
-    setMobileMenuOpen(false)
+    body.style.position = ''
+    body.style.top = ''
+    body.style.width = ''
+
+    window.scrollTo({
+      top: scrollY,
+      left: 0,
+      behavior: 'instant' as ScrollBehavior,
+    })
+
+    html.style.scrollBehavior = htmlStyleRestoreRef.current.scrollBehavior
+    html.style.scrollSnapType = htmlStyleRestoreRef.current.scrollSnapType
+  }
+
+  const handleMobileClick = (index: number) => {
+    pendingNavigationIndexRef.current = index
+    setMobileMenuOpenState(false)
     setDragStartY(null)
     setDragCurrentY(null)
-
-    // Let close-state cleanup settle first, then trigger section navigation.
-    requestAnimationFrame(() => {
-      requestAnimationFrame(() => {
-        onSectionClick(index)
-        // Reset navigation flag after navigation is initiated
-        setTimeout(() => {
-          isNavigatingRef.current = false
-        }, 100)
-      })
-    })
   }
 
   // Swipe to close functionality
@@ -72,7 +87,6 @@ export function ScrollNavigation({
     const currentY = e.touches[0].clientY
     const diff = currentY - dragStartY
 
-    // Only allow dragging down
     if (diff > 0) {
       setDragCurrentY(currentY)
     }
@@ -87,21 +101,19 @@ export function ScrollNavigation({
 
     const diff = dragCurrentY - dragStartY
 
-    // Close if dragged down more than 100px
     if (diff > 100) {
-      setMobileMenuOpen(false)
+      pendingNavigationIndexRef.current = null
+      setMobileMenuOpenState(false)
     }
 
     setDragStartY(null)
     setDragCurrentY(null)
   }
 
-  // Mouse events for desktop testing
   const handleMouseDown = (e: React.MouseEvent) => {
     setDragStartY(e.clientY)
   }
 
-  // Handle mouse move and up on document level
   useEffect(() => {
     if (dragStartY === null) return
 
@@ -111,22 +123,19 @@ export function ScrollNavigation({
       const currentY = e.clientY
       const diff = currentY - dragStartY
 
-      // Only allow dragging down
       if (diff > 0) {
         setDragCurrentY(currentY)
       }
     }
 
     const handleMouseUp = () => {
-      // Calculate total drag distance
       const diff = dragCurrentY !== null && dragStartY !== null ? dragCurrentY - dragStartY : 0
 
-      // Only close if dragged significantly (> 100px)
       if (diff > 100) {
-        setMobileMenuOpen(false)
+        pendingNavigationIndexRef.current = null
+        setMobileMenuOpenState(false)
       }
 
-      // Reset all drag state
       setDragStartY(null)
       setDragCurrentY(null)
     }
@@ -140,90 +149,52 @@ export function ScrollNavigation({
     }
   }, [dragStartY, dragCurrentY])
 
-  // Calculate drag offset for visual feedback
   const getDragOffset = () => {
     if (dragStartY === null || dragCurrentY === null) return 0
     const diff = dragCurrentY - dragStartY
     return diff > 0 ? diff : 0
   }
 
-  // Prevent body scroll when menu is open - PROPER SOLUTION
   useEffect(() => {
     const html = document.documentElement
     const body = document.body
 
-    if (mobileMenuOpen) {
-      htmlStyleRestoreRef.current = {
-        scrollBehavior: html.style.scrollBehavior,
-        scrollSnapType: html.style.scrollSnapType,
-      }
+    if (!mobileMenuOpen) {
+      return
+    }
 
-      // Save current scroll position IMMEDIATELY
-      const currentScrollY = window.scrollY
-      scrollPositionRef.current = currentScrollY
+    htmlStyleRestoreRef.current = {
+      scrollBehavior: html.style.scrollBehavior,
+      scrollSnapType: html.style.scrollSnapType,
+    }
 
-      // Disable scroll snap and smooth scrolling without mutating html className.
-      html.style.scrollBehavior = 'auto'
-      html.style.scrollSnapType = 'none'
+    scrollPositionRef.current = window.scrollY
 
-      // Prevent scroll using position fixed on body to avoid any layout shift
-      body.style.position = 'fixed'
-      body.style.top = `-${currentScrollY}px`
-      body.style.width = '100%'
+    html.style.scrollBehavior = 'auto'
+    html.style.scrollSnapType = 'none'
 
-      return () => {
-        // START scroll restoration - notify parent to skip handleScroll
-        if (onScrollRestore) {
-          onScrollRestore(true)
+    body.style.position = 'fixed'
+    body.style.top = `-${scrollPositionRef.current}px`
+    body.style.width = '100%'
+
+    return () => {
+      onScrollRestore?.(true)
+      unlockBodyScroll()
+
+      requestAnimationFrame(() => {
+        onScrollRestore?.(false)
+
+        const pendingIndex = pendingNavigationIndexRef.current
+        if (pendingIndex !== null) {
+          pendingNavigationIndexRef.current = null
+          onSectionClickRef.current(pendingIndex)
         }
-
-        // Restore scroll position
-        const scrollY = scrollPositionRef.current
-
-        // Remove fixed positioning first
-        body.style.position = ''
-        body.style.top = ''
-        body.style.width = ''
-
-        // ALWAYS restore scroll position immediately to prevent jumping to top (0)
-        // This ensures we start the navigation from the correct place
-        window.scrollTo({
-          top: scrollY,
-          left: 0,
-          behavior: 'instant' as ScrollBehavior,
-        })
-
-        // CRITICAL: Use requestAnimationFrame to ensure DOM has updated before re-enabling features
-        requestAnimationFrame(() => {
-          html.style.scrollBehavior = htmlStyleRestoreRef.current.scrollBehavior
-          html.style.scrollSnapType = htmlStyleRestoreRef.current.scrollSnapType
-
-          // END scroll restoration - notify parent to resume handleScroll
-          if (onScrollRestore) {
-            onScrollRestore(false)
-          }
-        })
-      }
-    } else {
-      // Safety cleanup to ensure no styles are stuck if component re-renders or state changes unexpectedly
-      body.style.position = ''
-      body.style.top = ''
-      body.style.width = ''
-      html.style.scrollBehavior = htmlStyleRestoreRef.current.scrollBehavior
-      html.style.scrollSnapType = htmlStyleRestoreRef.current.scrollSnapType
+      })
     }
   }, [mobileMenuOpen, onScrollRestore])
 
-  // Notify parent about menu state change
-  useEffect(() => {
-    if (onMenuStateChange) {
-      onMenuStateChange(mobileMenuOpen)
-    }
-  }, [mobileMenuOpen, onMenuStateChange])
-
   return (
     <>
-      {/* DESKTOP - Right side vertical dots */}
       <FloatingRail variant='center-right' desktopOnly childOffsetRightPx={22}>
         <nav aria-label='Page navigation' role='navigation'>
           <div className='flex flex-col gap-4'>
@@ -239,15 +210,18 @@ export function ScrollNavigation({
         </nav>
       </FloatingRail>
 
-      {/* MOBILE - Hamburger button (top-right) with dynamic glow */}
       <div className='pointer-events-none fixed top-0 right-0 left-0 lg:hidden' style={{ zIndex: 60 }}>
-        <div className='relative mx-auto h-0 max-w-6xl px-6'>
+        <div className='relative mx-auto h-0 max-w-6xl px-4 sm:px-6'>
           <button
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            onClick={() => {
+              pendingNavigationIndexRef.current = null
+              setMobileMenuOpenState(!mobileMenuOpen)
+            }}
             onKeyDown={(e) => {
               if (e.key === 'Enter' || e.key === ' ') {
                 e.preventDefault()
-                setMobileMenuOpen(!mobileMenuOpen)
+                pendingNavigationIndexRef.current = null
+                setMobileMenuOpenState(!mobileMenuOpen)
               }
             }}
             className='pointer-events-auto absolute top-7 transition-all duration-300 hover:scale-105'
@@ -257,13 +231,10 @@ export function ScrollNavigation({
             aria-controls='mobile-navigation-menu'
           >
             <div className='group relative'>
-              {/* Shimmer glow layer - same as scroll-to-top */}
               <div
                 className='animate-glow-shimmer scroll-to-top-glow pointer-events-none absolute inset-0 -z-10 rounded-xl'
                 aria-hidden='true'
               />
-
-              {/* Button - same styling as scroll-to-top */}
               <div className='scroll-to-top-inner rounded-xl bg-black/40 p-3 backdrop-blur-sm transition-all duration-500'>
                 {mobileMenuOpen ? (
                   <X className='scroll-to-top-icon h-6 w-6' aria-hidden='true' />
@@ -276,9 +247,13 @@ export function ScrollNavigation({
         </div>
       </div>
 
-      {/* MOBILE - Slide-in menu panel */}
-      <MobileDrawerBackdrop isOpen={mobileMenuOpen} onClose={() => setMobileMenuOpen(false)}>
-        {/* Menu panel - slide from bottom with swipe support */}
+      <MobileDrawerBackdrop
+        isOpen={mobileMenuOpen}
+        onClose={() => {
+          pendingNavigationIndexRef.current = null
+          setMobileMenuOpenState(false)
+        }}
+      >
         <nav
           id='mobile-navigation-menu'
           ref={drawerRef}
@@ -294,7 +269,6 @@ export function ScrollNavigation({
             visibility: mobileMenuOpen ? 'visible' : 'hidden',
           }}
         >
-          {/* Handle bar - visual hint for swipe - THIS is the drag area */}
           <div
             className='flex justify-center pt-4 pb-2'
             onTouchStart={handleTouchStart}
@@ -305,7 +279,6 @@ export function ScrollNavigation({
             <div className='h-1 w-12 rounded-full bg-gray-600' />
           </div>
 
-          {/* Menu items */}
           <div className='px-6 pt-4 pb-8'>
             <div className='space-y-2'>
               {sections.map((section) => (

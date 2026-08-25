@@ -16,10 +16,10 @@ type OrbSettings = {
 
 /**
  * Generate color breakpoints dynamically based on section count
- * Each section gets equal percentage space (100% / 9 sections = ~11.11% each)
+ * Each section gets equal percentage space across the scroll range
  */
 const generateColorBreakpoints = () => {
-  const percentPerSection = 100 / (SECTION_COUNT - 1) // 9 sections = 8 segments
+  const percentPerSection = 100 / (SECTION_COUNT - 1)
 
   return ORB_COLORS.map((color, index) => ({
     percent: index * percentPerSection,
@@ -136,7 +136,7 @@ export function AnimatedBackground() {
   const [colorVariation, setColorVariation] = useState(0.4) // 40%
   const [orbSize, setOrbSize] = useState(1.2)
   const [orbBlur, setOrbBlur] = useState(1.0)
-  const [orbOpacity, setOrbOpacity] = useState(1.4) // Hidden, controlled by opacity
+  const [orbOpacity, setOrbOpacity] = useState(0.85) // Subtle default — text stays readable
   const [positionVariation, setPositionVariation] = useState(1.0) // 100% = default positions
 
   // Track window width for responsive vignette — start false (SSR-safe), update on client mount
@@ -196,7 +196,7 @@ export function AnimatedBackground() {
         colorVariation: parseFloat(rootStyles.getPropertyValue('--color-variation') || '0.4'),
         orbSize: parseFloat(rootStyles.getPropertyValue('--orb-size') || '1.2'),
         orbBlur: parseFloat(rootStyles.getPropertyValue('--orb-blur') || '1.0'),
-        orbOpacity: parseFloat(rootStyles.getPropertyValue('--orb-opacity') || '1.4'),
+        orbOpacity: parseFloat(rootStyles.getPropertyValue('--orb-opacity') || '0.85'),
         positionVariation: parseFloat(rootStyles.getPropertyValue('--position-variation') || '1.0'),
       }
     }
@@ -322,9 +322,9 @@ export function AnimatedBackground() {
     }
   }, [prefersReducedMotion, targetScrollPercent])
 
-  // Calculate segment (0 to SECTION_COUNT-2, so 0-7 for 9 sections)
+  // Calculate segment (0 to SECTION_COUNT-2)
   const effectiveScrollPercent = prefersReducedMotion ? targetScrollPercent : smoothScrollPercent
-  const percentPerSegment = 100 / (SECTION_COUNT - 1) // ~12.5% per segment
+  const percentPerSegment = 100 / (SECTION_COUNT - 1)
   const segmentIndex = Math.min(SECTION_COUNT - 2, Math.floor(effectiveScrollPercent / percentPerSegment))
 
   // Local progress within current segment (0-1)
@@ -473,7 +473,7 @@ export function AnimatedBackground() {
           width: `${800 * orbSize * mobileSizeMultiplier}px`,
           height: `${800 * orbSize * mobileSizeMultiplier}px`,
           background: `radial-gradient(circle, ${orbColor} 0%, transparent 70%)`,
-          opacity: 0.25 * orbOpacity * mobileOpacityMultiplier,
+          opacity: 0.14 * orbOpacity * mobileOpacityMultiplier,
           ...getOrbMotionStyle(120, 45),
         }}
       />
@@ -486,7 +486,7 @@ export function AnimatedBackground() {
           width: `${600 * orbSize * mobileSizeMultiplier}px`,
           height: `${600 * orbSize * mobileSizeMultiplier}px`,
           background: `radial-gradient(circle, ${orbColor1} 0%, transparent 70%)`,
-          opacity: 0.2 * orbOpacity * mobileOpacityMultiplier,
+          opacity: 0.11 * orbOpacity * mobileOpacityMultiplier,
           ...getOrbMotionStyle(100, 38),
         }}
       />
@@ -498,7 +498,7 @@ export function AnimatedBackground() {
           width: `${650 * orbSize * mobileSizeMultiplier}px`,
           height: `${650 * orbSize * mobileSizeMultiplier}px`,
           background: `radial-gradient(circle, ${orbColor2} 0%, transparent 70%)`,
-          opacity: 0.22 * orbOpacity * mobileOpacityMultiplier,
+          opacity: 0.12 * orbOpacity * mobileOpacityMultiplier,
           ...getOrbMotionStyle(110, 42),
         }}
       />
@@ -511,7 +511,7 @@ export function AnimatedBackground() {
           width: `${500 * orbSize * mobileSizeMultiplier}px`,
           height: `${500 * orbSize * mobileSizeMultiplier}px`,
           background: `radial-gradient(circle, ${orbColor3} 0%, transparent 70%)`,
-          opacity: 0.18 * orbOpacity * mobileOpacityMultiplier,
+          opacity: 0.1 * orbOpacity * mobileOpacityMultiplier,
           ...getOrbMotionStyle(90, 40),
         }}
       />
@@ -523,7 +523,7 @@ export function AnimatedBackground() {
           width: `${550 * orbSize * mobileSizeMultiplier}px`,
           height: `${550 * orbSize * mobileSizeMultiplier}px`,
           background: `radial-gradient(circle, ${orbColor4} 0%, transparent 70%)`,
-          opacity: 0.19 * orbOpacity * mobileOpacityMultiplier,
+          opacity: 0.11 * orbOpacity * mobileOpacityMultiplier,
           ...getOrbMotionStyle(95, 36),
         }}
       />
@@ -536,7 +536,7 @@ export function AnimatedBackground() {
           width: `${700 * orbSize * mobileSizeMultiplier}px`,
           height: `${700 * orbSize * mobileSizeMultiplier}px`,
           background: `radial-gradient(circle, ${orbColor5} 0%, transparent 70%)`,
-          opacity: 0.21 * orbOpacity * mobileOpacityMultiplier,
+          opacity: 0.12 * orbOpacity * mobileOpacityMultiplier,
           ...getOrbMotionStyle(115, 44),
         }}
       />
@@ -551,7 +551,7 @@ export function AnimatedBackground() {
               width: `${600 * orbSize * mobileSizeMultiplier}px`,
               height: `${600 * orbSize * mobileSizeMultiplier}px`,
               background: `radial-gradient(circle, ${orbColor6} 0%, transparent 70%)`,
-              opacity: 0.2 * orbOpacity * mobileOpacityMultiplier,
+              opacity: 0.11 * orbOpacity * mobileOpacityMultiplier,
               ...getOrbMotionStyle(105, 50),
             }}
           />
@@ -563,7 +563,7 @@ export function AnimatedBackground() {
               width: `${550 * orbSize * mobileSizeMultiplier}px`,
               height: `${550 * orbSize * mobileSizeMultiplier}px`,
               background: `radial-gradient(circle, ${orbColor1} 0%, transparent 70%)`,
-              opacity: 0.18 * orbOpacity * mobileOpacityMultiplier,
+              opacity: 0.1 * orbOpacity * mobileOpacityMultiplier,
               ...getOrbMotionStyle(100, 46),
             }}
           />

@@ -3,6 +3,8 @@
  * Centralized configuration for animations, thresholds, and timing
  */
 
+export const SECTION_COUNT = 4 // Total number of sections in the app
+
 export const ANIMATION_CONFIG = {
   // Scroll reveal animation
   SCROLL_REVEAL_THRESHOLD: 0.15, // 15% visibility triggers fade-in
@@ -16,9 +18,7 @@ export const ANIMATION_CONFIG = {
   STAGGER_DELAY_MS: 100,
   STAGGER_BASE_DELAY_MS: 200,
 
-  // Background orbs
-  ORB_OPACITY_MIN: 0.11,
-  ORB_OPACITY_MAX: 0.15,
+  // Background orbs — kept subtle so body copy stays readable
+  ORB_OPACITY_MIN: 0.08,
+  ORB_OPACITY_MAX: 0.12,
 } as const
-
-export const SECTION_COUNT = 9 // Total number of sections in the app

@@ -759,17 +759,7 @@ export function EasterEggs() {
       return
     }
 
-    const sectionIds = [
-      'hero',
-      'who-i-am',
-      'tech-journey',
-      'notable-work',
-      'work-experience',
-      'education',
-      'beyond-code',
-      'whats-next',
-      'contact',
-    ]
+    const sectionIds = ['hero', 'featured-projects', 'experience', 'contact']
 
     const checkSections = () => {
       const viewportMiddle = window.innerHeight / 2

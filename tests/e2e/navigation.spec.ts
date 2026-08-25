@@ -1,9 +1,9 @@
 import { expect, test } from '@playwright/test'
 
 const SECTIONS = [
-  { id: 'tech-journey', label: 'Tech Stack' },
-  { id: 'notable-work', label: 'Notable Work' },
-  { id: 'contact', label: "Let's Connect" },
+  { id: 'featured-projects', label: 'Projects' },
+  { id: 'experience', label: 'Experience' },
+  { id: 'contact', label: 'Contact' },
 ] as const
 
 test.describe('Desktop navigation baseline', () => {
@@ -27,26 +27,33 @@ test.describe('Desktop navigation baseline', () => {
   }
 
   test('active navigation state follows manual section scroll', async ({ page }) => {
-    await page.locator('#work-experience').scrollIntoViewIfNeeded()
+    await page.locator('#experience').scrollIntoViewIfNeeded()
     await page.waitForTimeout(1200)
 
-    await expect(page.getByRole('button', { name: 'Navigate to Work Experience' })).toHaveAttribute(
+    await expect(page.getByRole('button', { name: 'Navigate to Experience' })).toHaveAttribute(
       'aria-current',
       'true',
     )
   })
 
-  test('navigation order keeps Work Experience before Academic Journey', async ({ page }) => {
-    const workExpButton = page.getByRole('button', { name: 'Navigate to Work Experience' })
-    const educationButton = page.getByRole('button', { name: 'Navigate to Academic Journey' })
+  test('contact navigation dot activates at bottom of page', async ({ page }) => {
+    await page.evaluate(() => window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'instant' }))
+    await page.waitForTimeout(800)
 
-    await expect(workExpButton).toBeVisible()
-    await expect(educationButton).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Navigate to Contact' })).toHaveAttribute('aria-current', 'true')
+  })
 
-    const workExpY = await workExpButton.evaluate((el) => el.getBoundingClientRect().top)
-    const educationY = await educationButton.evaluate((el) => el.getBoundingClientRect().top)
+  test('navigation order keeps Projects before Experience', async ({ page }) => {
+    const projectsButton = page.getByRole('button', { name: 'Navigate to Projects' })
+    const experienceButton = page.getByRole('button', { name: 'Navigate to Experience' })
 
-    expect(workExpY).toBeLessThanOrEqual(educationY)
+    await expect(projectsButton).toBeVisible()
+    await expect(experienceButton).toBeVisible()
+
+    const projectsY = await projectsButton.evaluate((el) => el.getBoundingClientRect().top)
+    const experienceY = await experienceButton.evaluate((el) => el.getBoundingClientRect().top)
+
+    expect(projectsY).toBeLessThanOrEqual(experienceY)
   })
 
   test('scroll-to-top appears after leaving hero and returns page to top', async ({ page }) => {
@@ -90,7 +97,7 @@ test.describe('Mobile navigation baseline', () => {
     await page.locator('button[aria-controls="mobile-navigation-menu"]').click()
 
     const drawer = page.getByRole('navigation', { name: 'Mobile navigation' })
-    const contactButton = drawer.getByRole('button', { name: "Let's Connect" })
+    const contactButton = drawer.getByRole('button', { name: 'Contact' })
     await expect(contactButton).toBeVisible()
 
     await contactButton.click()
@@ -134,7 +141,7 @@ test.describe('Mobile navigation baseline', () => {
   })
 
   test('mobile menu marks the current section as active after manual scroll', async ({ page }) => {
-    await page.locator('#work-experience').scrollIntoViewIfNeeded()
+    await page.locator('#experience').scrollIntoViewIfNeeded()
     await page.waitForTimeout(1200)
 
     const trigger = page.locator('button[aria-controls="mobile-navigation-menu"]')
@@ -143,7 +150,7 @@ test.describe('Mobile navigation baseline', () => {
     const drawer = page.getByRole('navigation', { name: 'Mobile navigation' })
     await expect(drawer).toBeVisible()
 
-    const activeItem = drawer.getByRole('button', { name: 'Work Experience' })
+    const activeItem = drawer.getByRole('button', { name: 'Experience' })
     await expect(activeItem).toHaveAttribute('aria-current', 'page')
   })
 })

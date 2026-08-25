@@ -33,10 +33,10 @@ test.describe('Devtools and layered UI interactions', () => {
       await page.getByLabel('Close menu backdrop').click()
       await page.waitForTimeout(300)
     } else {
-      const navButton = page.getByRole('button', { name: 'Navigate to Tech Stack' })
+      const navButton = page.getByRole('button', { name: 'Navigate to Projects' })
       await navButton.click()
       await page.waitForTimeout(800)
-      await expect(page.locator('#tech-journey')).toBeInViewport({ ratio: 0.15 })
+      await expect(page.locator('#featured-projects')).toBeInViewport({ ratio: 0.15 })
     }
   })
 
@@ -117,10 +117,10 @@ test.describe('Devtools and layered UI interactions', () => {
       })
 
       expect(headingIsTopClickableTarget).toBe(true)
-      const navButton = page.getByRole('button', { name: 'Navigate to Notable Work' })
+      const navButton = page.getByRole('button', { name: 'Navigate to Projects' })
       await navButton.click()
       await page.waitForTimeout(800)
-      await expect(page.locator('#notable-work')).toBeInViewport({ ratio: 0.15 })
+      await expect(page.locator('#featured-projects')).toBeInViewport({ ratio: 0.15 })
     }
   })
 
