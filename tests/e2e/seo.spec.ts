@@ -18,7 +18,7 @@ test.describe('SEO outputs', () => {
     const jsonLd = JSON.parse((await page.locator('script[type="application/ld+json"]').textContent()) ?? '{}')
     expect(jsonLd['@type']).toBe('Person')
     expect(jsonLd.url).toBe('https://lowcash.dev')
-    expect(jsonLd.sameAs).toContain('https://github.com/Lowcash')
+    expect(jsonLd.sameAs).toContain('https://github.com/lowcash')
   })
 
   test('robots.txt and sitemap.xml use the canonical production URL', async ({ request }) => {

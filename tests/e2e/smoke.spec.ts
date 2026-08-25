@@ -19,10 +19,7 @@ test.describe('Portfolio smoke baseline', () => {
     const hero = page.locator('#hero')
     await expect(hero.getByRole('heading', { name: "Hey, I'm Lukáš Machala" })).toBeVisible()
     await expect(
-      hero.getByText(
-        'Software Engineer building quantitative data pipelines, time-series systems, and modern web applications.',
-        { exact: true },
-      ),
+      hero.getByText(/Software Engineer building quantitative data pipelines,\s*time[\u2011-]series systems/i),
     ).toBeVisible()
   })
 

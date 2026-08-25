@@ -33,6 +33,6 @@ test.describe('Content sections baseline', () => {
     const lowcashLink = page.getByRole('link', { name: /^Lowcash$/i })
     await expect(lowcashLink).toHaveAttribute('href', /youtube.com\/@ltdlowcash/)
     await expect(lowcashLink).toHaveAttribute('target', '_blank')
-    await expect(page.getByText(/mix drum &\s*bass sets as/i)).toBeVisible()
+    await expect(page.getByText(/mix drum\s*&\s*bass sets\s+as/i)).toBeVisible()
   })
 })
