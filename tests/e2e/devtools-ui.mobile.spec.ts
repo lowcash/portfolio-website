@@ -70,7 +70,7 @@ test.describe('Mobile devtools visuals', () => {
     if (hasPopup) {
       await expect(mobilePopup).toBeVisible()
 
-      // Verify popup content — use exact text to avoid strict mode violation across 4 child elements
+      // Verify popup content – use exact text to avoid strict mode violation across 4 child elements
       const achievementText = mobilePopup.getByText('Achievement Unlocked!')
       await expect(achievementText).toBeVisible()
     }

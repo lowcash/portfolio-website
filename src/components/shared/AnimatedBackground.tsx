@@ -1,4 +1,4 @@
-// style-boundary-ignore-file: orb animation uses JS-computed inline styles (size, position, filter, duration) — cannot be expressed as static Tailwind classes
+// style-boundary-ignore-file: orb animation uses JS-computed inline styles (size, position, filter, duration) – cannot be expressed as static Tailwind classes
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
 
 import { ANIMATION_CONFIG, SECTION_COUNT } from '@/lib/constants'
@@ -136,13 +136,13 @@ export function AnimatedBackground() {
   const [colorVariation, setColorVariation] = useState(0.4) // 40%
   const [orbSize, setOrbSize] = useState(1.2)
   const [orbBlur, setOrbBlur] = useState(1.0)
-  const [orbOpacity, setOrbOpacity] = useState(0.85) // Subtle default — text stays readable
+  const [orbOpacity, setOrbOpacity] = useState(0.85) // Subtle default – text stays readable
   const [positionVariation, setPositionVariation] = useState(1.0) // 100% = default positions
 
-  // Track window width for responsive vignette — start false (SSR-safe), update on client mount
+  // Track window width for responsive vignette – start false (SSR-safe), update on client mount
   const [isMobile, setIsMobile] = useState(false)
 
-  // Update isMobile on resize — useLayoutEffect runs synchronously before paint (client-only)
+  // Update isMobile on resize – useLayoutEffect runs synchronously before paint (client-only)
   useLayoutEffect(() => {
     const updateSize = () => {
       setIsMobile(window.innerWidth < 768)

@@ -1,4 +1,4 @@
-# Portfolio Website — lowcash.dev
+# Portfolio Website – lowcash.dev
 
 Personal developer portfolio with scroll-based navigation, dynamic color theming, and a hidden achievement system.
 

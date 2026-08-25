@@ -7,7 +7,7 @@ export function formatTypography(str: string): string {
   return (
     str
       // 1. Date ranges: keep (2017 – 2020) intact and glued to the prior word
-      .replace(/\((\d{4})\s*[–—-]\s*(\d{4})\)/g, '($1\u00A0\u2013\u00A0$2)')
+      .replace(/\((\d{4})\s*[–\u2014-]\s*(\d{4})\)/g, '($1\u00A0\u2013\u00A0$2)')
       .replace(/(\S+)\s+(\(\d{4}\u00A0\u2013\u00A0\d{4}\))/g, '$1\u00A0$2')
       // Keep "& Augmented Reality (years)" / "& Game Development (years)" on one row
       .replace(

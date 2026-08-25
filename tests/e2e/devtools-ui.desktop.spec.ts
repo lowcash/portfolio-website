@@ -161,7 +161,7 @@ test.describe('Desktop devtools and overlays', () => {
       }
     }
 
-    // Verify achievement was recorded in console — wait for the grid to reflect the unlock
+    // Verify achievement was recorded in console – wait for the grid to reflect the unlock
     const unlockedSlot = consoleRegion.locator('div[class*="border-yellow"]').first()
     await expect(unlockedSlot).toBeVisible({ timeout: 5000 })
 

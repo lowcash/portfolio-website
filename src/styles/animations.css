@@ -380,7 +380,7 @@
 }
 
 /**
- * Mobile orb animation — reduced amplitude (40-50px vs 150-190px desktop)
+ * Mobile orb animation – reduced amplitude (40-50px vs 150-190px desktop)
  * so motion is perceptible on small viewports without orbs moving off-screen.
  * Faster durations (11-16s vs 36-50s) make the motion visible to the eye.
  */

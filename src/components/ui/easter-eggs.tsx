@@ -27,7 +27,7 @@ import { Trophy } from 'lucide-react'
  * Open Dev Console (tap terminal icon bottom-left or press D on desktop) to see all achievements!
  */
 
-/** Module-level holder for the canvas-bound confetti function — set after canvas mounts */
+/** Module-level holder for the canvas-bound confetti function – set after canvas mounts */
 let _canvasFire: ((opts: confetti.Options) => Promise<null> | null) | null = null
 
 /** Realistic dual-cannon + top-shower casino confetti burst via canvas-confetti */
@@ -35,7 +35,7 @@ function fireCasinoConfetti() {
   const fire = (opts: confetti.Options) => (_canvasFire ? _canvasFire(opts) : confetti(opts))
   const COLORS = ['#fbbf24', '#f59e0b', '#ef4444', '#22c55e', '#3b82f6', '#a855f7', '#e5e7eb']
 
-  // Cannon burst — both sides simultaneously
+  // Cannon burst – both sides simultaneously
   fire({
     particleCount: 140,
     angle: 60,
@@ -322,7 +322,7 @@ export function EasterEggs() {
     }
   }, [canUseStorage])
 
-  // Unlock achievement helper — called via ref so effects don't need it in their deps arrays.
+  // Unlock achievement helper – called via ref so effects don't need it in their deps arrays.
   // The ref is always up-to-date (assigned every render below), so event listeners
   // remain registered across re-renders without triggering re-registration.
   const unlockAchievementRef = useRef<(id: string) => void>(() => {})
@@ -977,11 +977,11 @@ export function EasterEggs() {
     }
   }, [])
 
-  // Prevent SSR/client hydration mismatch — premium overlay depends on localStorage
+  // Prevent SSR/client hydration mismatch – premium overlay depends on localStorage
   const [mounted, setMounted] = useState(false)
   useEffect(() => setMounted(true), [])
 
-  // Derive enlightenment unlock state for premium UI — only after mount
+  // Derive enlightenment unlock state for premium UI – only after mount
   const enlightenmentUnlocked = mounted && (achievements.find((a) => a.id === 'enlightenment')?.unlocked ?? false)
 
   // Sync premium state to document root when enlightenment is unlocked
@@ -1074,7 +1074,7 @@ export function EasterEggs() {
 
   return (
     <>
-      {/* Dedicated confetti canvas — fixed above all overlays including mobile DevConsole (z:130) */}
+      {/* Dedicated confetti canvas – fixed above all overlays including mobile DevConsole (z:130) */}
       <canvas
         ref={confettiCanvasRef}
         aria-hidden='true'
@@ -1152,7 +1152,7 @@ export function EasterEggs() {
         )
       })}
 
-      {/* Floating gold sparkles — ambient atmosphere when enlightened */}
+      {/* Floating gold sparkles – ambient atmosphere when enlightened */}
       {enlightenmentUnlocked &&
         sparkles.map((s) => (
           <div
@@ -1173,10 +1173,10 @@ export function EasterEggs() {
           </div>
         ))}
 
-      {/* Premium golden vignette frame — visible once all achievements are unlocked */}
+      {/* Premium golden vignette frame – visible once all achievements are unlocked */}
       {enlightenmentUnlocked && (
         <>
-          {/* Golden sweeping hairline — animated gleam at very top of viewport */}
+          {/* Golden sweeping hairline – animated gleam at very top of viewport */}
           <div
             className='pointer-events-none fixed inset-x-0 top-0'
             aria-hidden='true'

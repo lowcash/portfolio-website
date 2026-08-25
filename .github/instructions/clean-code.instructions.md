@@ -9,8 +9,8 @@ This document enforces implementation discipline. Architecture ownership lives i
 ## Dead Code
 
 - Detect unused exports, imports, and types with Knip (`npm run analyze:unused` / `knip --strict`).
-- Remove dead code incrementally in small, safe commits — never suppress or ignore Knip errors.
-- Do not add new exports "for later" — add them when they are consumed.
+- Remove dead code incrementally in small, safe commits – never suppress or ignore Knip errors.
+- Do not add new exports "for later" – add them when they are consumed.
 
 ## Styling Boundary
 
@@ -27,7 +27,7 @@ This document enforces implementation discipline. Architecture ownership lives i
 ## Suppression Rules
 
 - `// eslint-disable`, `@ts-ignore`, `@ts-expect-error` require a comment explaining why.
-- Never use `any` as a type unless bridging an untyped third-party boundary — document the reason.
+- Never use `any` as a type unless bridging an untyped third-party boundary – document the reason.
 - Do not use `!` (non-null assertion) when a null check is feasible.
 
 ## General

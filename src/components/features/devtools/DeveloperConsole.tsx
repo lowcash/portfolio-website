@@ -1,4 +1,4 @@
-// style-boundary-ignore-file: dynamic orbR/orbG/orbB RGB values computed from React state — inline styles are unavoidable here
+// style-boundary-ignore-file: dynamic orbR/orbG/orbB RGB values computed from React state – inline styles are unavoidable here
 import { useEffect, useRef, useState } from 'react'
 
 import { Terminal, Trophy, X } from 'lucide-react'
@@ -74,7 +74,7 @@ export function DeveloperConsole({ onVisibilityChange, isMobileMenuOpen = false 
     return saved ? JSON.parse(saved) : []
   })
 
-  // Tooltip state — anchored to the active achievement tile
+  // Tooltip state – anchored to the active achievement tile
   const [activeTooltipId, setActiveTooltipId] = useState<string | null>(null)
   const [activeTooltipAlign, setActiveTooltipAlign] = useState<TooltipAlign>('center')
   const tooltipTimeoutRef = useRef<NodeJS.Timeout | null>(null)
@@ -83,7 +83,7 @@ export function DeveloperConsole({ onVisibilityChange, isMobileMenuOpen = false 
   const [isDragging, setIsDragging] = useState(false)
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 })
 
-  // Debounce ref for settings dispatch — counts per drag-session, not per pixel change
+  // Debounce ref for settings dispatch – counts per drag-session, not per pixel change
   const settingsDispatchTimerRef = useRef<NodeJS.Timeout | null>(null)
 
   // Panel ref for click outside detection and viewport clamping
@@ -123,7 +123,7 @@ export function DeveloperConsole({ onVisibilityChange, isMobileMenuOpen = false 
     return { x: 20, y: 20 }
   })
 
-  // Scale is session-only — not persisted, always opens at readable default
+  // Scale is session-only – not persisted, always opens at readable default
   const [scale, setScale] = useState(1.0)
 
   // Easter egg settings
@@ -217,7 +217,7 @@ export function DeveloperConsole({ onVisibilityChange, isMobileMenuOpen = false 
     }
   }, [])
 
-  // Toggle via "D" key and 4-finger tap — local toggleVisibility keeps isVisible in deps, so listener always has fresh closure
+  // Toggle via "D" key and 4-finger tap – local toggleVisibility keeps isVisible in deps, so listener always has fresh closure
   useEffect(() => {
     const toggleVisibility = () => {
       const nextValue = !isVisible
@@ -621,7 +621,7 @@ export function DeveloperConsole({ onVisibilityChange, isMobileMenuOpen = false 
               </button>
             </div>
 
-            {/* Content — single scroll container for controls + achievements */}
+            {/* Content – single scroll container for controls + achievements */}
             <div
               data-testid='devtools-panel-content'
               className='devtools-scroll-area max-h-[85vh] space-y-6 overflow-y-auto p-6'

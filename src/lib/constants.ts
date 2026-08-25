@@ -18,7 +18,7 @@ export const ANIMATION_CONFIG = {
   STAGGER_DELAY_MS: 100,
   STAGGER_BASE_DELAY_MS: 200,
 
-  // Background orbs — kept subtle so body copy stays readable
+  // Background orbs – kept subtle so body copy stays readable
   ORB_OPACITY_MIN: 0.08,
   ORB_OPACITY_MAX: 0.12,
 } as const

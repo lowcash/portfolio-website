@@ -45,7 +45,7 @@ export const SITE_CONFIG = {
     url: 'https://lowcash.dev',
     name: 'lowcash.dev',
     shortName: 'lowcash.dev',
-    title: 'Lukáš Machala — Software Engineer',
+    title: 'Lukáš Machala – Software Engineer',
     description:
       'Software Engineer building quantitative data pipelines, time-series systems, and modern web applications with Python, TypeScript, Next.js, and PostgreSQL.',
     category: 'technology',
@@ -85,7 +85,7 @@ export const SITE_CONFIG = {
       width: 1200,
       height: 630,
     },
-    alt: 'Lukáš Machala — Software Engineer',
+    alt: 'Lukáš Machala – Software Engineer',
     siteLabel: 'lowcash.dev',
     headline: 'Lukáš Machala',
     subheadline: 'Software Engineer',
