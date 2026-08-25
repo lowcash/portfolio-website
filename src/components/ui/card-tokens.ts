@@ -11,10 +11,10 @@ export const CARD_BODY_CLASS = 'text-pretty text-sm font-normal leading-relaxed 
 /** Mono sub-labels (column headers, etc.). */
 export const CARD_MONO_LABEL_CLASS = 'font-mono text-xs tracking-wider text-zinc-400 uppercase'
 
-/** Status / timeline badges. */
+/** Status / timeline badges — same geometry as tech pills; muted tone. */
 export const CARD_BADGE_CLASS =
-  'inline-flex shrink-0 items-center whitespace-nowrap rounded border border-zinc-700/40 bg-zinc-800/60 px-2 py-0.5 font-mono text-[11px] text-zinc-400'
+  'inline-flex shrink-0 items-center whitespace-nowrap rounded-md border border-zinc-700/40 bg-zinc-800/60 px-2.5 py-1 font-mono text-xs text-zinc-400'
 
-/** Tech pills. */
+/** Tech pills — same geometry as status badges; brighter tone. */
 export const CARD_TECH_PILL_CLASS =
   'inline-flex items-center rounded-md border border-zinc-700/60 bg-zinc-800/80 px-2.5 py-1 font-mono text-xs text-zinc-200'
