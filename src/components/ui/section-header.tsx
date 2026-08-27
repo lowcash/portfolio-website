@@ -12,7 +12,7 @@ interface SectionHeaderProps {
 }
 
 const SECTION_TITLE_CLASS =
-  'relative mb-3 pb-[2px] text-2xl font-bold tracking-tight text-balance text-zinc-100 sm:text-3xl'
+  'relative mb-3 pb-[2px] text-[1.625rem] font-bold tracking-tight text-balance text-zinc-100 md:text-[2.5rem]'
 
 export function SectionHeader({ title, subtitle, gradient, glowColors, variant = 'compact' }: SectionHeaderProps) {
   const formattedTitle = formatTypography(title)
@@ -24,7 +24,7 @@ export function SectionHeader({ title, subtitle, gradient, glowColors, variant =
       : `drop-shadow(0 0 12px ${glowColors.primary}) drop-shadow(0 0 24px ${glowColors.secondary})`
 
   return (
-    <header className='mb-6 text-center md:mb-8'>
+    <header className='mb-7 text-center md:mb-10'>
       <h2 className={SECTION_TITLE_CLASS} style={{ filter: glowFilter }}>
         <span className='relative'>{formattedTitle}</span>
         <span
