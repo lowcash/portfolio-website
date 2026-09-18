@@ -105,13 +105,13 @@ export const siteContent = {
       {
         icon: 'gamepad' as FeaturedProjectIconKey,
         title: 'Initial D Racing',
-        badges: ['Playable Demo'],
+        badges: ['Playable'],
         bullets: [
-          'Endless traffic-dodging racer in the spirit of Initial D — pick a car, choose controls, and chase the high score.',
-          'Built as a Phaser 3 TypeScript game with parallax scenery, AI traffic, coin pickup, and progressive speed.',
+          'Hiring sample built to demonstrate Phaser skills for a previous role — pick a car, choose controls, and chase the high score.',
+          'Endless road with parallax scenery, lane-spawned traffic obstacles, coin pickup, and progressive speed.',
           'Keyboard on desktop; on-screen controls for mobile landscape play.',
         ],
-        tech: ['TypeScript', 'Phaser 3', 'Webpack'],
+        tech: ['TypeScript', 'Phaser 3'],
         demoUrl: 'https://lowcash.github.io/initial-d/',
         demoLabel: 'Play Game',
         iconColor: 'text-amber-400',
