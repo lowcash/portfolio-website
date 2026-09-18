@@ -172,11 +172,7 @@ export function FeaturedProjects() {
       <div className='grid items-start gap-6 md:grid-cols-2'>
         <FeaturedTradingCard project={featured} />
         {rest.map((project, index) => (
-          <ProjectCard
-            key={project.title}
-            project={project}
-            fullWidth={oddHalfCount && index === rest.length - 1}
-          />
+          <ProjectCard key={project.title} project={project} fullWidth={oddHalfCount && index === rest.length - 1} />
         ))}
       </div>
     </SectionWrapper>
