@@ -107,7 +107,7 @@ export const siteContent = {
         title: 'Initial D Racing',
         badges: ['Playable'],
         bullets: [
-          'Hiring sample built to demonstrate Phaser skills for a previous role — pick a car, choose controls, and chase the high score.',
+          'Hiring sample built to demonstrate Phaser skills for a previous role. Pick a car, choose controls, and chase the high score.',
           'Endless road with parallax scenery, lane-spawned traffic obstacles, coin pickup, and progressive speed.',
           'Keyboard on desktop; on-screen controls for mobile landscape play.',
         ],
