@@ -123,13 +123,20 @@ function FeaturedTradingCard({ project }: { project: TradingProject }) {
   )
 }
 
-function ProjectCard({ project }: { project: Exclude<Project, TradingProject> }) {
+function ProjectCard({
+  project,
+  fullWidth = false,
+}: {
+  project: Exclude<Project, TradingProject>
+  fullWidth?: boolean
+}) {
   return (
     <ContentCard
       icon={iconMap[project.icon]}
       iconColor={project.iconColor}
       title={project.title}
       badges={project.badges}
+      articleClassName={fullWidth ? 'md:col-span-2' : undefined}
     >
       {'bullets' in project && project.bullets ? <ProjectBullets bullets={project.bullets} /> : null}
 
@@ -156,6 +163,7 @@ function ProjectCard({ project }: { project: Exclude<Project, TradingProject> })
 export function FeaturedProjects() {
   const { title, projects } = siteContent.featuredProjects
   const [featured, ...rest] = projects
+  const oddHalfCount = rest.length % 2 === 1
 
   return (
     <SectionWrapper id='featured-projects' maxWidth='5xl'>
@@ -163,8 +171,12 @@ export function FeaturedProjects() {
 
       <div className='grid items-start gap-6 md:grid-cols-2'>
         <FeaturedTradingCard project={featured} />
-        {rest.map((project) => (
-          <ProjectCard key={project.title} project={project} />
+        {rest.map((project, index) => (
+          <ProjectCard
+            key={project.title}
+            project={project}
+            fullWidth={oddHalfCount && index === rest.length - 1}
+          />
         ))}
       </div>
     </SectionWrapper>
