@@ -5,7 +5,7 @@ async function getCardBoxes(page: Page) {
   await page.waitForTimeout(600)
 
   const cards = page.locator('#featured-projects article')
-  await expect(cards).toHaveCount(3)
+  await expect(cards).toHaveCount(4)
 
   const featured = await cards.nth(0).boundingBox()
   const firstHalf = await cards.nth(1).boundingBox()

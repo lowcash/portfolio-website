@@ -8,7 +8,7 @@ test.describe('Content sections baseline', () => {
   })
 
   test('core content sections render expected card counts', async ({ page }) => {
-    await expect(page.locator('#featured-projects article')).toHaveCount(3)
+    await expect(page.locator('#featured-projects article')).toHaveCount(4)
     await expect(page.locator('#experience article')).toHaveCount(3)
   })
 
@@ -17,6 +17,8 @@ test.describe('Content sections baseline', () => {
     await page.waitForTimeout(500)
 
     await expect(page.locator('#featured-projects a[href="https://youtu.be/8PpEFLIw7TY"]')).toHaveCount(1)
+    await expect(page.locator('#featured-projects a[href="https://lowcash.github.io/initial-d/"]')).toHaveCount(1)
+    await expect(page.getByRole('link', { name: /Play Game/i })).toBeVisible()
     await expect(page.locator('#featured-projects a[href*="github.com"]')).toHaveCount(0)
     await expect(page.locator('#featured-projects a[href="https://pohlazenipoteleadusi.cz/"]')).toHaveCount(1)
     await expect(page.locator('#featured-projects a[href="https://pinkladyyachtingservices.com/"]')).toHaveCount(1)

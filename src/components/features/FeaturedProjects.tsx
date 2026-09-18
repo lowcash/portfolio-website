@@ -1,4 +1,4 @@
-import { Eye, Globe, type LucideIcon, TrendingUp } from 'lucide-react'
+import { Eye, Gamepad2, Globe, type LucideIcon, TrendingUp } from 'lucide-react'
 
 import { type FeaturedProjectIconKey, siteContent } from '@/lib/content'
 import { formatTypography } from '@/lib/prevent-widows'
@@ -14,6 +14,7 @@ import { TechTag } from '@/components/ui/tech-tag'
 
 const iconMap: Record<FeaturedProjectIconKey, LucideIcon> = {
   eye: Eye,
+  gamepad: Gamepad2,
   trendingUp: TrendingUp,
   globe: Globe,
 }
@@ -135,7 +136,9 @@ function ProjectCard({ project }: { project: Exclude<Project, TradingProject> })
       {'demoUrl' in project && project.demoUrl ? (
         <p className={`mt-2.5 ${CARD_BODY_CLASS}`}>
           <a href={project.demoUrl} target='_blank' rel='noopener noreferrer' className={EXTERNAL_LINK_CLASS}>
-            <span className={EXTERNAL_LINK_LABEL_CLASS}>Watch Demo Video</span>
+            <span className={EXTERNAL_LINK_LABEL_CLASS}>
+              {'demoLabel' in project && project.demoLabel ? project.demoLabel : 'Watch Demo Video'}
+            </span>
             <ExternalLinkIcon />
           </a>
         </p>
