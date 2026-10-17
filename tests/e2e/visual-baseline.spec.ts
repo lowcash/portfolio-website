@@ -30,8 +30,15 @@ test.describe('Visual baseline', () => {
         }
       }, sectionId)
 
-      // Let scroll listeners, the background interpolation and hash sync settle.
-      await page.waitForTimeout(1500)
+      // The background eases toward the scroll position frame by frame; wait until it has fully arrived.
+      await page.waitForFunction(() => {
+        const { scrollHeight } = document.documentElement
+        const maxScroll = scrollHeight - window.innerHeight
+        const expected = maxScroll > 0 ? (window.scrollY / maxScroll) * 100 : 0
+        const actual = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--scroll-percent'))
+        return Math.abs(actual - expected) < 0.06
+      })
+      await page.waitForTimeout(300)
 
       await expect(page).toHaveScreenshot(`${sectionId}.png`, {
         maxDiffPixelRatio: 0.01,

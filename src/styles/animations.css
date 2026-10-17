@@ -413,7 +413,7 @@
   }
 }
 
-@media (max-width: 768px) {
+@media (max-width: 767.98px) {
   .orb-1 {
     animation: orb-float-mobile-1 15s ease-in-out infinite;
   }
@@ -434,7 +434,83 @@
   }
   .orb-7,
   .orb-8 {
-    animation: none; /* Desktop-only; JSX conditionally hides these on mobile */
+    display: none; /* Desktop-only accents keep mobile rendering cheap */
+  }
+}
+
+/**
+ * Orb layout, color and motion driven entirely by CSS custom properties.
+ *
+ * Per-orb values (--orb-top/left[-m], --orb-rand-x/y, --orb-diameter, --orb-alpha, --orb-blur-px, --orb-duration,
+ * --orb-color) are set inline by AnimatedBackground; user tunables (--orb-size, --orb-blur, --orb-opacity,
+ * --orb-brightness, --animation-speed, --position-variation) are written to :root by the developer console.
+ * Keeping mobile/desktop/reduced-motion differences in media queries means the server HTML already matches the
+ * final layout, so hydration never moves the orbs (no layout shift).
+ * Must stay after the .orb-N animation rules so animation-duration wins over their shorthand.
+ */
+:root {
+  --orb-brightness: 0.5;
+  --animation-speed: 3;
+  --color-variation: 0.4;
+  --orb-size: 1.2;
+  --orb-blur: 1;
+  --orb-opacity: 0.85;
+  --position-variation: 1;
+}
+
+.orb {
+  position: absolute;
+  top: calc(var(--orb-top) * 1% + var(--orb-rand-y) * (var(--position-variation) - 1) * 30%);
+  left: calc(var(--orb-left) * 1% + var(--orb-rand-x) * (var(--position-variation) - 1) * 30%);
+  width: calc(var(--orb-diameter) * var(--orb-size) * 1px);
+  height: calc(var(--orb-diameter) * var(--orb-size) * 1px);
+  transform: translate(-50%, -50%);
+  background: radial-gradient(circle, var(--orb-color) 0%, transparent 70%);
+  opacity: calc(var(--orb-alpha) * var(--orb-opacity));
+  filter: blur(calc(var(--orb-blur-px) * var(--orb-blur) * 1px)) brightness(var(--orb-brightness));
+  animation-duration: calc(var(--orb-duration) / var(--animation-speed) * 1s);
+  will-change: transform;
+}
+
+@media (max-width: 767.98px) {
+  .orb {
+    top: calc(var(--orb-top-m) * 1% + var(--orb-rand-y) * (var(--position-variation) - 1) * 8%);
+    left: calc(var(--orb-left-m) * 1% + var(--orb-rand-x) * (var(--position-variation) - 1) * 8%);
+    width: calc(var(--orb-diameter) * var(--orb-size) * 0.4px);
+    height: calc(var(--orb-diameter) * var(--orb-size) * 0.4px);
+    opacity: calc(var(--orb-alpha) * var(--orb-opacity) * 0.8);
+    filter: blur(calc(var(--orb-blur-px) * var(--orb-blur) * 0.62px))
+      brightness(clamp(0.72, calc(var(--orb-brightness) * 1.2), 0.95));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .orb {
+    animation: none;
+    filter: none;
+    will-change: auto;
+  }
+}
+
+.orb-vignette {
+  background: radial-gradient(
+    circle at center,
+    transparent 0%,
+    transparent 40%,
+    rgba(3, 7, 18, 0.2) 70%,
+    rgba(3, 7, 18, 0.5) 100%
+  );
+}
+
+@media (max-width: 767.98px) {
+  .orb-vignette {
+    background: radial-gradient(
+      circle at center,
+      transparent 0%,
+      transparent 44%,
+      rgba(3, 7, 18, 0.1) 70%,
+      rgba(3, 7, 18, 0.2) 100%
+    );
   }
 }
 
