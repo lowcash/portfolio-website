@@ -34,7 +34,7 @@ jobs:
         run: pnpm run format:check
 
       - name: Run E2E tests
-        run: pnpm run test:e2e -- --project=desktop-chrome
+        run: pnpm run test:e2e --project=desktop-chrome
 
       - uses: actions/upload-artifact@v7
         if: failure()
