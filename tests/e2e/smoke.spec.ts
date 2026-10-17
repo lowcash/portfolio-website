@@ -68,6 +68,8 @@ test.describe('Portfolio smoke baseline', () => {
   })
 
   test('debug console toggles from keyboard without breaking layout', async ({ page }) => {
+    // The console is code-split and mounted when the browser is idle; its trigger button signals it is ready.
+    await expect(page.getByRole('button', { name: 'Toggle debug console' })).toBeAttached()
     await page.mouse.click(640, 400)
     await page.keyboard.press('d')
     await expect(page.getByRole('region', { name: 'Developer debug console' })).toBeVisible()

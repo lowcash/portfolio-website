@@ -2,6 +2,8 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react'
 
+import dynamic from 'next/dynamic'
+
 import { siteContent } from '@/lib/content'
 import {
   resolveActiveSectionIndex,
@@ -10,14 +12,22 @@ import {
   setSectionHashByIndex,
 } from '@/lib/navigation-core-adapter'
 
-import { DeveloperConsole } from '@/components/features/devtools/DeveloperConsole'
 import { AnimatedBackground } from '@/components/shared/AnimatedBackground'
-import { EasterEggs } from '@/components/ui/easter-eggs'
 import { ScrollNavigation } from '@/components/ui/scroll-navigation'
 import { ScrollProgress } from '@/components/ui/scroll-progress'
 import { ScrollToTop } from '@/components/ui/scroll-to-top'
 
 import { useActiveSection } from '@/hooks/use-active-section'
+import { useIdleReady } from '@/hooks/use-idle-ready'
+
+// Non-critical, interaction-only features: split out of the initial bundle and mounted once the browser is idle
+const DeveloperConsole = dynamic(
+  () => import('@/components/features/devtools/DeveloperConsole').then((module) => module.DeveloperConsole),
+  { ssr: false },
+)
+const EasterEggs = dynamic(() => import('@/components/ui/easter-eggs').then((module) => module.EasterEggs), {
+  ssr: false,
+})
 
 type AppShellProps = {
   sectionIds: string[]
@@ -25,6 +35,7 @@ type AppShellProps = {
 
 export function AppShell({ sectionIds }: AppShellProps) {
   const sectionMeta = siteContent.navigation.sections
+  const areExtrasReady = useIdleReady()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [, setIsDevConsoleOpen] = useState(false)
   const [isRestoringScroll, setIsRestoringScroll] = useState(false)
@@ -162,7 +173,7 @@ export function AppShell({ sectionIds }: AppShellProps) {
 
   return (
     <>
-      <EasterEggs />
+      {areExtrasReady ? <EasterEggs /> : null}
       <AnimatedBackground />
 
       <ScrollToTop currentSection={currentSection} onGoToFirst={() => scrollToSection(0)} />
@@ -176,7 +187,9 @@ export function AppShell({ sectionIds }: AppShellProps) {
         onScrollRestore={setIsRestoringScroll}
       />
 
-      <DeveloperConsole onVisibilityChange={setIsDevConsoleOpen} isMobileMenuOpen={isMobileMenuOpen} />
+      {areExtrasReady ? (
+        <DeveloperConsole onVisibilityChange={setIsDevConsoleOpen} isMobileMenuOpen={isMobileMenuOpen} />
+      ) : null}
       <ScrollProgress />
     </>
   )
