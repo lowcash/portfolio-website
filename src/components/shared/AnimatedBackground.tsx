@@ -157,10 +157,14 @@ const INITIAL_SLOT_COLORS = [
   ...resolveOrbVariantColors(INITIAL_BASE_COLOR, DEFAULT_COLOR_VARIATION),
 ]
 
-/** Deterministic pseudo-random offset in [0, 1) so orb placement is stable between renders. */
+/**
+ * Deterministic pseudo-random offset in [0, 1) so orb placement is stable between renders.
+ * Rounded because Math.sin differs in the last digits between Node and the browser, which would
+ * otherwise cause a hydration mismatch on the inline custom properties.
+ */
 function seededFraction(seed: number, multiplier: number) {
   const value = Math.sin(seed * multiplier) * 43758.5453
-  return value - Math.floor(value)
+  return Math.round((value - Math.floor(value)) * 1e4) / 1e4
 }
 
 function getOrbStyle(orb: OrbConfig): CSSProperties {

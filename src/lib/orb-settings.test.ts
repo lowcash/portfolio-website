@@ -41,7 +41,7 @@ describe('orb setting definitions', () => {
   })
 })
 
-describe('defaults reproduce the original look', () => {
+describe('defaults', () => {
   it('emits the original CSS custom property values', () => {
     expect(settingsToCssVars(DEFAULT_ORB_SETTINGS)).toMatchObject({
       '--orb-brightness': '0.5',
@@ -49,7 +49,7 @@ describe('defaults reproduce the original look', () => {
       '--color-variation': '0.4',
       '--orb-size': '1.2',
       '--orb-blur': '1',
-      '--orb-opacity': '0.85',
+      '--orb-opacity': '1.05',
       '--position-variation': '1',
       '--orb-magnetism': '0',
       '--orb-grain': '0',

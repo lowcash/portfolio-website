@@ -101,7 +101,7 @@ export const ORB_SETTING_DEFINITIONS: readonly OrbSettingDefinition[] = [
     min: 0,
     max: 3,
     step: 0.1,
-    defaultValue: 0.85,
+    defaultValue: 1.05,
     storageKey: 'orb_opacity',
     format: (value) => percent(value * 100),
     cssVar: '--orb-opacity',
@@ -246,7 +246,7 @@ type OrbPreset = {
 }
 
 export const ORB_PRESETS: readonly OrbPreset[] = [
-  { id: 'calm', label: 'Calm', description: 'The original look', values: {} },
+  { id: 'calm', label: 'Calm', description: 'The default look', values: {} },
   {
     id: 'aurora',
     label: 'Aurora',

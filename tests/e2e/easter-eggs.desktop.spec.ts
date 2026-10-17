@@ -1,6 +1,7 @@
 import { type Page, expect, test } from '@playwright/test'
 
-const SECTION_IDS = ['hero', 'featured-projects', 'experience', 'contact'] as const
+// Ends back on the hero so every section is visited by an explicit scroll, independent of mount timing
+const SECTION_IDS = ['hero', 'featured-projects', 'experience', 'contact', 'hero'] as const
 
 const readAchievements = (page: Page) =>
   page.evaluate(() => {
