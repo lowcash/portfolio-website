@@ -137,22 +137,23 @@ export function OrbControls({ accent }: AccentProps) {
       {GROUPS.map((group) => (
         <div key={group.id} className='space-y-3'>
           <div className='pt-1 text-[11px] tracking-wider text-gray-600 uppercase'>{group.title}</div>
-          {ORB_SETTING_DEFINITIONS.filter((definition) => definition.group === group.id).map((definition) =>
-            definition.kind === 'toggle' ? (
-              <SettingToggle
-                key={definition.key}
-                definition={definition}
-                value={settings[definition.key]}
-                accent={accent}
-              />
-            ) : (
-              <SettingSlider
-                key={definition.key}
-                definition={definition}
-                value={settings[definition.key]}
-                accent={accent}
-              />
-            ),
+          {ORB_SETTING_DEFINITIONS.filter((definition) => definition.group === group.id && !definition.hidden).map(
+            (definition) =>
+              definition.kind === 'toggle' ? (
+                <SettingToggle
+                  key={definition.key}
+                  definition={definition}
+                  value={settings[definition.key]}
+                  accent={accent}
+                />
+              ) : (
+                <SettingSlider
+                  key={definition.key}
+                  definition={definition}
+                  value={settings[definition.key]}
+                  accent={accent}
+                />
+              ),
           )}
         </div>
       ))}

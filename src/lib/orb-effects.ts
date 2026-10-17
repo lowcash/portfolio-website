@@ -5,7 +5,8 @@
  */
 import { DEFAULT_ORB_SETTINGS, getOrbSettings, subscribeToOrbSettings } from '@/lib/orb-settings'
 
-const POINTER_EASING = 0.08
+// Time constant of the pointer easing (about 8% per 60fps frame), applied per elapsed time so low fps feels the same
+const POINTER_EASING_MS = 190
 const POINTER_EPSILON = 0.001
 const BURST_DURATION_MS = 1100
 const BURST_STAGGER_MS = 45
@@ -61,10 +62,15 @@ function startMagnetism() {
   let frameId: number | null = null
   let hasAskedOrientationPermission = false
 
-  const tick = () => {
+  let lastFrameAt = 0
+
+  const tick = (now: number) => {
     frameId = null
-    currentX += (targetX - currentX) * POINTER_EASING
-    currentY += (targetY - currentY) * POINTER_EASING
+    const elapsed = lastFrameAt === 0 ? 16 : Math.min(100, now - lastFrameAt)
+    const easing = 1 - Math.exp(-elapsed / POINTER_EASING_MS)
+    lastFrameAt = now
+    currentX += (targetX - currentX) * easing
+    currentY += (targetY - currentY) * easing
 
     const isSettled = Math.abs(targetX - currentX) < POINTER_EPSILON && Math.abs(targetY - currentY) < POINTER_EPSILON
 
@@ -76,7 +82,9 @@ function startMagnetism() {
     root.style.setProperty('--orb-pointer-x', currentX.toFixed(4))
     root.style.setProperty('--orb-pointer-y', currentY.toFixed(4))
 
-    if (!isSettled) {
+    if (isSettled) {
+      lastFrameAt = 0
+    } else {
       frameId = requestAnimationFrame(tick)
     }
   }
@@ -87,14 +95,34 @@ function startMagnetism() {
     }
   }
 
+  const aim = (x: number, y: number) => {
+    targetX = clamp(x, -1, 1)
+    targetY = clamp(y, -1, 1)
+    schedule()
+  }
+
   const setTarget = (x: number, y: number) => {
     if (getOrbSettings().magnetism === 0 || prefersReducedMotion()) {
       return
     }
 
-    targetX = clamp(x, -1, 1)
-    targetY = clamp(y, -1, 1)
-    schedule()
+    aim(x, y)
+  }
+
+  // Preview when the setting changes: swing the orbs across the screen and back so the slider visibly does something
+  const swingTimers: ReturnType<typeof setTimeout>[] = []
+  const swing = () => {
+    if (prefersReducedMotion()) {
+      return
+    }
+
+    swingTimers.forEach(clearTimeout)
+    swingTimers.length = 0
+    ;[
+      [0, 0.9, -0.7],
+      [450, -0.9, 0.7],
+      [900, 0, 0],
+    ].forEach(([delay, x, y]) => swingTimers.push(setTimeout(() => aim(x, y), delay)))
   }
 
   const handlePointerMove = (event: PointerEvent) => {
@@ -144,8 +172,9 @@ function startMagnetism() {
   window.addEventListener('pointerdown', handlePointerDown, { passive: true })
   window.addEventListener('deviceorientation', handleOrientation)
 
-  return () => {
+  const stop = () => {
     unsubscribe()
+    swingTimers.forEach(clearTimeout)
     window.removeEventListener('pointermove', handlePointerMove)
     window.removeEventListener('pointerdown', handlePointerDown)
     window.removeEventListener('deviceorientation', handleOrientation)
@@ -157,6 +186,8 @@ function startMagnetism() {
     root.style.removeProperty('--orb-pointer-x')
     root.style.removeProperty('--orb-pointer-y')
   }
+
+  return { stop, swing }
 }
 
 function burstOrbs(intensity: number) {
@@ -244,12 +275,59 @@ function startRipples(layer: HTMLElement) {
 
   window.addEventListener('pointerdown', handlePointerDown, { passive: true })
 
-  return () => window.removeEventListener('pointerdown', handlePointerDown)
+  return {
+    stop: () => window.removeEventListener('pointerdown', handlePointerDown),
+    spawn: spawnRipple,
+  }
+}
+
+const PREVIEW_COOLDOWN_MS = 500
+
+/**
+ * Burst, ripples and magnetism react to events (a new section, a click, the cursor), so dragging their slider shows
+ * nothing by itself. Play a short demo whenever one of them is changed.
+ */
+function startSettingPreviews(previews: { burst: (intensity: number) => void; ripple: () => void; swing: () => void }) {
+  let previous = getOrbSettings()
+  let lastPreviewAt = 0
+
+  return subscribeToOrbSettings(() => {
+    const next = getOrbSettings()
+    const now = performance.now()
+    const canPreview = now - lastPreviewAt > PREVIEW_COOLDOWN_MS && !prefersReducedMotion()
+
+    if (canPreview) {
+      if (next.burst !== previous.burst && next.burst > 0) {
+        lastPreviewAt = now
+        previews.burst(next.burst / 100)
+      } else if (next.ripples > previous.ripples) {
+        lastPreviewAt = now
+        previews.ripple()
+      } else if (next.magnetism !== previous.magnetism && next.magnetism > 0) {
+        lastPreviewAt = now
+        previews.swing()
+      }
+    }
+
+    previous = next
+  })
 }
 
 /** Starts every background effect. `rippleLayer` is the element ripple rings are appended to. */
 export function startOrbEffects(rippleLayer: HTMLElement) {
-  const stops = [startAnimationRate(), startMagnetism(), startSectionBurst(), startRipples(rippleLayer)]
+  const magnetism = startMagnetism()
+  const ripples = startRipples(rippleLayer)
+  const stops = [
+    startAnimationRate(),
+    magnetism.stop,
+    startSectionBurst(),
+    ripples.stop,
+    startSettingPreviews({
+      burst: burstOrbs,
+      ripple: () => ripples.spawn(window.innerWidth / 2, window.innerHeight / 2),
+      swing: magnetism.swing,
+    }),
+  ]
 
   return () => stops.forEach((stop) => stop())
 }

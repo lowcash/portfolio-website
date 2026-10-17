@@ -236,9 +236,9 @@
 /**
  * Orb layout, color and motion driven entirely by CSS custom properties.
  *
- * Per-orb values (--orb-top/left[-m], --orb-rand-x/y, --orb-diameter, --orb-alpha, --orb-blur-px, --orb-duration,
+ * Per-orb values (--orb-top/left[-m], --orb-diameter, --orb-alpha, --orb-blur-px, --orb-duration,
  * --orb-depth, --orb-color) are set inline by AnimatedBackground; user tunables (--orb-size, --orb-blur,
- * --orb-opacity, --orb-brightness, --position-variation, --orb-magnetism, --orb-grain) are written to :root by
+ * --orb-opacity, --orb-brightness, --orb-magnetism) are written to :root by
  * the orb settings store. Animation speed is applied as playbackRate (see orb-effects.ts) so changing it never
  * restarts or jumps the animation; durations here are authored for the default speed of 3.
  * Keeping mobile/desktop/reduced-motion differences in media queries means the server HTML already matches the
@@ -252,17 +252,15 @@
   --orb-size: 1.2;
   --orb-blur: 1;
   --orb-opacity: 1.05;
-  --position-variation: 1;
   --orb-magnetism: 0;
-  --orb-grain: 0;
   --orb-pointer-x: 0;
   --orb-pointer-y: 0;
 }
 
 .orb {
   position: absolute;
-  top: calc(var(--orb-top) * 1% + var(--orb-rand-y) * (var(--position-variation) - 1) * 30%);
-  left: calc(var(--orb-left) * 1% + var(--orb-rand-x) * (var(--position-variation) - 1) * 30%);
+  top: calc(var(--orb-top) * 1%);
+  left: calc(var(--orb-left) * 1%);
   width: calc(var(--orb-diameter) * var(--orb-size) * 1px);
   height: calc(var(--orb-diameter) * var(--orb-size) * 1px);
   transform: translate(-50%, -50%);
@@ -283,8 +281,8 @@
 
 @media (max-width: 767.98px) {
   .orb {
-    top: calc(var(--orb-top-m) * 1% + var(--orb-rand-y) * (var(--position-variation) - 1) * 8%);
-    left: calc(var(--orb-left-m) * 1% + var(--orb-rand-x) * (var(--position-variation) - 1) * 8%);
+    top: calc(var(--orb-top-m) * 1%);
+    left: calc(var(--orb-left-m) * 1%);
     width: calc(var(--orb-diameter) * var(--orb-size) * 0.4px);
     height: calc(var(--orb-diameter) * var(--orb-size) * 0.4px);
     opacity: calc(var(--orb-alpha) * var(--orb-opacity) * var(--orb-opacity-boost) * 0.8);
@@ -507,13 +505,6 @@
     background-position: 100% 0;
     opacity: 1;
   }
-}
-
-/* Film grain: static SVG noise, invisible at the default setting */
-.orb-grain {
-  opacity: calc(var(--orb-grain) * 0.35);
-  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  mix-blend-mode: overlay;
 }
 
 /* Click ripple ring, animated by orb-effects via the Web Animations API */

@@ -31,7 +31,13 @@ async function scrollToSection(page: Page, id: string) {
     const section = document.getElementById(sectionId)
     window.scrollTo({ top: section ? section.offsetTop : 0, behavior: 'instant' })
   }, id)
-  await page.waitForTimeout(250)
+  // Scroll handlers run on the next frames; wait for them so a slow machine cannot skip a section
+  await page.evaluate(
+    () =>
+      new Promise<void>((resolve) =>
+        requestAnimationFrame(() => requestAnimationFrame(() => setTimeout(resolve, 300))),
+      ),
+  )
 }
 
 test.describe('Easter eggs and achievements', () => {

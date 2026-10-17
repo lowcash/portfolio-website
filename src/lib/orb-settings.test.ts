@@ -50,14 +50,12 @@ describe('defaults', () => {
       '--orb-size': '1.2',
       '--orb-blur': '1',
       '--orb-opacity': '1.05',
-      '--position-variation': '1',
       '--orb-magnetism': '0',
-      '--orb-grain': '0',
     })
   })
 
   it('has all effects switched off', () => {
-    expect(DEFAULT_ORB_SETTINGS).toMatchObject({ magnetism: 0, burst: 0, ripples: 0, grain: 0, hue: 0, saturation: 1 })
+    expect(DEFAULT_ORB_SETTINGS).toMatchObject({ magnetism: 0, burst: 0, ripples: 0, hue: 0, saturation: 1 })
   })
 })
 
@@ -79,6 +77,14 @@ describe('resolveStoredSettings', () => {
     const settings = resolveStoredSettings((key) => (key === 'orb_blur' ? 'not-a-number' : null))
 
     expect(settings.orbBlur).toBe(DEFAULT_ORB_SETTINGS.orbBlur)
+  })
+})
+
+describe('visible controls', () => {
+  it('hides only the subtle settings that presets still use', () => {
+    const hidden = ORB_SETTING_DEFINITIONS.filter((definition) => definition.hidden).map((definition) => definition.key)
+
+    expect(hidden.sort()).toEqual(['colorVariation', 'saturation'])
   })
 })
 

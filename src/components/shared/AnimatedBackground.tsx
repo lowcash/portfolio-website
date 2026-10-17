@@ -15,8 +15,6 @@ type OrbConfig = {
   /** Mobile anchor, % of the viewport (orbs spread across the canvas instead of clustering in the center) */
   mobileTop: number
   mobileLeft: number
-  /** Seed for the deterministic position-variation offset */
-  seed: number
   diameter: number
   opacity: number
   blur: number
@@ -36,7 +34,6 @@ const ORBS: readonly OrbConfig[] = [
     left: 50,
     mobileTop: 24,
     mobileLeft: 26,
-    seed: 0,
     diameter: 800,
     opacity: 0.14,
     blur: 120,
@@ -51,7 +48,6 @@ const ORBS: readonly OrbConfig[] = [
     left: 25,
     mobileTop: 18,
     mobileLeft: 74,
-    seed: 1,
     diameter: 600,
     opacity: 0.11,
     blur: 100,
@@ -65,7 +61,6 @@ const ORBS: readonly OrbConfig[] = [
     left: 75,
     mobileTop: 46,
     mobileLeft: 16,
-    seed: 2,
     diameter: 650,
     opacity: 0.12,
     blur: 110,
@@ -80,7 +75,6 @@ const ORBS: readonly OrbConfig[] = [
     left: 66,
     mobileTop: 44,
     mobileLeft: 82,
-    seed: 3,
     diameter: 500,
     opacity: 0.1,
     blur: 90,
@@ -94,7 +88,6 @@ const ORBS: readonly OrbConfig[] = [
     left: 33,
     mobileTop: 74,
     mobileLeft: 28,
-    seed: 4,
     diameter: 550,
     opacity: 0.11,
     blur: 95,
@@ -109,7 +102,6 @@ const ORBS: readonly OrbConfig[] = [
     left: 66,
     mobileTop: 72,
     mobileLeft: 72,
-    seed: 5,
     diameter: 700,
     opacity: 0.12,
     blur: 115,
@@ -123,7 +115,6 @@ const ORBS: readonly OrbConfig[] = [
     left: 50,
     mobileTop: 58,
     mobileLeft: 50,
-    seed: 6,
     diameter: 600,
     opacity: 0.11,
     blur: 105,
@@ -137,7 +128,6 @@ const ORBS: readonly OrbConfig[] = [
     left: 33,
     mobileTop: 32,
     mobileLeft: 54,
-    seed: 7,
     diameter: 550,
     opacity: 0.1,
     blur: 100,
@@ -157,24 +147,12 @@ const INITIAL_SLOT_COLORS = [
   ...resolveOrbVariantColors(INITIAL_BASE_COLOR, DEFAULT_COLOR_VARIATION),
 ]
 
-/**
- * Deterministic pseudo-random offset in [0, 1) so orb placement is stable between renders.
- * Rounded because Math.sin differs in the last digits between Node and the browser, which would
- * otherwise cause a hydration mismatch on the inline custom properties.
- */
-function seededFraction(seed: number, multiplier: number) {
-  const value = Math.sin(seed * multiplier) * 43758.5453
-  return Math.round((value - Math.floor(value)) * 1e4) / 1e4
-}
-
 function getOrbStyle(orb: OrbConfig): CSSProperties {
   return {
     '--orb-top': orb.top,
     '--orb-left': orb.left,
     '--orb-top-m': orb.mobileTop,
     '--orb-left-m': orb.mobileLeft,
-    '--orb-rand-y': seededFraction(orb.seed, 12.9898),
-    '--orb-rand-x': seededFraction(orb.seed, 78.233),
     '--orb-diameter': orb.diameter,
     '--orb-alpha': orb.opacity,
     '--orb-blur-px': orb.blur,
@@ -311,9 +289,6 @@ export function AnimatedBackground() {
 
       {/* Click ripples are appended here by orb-effects */}
       <div ref={rippleLayerRef} className='pointer-events-none absolute inset-0 overflow-hidden' />
-
-      {/* Film grain – invisible until the grain setting is raised */}
-      <div className='orb-grain pointer-events-none absolute inset-0' />
 
       {/* Subtle overlay for depth – reduced to keep orbs visible */}
       <div className='pointer-events-none absolute inset-0 bg-linear-to-b from-gray-950/20 via-transparent to-gray-950/20 md:from-gray-950/40 md:to-gray-950/40' />

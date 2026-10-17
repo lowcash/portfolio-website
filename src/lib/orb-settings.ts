@@ -15,13 +15,11 @@ export type OrbSettingKey =
   | 'orbBlur'
   | 'orbOpacity'
   | 'orbBrightness'
-  | 'scatter'
   | 'hue'
   | 'saturation'
   | 'magnetism'
   | 'burst'
   | 'ripples'
-  | 'grain'
 
 type OrbSettings = Record<OrbSettingKey, number>
 
@@ -42,6 +40,8 @@ export type OrbSettingDefinition = {
   /** CSS custom property written on :root, if the setting is consumed by CSS */
   cssVar?: string
   toCssValue?: (value: number) => string
+  /** Preset-only: applied and persisted, but without a slider (too subtle to read as a control) */
+  hidden?: boolean
   /** One line shown under the label so every slider says what it visibly does */
   hint: string
 }
@@ -63,21 +63,6 @@ export const ORB_SETTING_DEFINITIONS: readonly OrbSettingDefinition[] = [
     format: times,
     cssVar: '--animation-speed',
     hint: 'How fast the orbs drift',
-  },
-  {
-    key: 'scatter',
-    label: 'SCATTER',
-    group: 'motion',
-    kind: 'slider',
-    min: 0,
-    max: 200,
-    step: 5,
-    defaultValue: 0,
-    storageKey: 'orb_scatter',
-    format: percent,
-    cssVar: '--position-variation',
-    toCssValue: (value) => String(1 + value / 100),
-    hint: 'Pushes each orb away from its home position',
   },
   {
     key: 'orbSize',
@@ -137,6 +122,7 @@ export const ORB_SETTING_DEFINITIONS: readonly OrbSettingDefinition[] = [
   },
   {
     key: 'colorVariation',
+    hidden: true,
     label: 'COLOR VARIATION',
     group: 'color',
     kind: 'slider',
@@ -165,6 +151,7 @@ export const ORB_SETTING_DEFINITIONS: readonly OrbSettingDefinition[] = [
   },
   {
     key: 'saturation',
+    hidden: true,
     label: 'SATURATION',
     group: 'color',
     kind: 'slider',
@@ -203,21 +190,6 @@ export const ORB_SETTING_DEFINITIONS: readonly OrbSettingDefinition[] = [
     storageKey: 'orb_burst',
     format: percent,
     hint: 'Orbs pulse when you reach a new section',
-  },
-  {
-    key: 'grain',
-    label: 'FILM GRAIN',
-    group: 'effects',
-    kind: 'slider',
-    min: 0,
-    max: 100,
-    step: 5,
-    defaultValue: 0,
-    storageKey: 'orb_grain',
-    format: percent,
-    cssVar: '--orb-grain',
-    toCssValue: (value) => String(value / 100),
-    hint: 'Analog noise over the background',
   },
   {
     key: 'ripples',
@@ -283,7 +255,7 @@ export const ORB_PRESETS: readonly OrbPreset[] = [
   {
     id: 'nebula',
     label: 'Nebula',
-    description: 'Heavy magenta haze with film grain',
+    description: 'Heavy, glowing magenta haze',
     values: {
       animationSpeed: 1.5,
       orbSize: 1.7,
@@ -293,9 +265,7 @@ export const ORB_PRESETS: readonly OrbPreset[] = [
       colorVariation: 70,
       hue: 40,
       saturation: 1.4,
-      scatter: 45,
       magnetism: 20,
-      grain: 20,
     },
   },
   {
@@ -310,7 +280,6 @@ export const ORB_PRESETS: readonly OrbPreset[] = [
       orbBrightness: 0.6,
       colorVariation: 0,
       saturation: 0,
-      grain: 45,
       burst: 30,
     },
   },
@@ -417,7 +386,7 @@ function scheduleSettingsEvent() {
           orbSize: settings.orbSize,
           orbBlur: settings.orbBlur,
           orbOpacity: settings.orbOpacity,
-          positionVariation: 1 + settings.scatter / 100,
+          positionVariation: 1,
         },
       }),
     )

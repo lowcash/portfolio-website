@@ -3,6 +3,15 @@ import { type Page, expect, test } from '@playwright/test'
 const rootVar = (page: Page, name: string) =>
   page.evaluate((cssVar) => getComputedStyle(document.documentElement).getPropertyValue(cssVar).trim(), name)
 
+const countOrbWaapiAnimations = (page: Page) =>
+  page.evaluate(
+    () =>
+      document
+        .getAnimations()
+        .filter((animation) => !(animation instanceof CSSAnimation) && !(animation instanceof CSSTransition))
+        .filter((animation) => (animation.effect as KeyframeEffect | null)?.target?.classList.contains('orb')).length,
+  )
+
 async function openConsole(page: Page) {
   await page.getByRole('button', { name: 'Toggle debug console' }).evaluate((button: HTMLElement) => button.click())
   await expect(page.getByRole('region', { name: 'Developer debug console' })).toBeVisible()
@@ -38,19 +47,11 @@ test.describe('Orb settings and effects', () => {
     await expect.poll(() => rootVar(page, '--orb-size')).toBe('2.4')
   })
 
-  test('hue shift and saturation recolor the palette used by the whole page', async ({ page }) => {
+  test('hue shift recolors the palette used by the whole page', async ({ page }) => {
     const before = await rootVar(page, '--orb-r')
 
     await setSlider(page, 'hue', 180)
     await expect.poll(() => rootVar(page, '--orb-r')).not.toBe(before)
-
-    await setSlider(page, 'saturation', 0)
-    await expect
-      .poll(async () => {
-        const [r, g, b] = await Promise.all(['--orb-r', '--orb-g', '--orb-b'].map((name) => rootVar(page, name)))
-        return r === g && g === b
-      })
-      .toBe(true)
   })
 
   test('low blur gives the orbs a solid core and extra density', async ({ page }) => {
@@ -73,12 +74,61 @@ test.describe('Orb settings and effects', () => {
     await expect.poll(async () => (await readRates()).every((rate) => rate === 2)).toBe(true)
   })
 
-  test('scatter moves orbs away from their home position', async ({ page }) => {
-    const orb = page.locator('.orb-2')
-    const before = await orb.evaluate((element) => getComputedStyle(element).top)
+  test('only sliders with a clearly visible effect are shown', async ({ page }) => {
+    const consoleRegion = page.getByRole('region', { name: 'Developer debug console' })
 
-    await setSlider(page, 'scatter', 150)
-    await expect.poll(() => orb.evaluate((element) => getComputedStyle(element).top)).not.toBe(before)
+    for (const key of [
+      'animationSpeed',
+      'orbSize',
+      'orbOpacity',
+      'orbBlur',
+      'orbBrightness',
+      'hue',
+      'magnetism',
+      'burst',
+    ]) {
+      await expect(consoleRegion.locator(`#orb-setting-${key}`)).toHaveCount(1)
+    }
+    for (const key of ['scatter', 'grain', 'saturation', 'colorVariation']) {
+      await expect(consoleRegion.locator(`#orb-setting-${key}`)).toHaveCount(0)
+    }
+  })
+
+  test('changing burst plays a preview pulse on the orbs', async ({ page }) => {
+    await setSlider(page, 'burst', 60)
+
+    await expect.poll(() => countOrbWaapiAnimations(page)).toBeGreaterThan(0)
+  })
+
+  test('changing magnetism plays a preview swing', async ({ page }) => {
+    // The swing is brief, so sample the pointer variable every frame instead of polling
+    const peak = page.evaluate(
+      () =>
+        new Promise<number>((resolve) => {
+          let max = 0
+          const start = performance.now()
+          const sample = () => {
+            const x = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--orb-pointer-x')) || 0
+            max = Math.max(max, Math.abs(x))
+            if (performance.now() - start < 1600) requestAnimationFrame(sample)
+            else resolve(max)
+          }
+          sample()
+        }),
+    )
+
+    await setSlider(page, 'magnetism', 80)
+
+    expect(await peak).toBeGreaterThan(0.2)
+  })
+
+  test('turning ripples on plays a preview ring', async ({ page }) => {
+    await page
+      .getByRole('region', { name: 'Developer debug console' })
+      .getByRole('switch', { name: /CLICK RIPPLES/ })
+      .click()
+
+    await expect(page.locator('.orb-ripple')).toHaveCount(1)
   })
 
   test('presets apply a bundle of settings and reset restores the original look', async ({ page }) => {
