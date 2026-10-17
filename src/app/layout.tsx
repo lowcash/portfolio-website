@@ -7,16 +7,19 @@ import { SkipToContentLink } from '@/components/ui/skip-to-content-link'
 
 import '../styles/globals.css'
 
+// latin-ext is needed for the "š" in the hero heading; without it the glyph arrives late and re-renders the LCP element
 const sans = Inter({
-  subsets: ['latin'],
+  subsets: ['latin', 'latin-ext'],
   variable: '--font-inter',
   display: 'swap',
 })
 
+// Only used by small dev-console / label text, so it should not compete with the heading font for early bandwidth
 const mono = JetBrains_Mono({
   subsets: ['latin'],
   variable: '--font-jetbrains',
   display: 'swap',
+  preload: false,
 })
 
 export const viewport = ROOT_VIEWPORT
