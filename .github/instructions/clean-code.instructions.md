@@ -8,7 +8,7 @@ This document enforces implementation discipline. Architecture ownership lives i
 
 ## Dead Code
 
-- Detect unused exports, imports, and types with Knip (`npm run analyze:unused` / `knip --strict`).
+- Detect unused exports, imports, and types with Knip (`pnpm run analyze:unused` / `knip --strict`).
 - Remove dead code incrementally in small, safe commits – never suppress or ignore Knip errors.
 - Do not add new exports "for later" – add them when they are consumed.
 
@@ -34,4 +34,4 @@ This document enforces implementation discipline. Architecture ownership lives i
 
 - Logic that is used once does not need a helper or abstraction.
 - Do not add docstrings, comments, or type annotations to code you did not change.
-- Run `npm run format` before commit when touching multiple files.
+- Run `pnpm run format` before commit when touching multiple files.

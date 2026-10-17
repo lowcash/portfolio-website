@@ -23,18 +23,18 @@
     "analyze:style-boundary:strict": "node ./scripts/analyze-style-boundary.mjs --strict",
     "analyze:style-boundary:changed": "node ./scripts/analyze-style-boundary.mjs --changed",
     "analyze:style-boundary:changed:strict": "node ./scripts/analyze-style-boundary.mjs --changed --strict",
-    "analyze:clean-code": "npm run analyze:unused && npm run analyze:style-boundary",
-    "analyze:clean-code:strict": "npm run analyze:unused:strict && npm run analyze:style-boundary:strict",
+    "analyze:clean-code": "pnpm run analyze:unused && pnpm run analyze:style-boundary",
+    "analyze:clean-code:strict": "pnpm run analyze:unused:strict && pnpm run analyze:style-boundary:strict",
     "test:e2e": "playwright test",
     "test:e2e:ui": "playwright test --ui",
     "test:e2e:baseline": "playwright test tests/e2e/smoke.spec.ts tests/e2e/navigation.spec.ts tests/e2e/seo.spec.ts",
     "test:e2e:baseline:ci": "mkdir -p ./test-results && playwright test tests/e2e/smoke.spec.ts tests/e2e/navigation.spec.ts tests/e2e/seo.spec.ts --reporter=json > ./test-results/playwright-baseline.json",
     "test:e2e:headed": "playwright test --headed",
     "test:e2e:debug": "playwright test --debug",
-    "perf:lighthouse": "npm run perf:lighthouse:desktop && npm run perf:lighthouse:mobile",
-    "perf:lighthouse:desktop": "start-server-and-test \"npm run preview\" http://127.0.0.1:3000 \"node ./scripts/run-lighthouse.mjs desktop\"",
-    "perf:lighthouse:mobile": "start-server-and-test \"npm run preview\" http://127.0.0.1:3000 \"node ./scripts/run-lighthouse.mjs mobile\"",
-    "perf:lighthouse:baseline": "npm run build && npm run perf:lighthouse && node ./scripts/verify-lighthouse-thresholds.mjs"
+    "perf:lighthouse": "pnpm run perf:lighthouse:desktop && pnpm run perf:lighthouse:mobile",
+    "perf:lighthouse:desktop": "start-server-and-test \"pnpm run preview\" http://127.0.0.1:3000 \"node ./scripts/run-lighthouse.mjs desktop\"",
+    "perf:lighthouse:mobile": "start-server-and-test \"pnpm run preview\" http://127.0.0.1:3000 \"node ./scripts/run-lighthouse.mjs mobile\"",
+    "perf:lighthouse:baseline": "pnpm run build && pnpm run perf:lighthouse && node ./scripts/verify-lighthouse-thresholds.mjs"
   },
   "dependencies": {
     "@vercel/analytics": "^2.0.1",
@@ -73,5 +73,6 @@
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.58.0",
     "vitest": "^3.2.7"
-  }
+  },
+  "packageManager": "pnpm@12.14.0"
 }

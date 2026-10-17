@@ -11,7 +11,7 @@ export default defineConfig({
     trace: 'on-first-retry',
   },
   webServer: {
-    command: 'npm run build && npm run preview:e2e',
+    command: 'pnpm run build && pnpm run preview:e2e',
     url: 'http://127.0.0.1:3101',
     reuseExistingServer: !process.env.CI,
     stdout: 'ignore',

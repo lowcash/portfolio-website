@@ -2,7 +2,7 @@ import { expect, test } from '@playwright/test'
 
 /**
  * Local-only visual regression net for the refactor. Snapshots are platform specific, so CI skips it.
- * Update intentionally with: npx playwright test visual-baseline --update-snapshots
+ * Update intentionally with: pnpm exec playwright test visual-baseline --update-snapshots
  */
 const SECTION_IDS = ['hero', 'featured-projects', 'experience', 'contact'] as const
 

@@ -63,7 +63,7 @@ This file is intentionally reusable across Next.js projects; keep repo-specific 
 - Avoid duplicate global listeners for the same signal (scroll/resize/pointer).
 - Use shared metrics managers or centralized subscriptions for high-frequency events.
 - Respect `prefers-reduced-motion` and avoid unnecessary animation work.
-- Measure performance in production mode (`npm run build` + `npm run preview`) before diagnosing regressions.
+- Measure performance in production mode (`pnpm run build` + `pnpm run preview`) before diagnosing regressions.
 
 ## Imports
 

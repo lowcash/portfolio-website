@@ -1,6 +1,6 @@
 # Performance baseline
 
-Captured 2026-10-17 on `main` (414d2b6) before the optimization/refactor work. Lighthouse via `npm run perf:lighthouse`.
+Captured 2026-10-17 on `main` (414d2b6) before the optimization/refactor work. Lighthouse via `pnpm run perf:lighthouse`.
 
 | Metric         | Desktop | Mobile |
 | -------------- | ------- | ------ |
@@ -20,7 +20,7 @@ Largest JS chunk: 227 KB (71 KB gzip). Total chunk JS: ~712 KB.
 
 `tests/e2e/visual-baseline.spec.ts` snapshots 4 sections on desktop, tablet and mobile with animations frozen.
 It is local only (macOS snapshots, skipped when `CI` is set). Update intentionally with
-`npx playwright test visual-baseline --update-snapshots`.
+`pnpm exec playwright test visual-baseline --update-snapshots`.
 
 ## After block B (background rewrite, code splitting, font fix)
 

@@ -29,6 +29,6 @@ applyTo: 'playwright.config.ts,tests/e2e/**/*.ts,package.json'
 
 ## Performance
 
-- Run Lighthouse only against production mode (`npm run build` + `npm run preview`).
+- Run Lighthouse only against production mode (`pnpm run build` + `pnpm run preview`).
 - Store machine-readable scores under `test-results/`.
 - Keep threshold checks versioned so regressions are caught automatically.

@@ -52,9 +52,9 @@ User tunables live in `orb-settings.ts`: a single definition list drives the con
 
 ## Testing
 
-- `npm test` - unit tests for pure logic (colors, settings, URLs, typography).
-- `npm run test:e2e` - Playwright (desktop, tablet, mobile), including `orb-settings` and `easter-eggs` specs.
-- `visual-baseline.spec.ts` - local-only screenshot regression (macOS snapshots, skipped in CI). Update intentionally with `npx playwright test visual-baseline --update-snapshots=all`.
+- `pnpm test` - unit tests for pure logic (colors, settings, URLs, typography).
+- `pnpm run test:e2e` - Playwright (desktop, tablet, mobile), including `orb-settings` and `easter-eggs` specs.
+- `visual-baseline.spec.ts` - local-only screenshot regression (macOS snapshots, skipped in CI). Update intentionally with `pnpm exec playwright test visual-baseline --update-snapshots=all`.
 - `docs/PERF-BASELINE.md` - Lighthouse numbers before/after the optimization work.
 
 ## Tech Stack Decisions
