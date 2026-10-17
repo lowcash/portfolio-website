@@ -33,7 +33,6 @@
     "app/**/*.tsx",
     "src/**/*.ts",
     "src/**/*.tsx",
-    "packages/navigation-core/**/*.ts",
     ".next/types/**/*.ts"
   ]
 }

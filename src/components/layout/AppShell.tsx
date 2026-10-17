@@ -10,14 +10,14 @@ import {
   resolveHashSectionIndex,
   scrollToSectionByIndex,
   setSectionHashByIndex,
-} from '@/lib/navigation-core-adapter'
+  useActiveSection,
+} from '@/lib/navigation'
 
 import { AnimatedBackground } from '@/components/shared/AnimatedBackground'
 import { ScrollNavigation } from '@/components/ui/scroll-navigation'
 import { ScrollProgress } from '@/components/ui/scroll-progress'
 import { ScrollToTop } from '@/components/ui/scroll-to-top'
 
-import { useActiveSection } from '@/hooks/use-active-section'
 import { useIdleReady } from '@/hooks/use-idle-ready'
 
 // Non-critical, interaction-only features: split out of the initial bundle and mounted once the browser is idle
