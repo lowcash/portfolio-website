@@ -29,8 +29,9 @@ export function resolveOrbBaseColor(scrollPercent: number): Rgb {
   }
 }
 
-/** Shift hue, boost saturation (x1.8) and lightness (x1.15, capped) so orb variations read as distinct colors. */
-export function shiftHue({ r, g, b }: Rgb, hueDelta: number): string {
+type Hsl = { h: number; s: number; l: number }
+
+function rgbToHsl({ r, g, b }: Rgb): Hsl {
   const rNorm = r / 255
   const gNorm = g / 255
   const bNorm = b / 255
@@ -40,8 +41,8 @@ export function shiftHue({ r, g, b }: Rgb, hueDelta: number): string {
   const delta = max - min
 
   let h = 0
-  let l = (max + min) / 2
-  let s = delta === 0 ? 0 : delta / (1 - Math.abs(2 * l - 1))
+  const l = (max + min) / 2
+  const s = delta === 0 ? 0 : delta / (1 - Math.abs(2 * l - 1))
 
   if (delta !== 0) {
     if (max === rNorm) {
@@ -53,33 +54,32 @@ export function shiftHue({ r, g, b }: Rgb, hueDelta: number): string {
     }
   }
 
-  h = (h + hueDelta) % 360
-  if (h < 0) h += 360
+  return { h, s, l }
+}
 
-  s = Math.min(1, s * 1.8)
-  l = Math.min(0.65, l * 1.15)
-
+function hslToRgb({ h, s, l }: Hsl): Rgb {
+  const hue = ((h % 360) + 360) % 360
   const c = (1 - Math.abs(2 * l - 1)) * s
-  const x = c * (1 - Math.abs(((h / 60) % 2) - 1))
+  const x = c * (1 - Math.abs(((hue / 60) % 2) - 1))
   const m = l - c / 2
 
   let rOut = 0
   let gOut = 0
   let bOut = 0
 
-  if (h < 60) {
+  if (hue < 60) {
     rOut = c
     gOut = x
-  } else if (h < 120) {
+  } else if (hue < 120) {
     rOut = x
     gOut = c
-  } else if (h < 180) {
+  } else if (hue < 180) {
     gOut = c
     bOut = x
-  } else if (h < 240) {
+  } else if (hue < 240) {
     gOut = x
     bOut = c
-  } else if (h < 300) {
+  } else if (hue < 300) {
     rOut = x
     bOut = c
   } else {
@@ -87,7 +87,31 @@ export function shiftHue({ r, g, b }: Rgb, hueDelta: number): string {
     bOut = x
   }
 
-  return `rgb(${Math.round((rOut + m) * 255)}, ${Math.round((gOut + m) * 255)}, ${Math.round((bOut + m) * 255)})`
+  return {
+    r: Math.round((rOut + m) * 255),
+    g: Math.round((gOut + m) * 255),
+    b: Math.round((bOut + m) * 255),
+  }
+}
+
+const toCss = ({ r, g, b }: Rgb) => `rgb(${r}, ${g}, ${b})`
+
+/** Shift hue, boost saturation (x1.8) and lightness (x1.15, capped) so orb variations read as distinct colors. */
+export function shiftHue(color: Rgb, hueDelta: number): string {
+  const { h, s, l } = rgbToHsl(color)
+
+  return toCss(hslToRgb({ h: h + hueDelta, s: Math.min(1, s * 1.8), l: Math.min(0.65, l * 1.15) }))
+}
+
+/** User palette tuning: rotate the hue and scale the saturation of the base color. Identity at (0, 1). */
+export function adjustOrbColor(color: Rgb, hueShift: number, saturation: number): Rgb {
+  if (hueShift === 0 && saturation === 1) {
+    return color
+  }
+
+  const { h, s, l } = rgbToHsl(color)
+
+  return hslToRgb({ h: h + hueShift, s: Math.min(1, Math.max(0, s * saturation)), l })
 }
 
 /** Six hue-shifted variants of the base color for orb slots 1..6. */

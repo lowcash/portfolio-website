@@ -2,7 +2,9 @@
 import { type CSSProperties, useEffect, useRef } from 'react'
 
 import { ANIMATION_CONFIG } from '@/lib/constants'
-import { DEFAULT_COLOR_VARIATION, resolveOrbBaseColor, resolveOrbVariantColors } from '@/lib/orb-color'
+import { DEFAULT_COLOR_VARIATION, adjustOrbColor, resolveOrbBaseColor, resolveOrbVariantColors } from '@/lib/orb-color'
+import { startOrbEffects } from '@/lib/orb-effects'
+import { getOrbSettings, hydrateOrbSettings, subscribeToOrbSettings } from '@/lib/orb-settings'
 import { subscribeToScrollMetrics } from '@/lib/scroll-metrics'
 
 type OrbConfig = {
@@ -19,6 +21,8 @@ type OrbConfig = {
   opacity: number
   blur: number
   durationSeconds: number
+  /** Parallax travel (px at magnetism 50%) toward/away from the pointer; sign sets the direction */
+  depth: number
   /** 0 = base color, 1..6 = hue-shifted variants (see ORB_HUE_OFFSETS) */
   colorSlot: number
 }
@@ -37,6 +41,7 @@ const ORBS: readonly OrbConfig[] = [
     opacity: 0.14,
     blur: 120,
     durationSeconds: 45,
+    depth: -30,
     colorSlot: 0,
   },
   // Secondary orbs - hue shifted variations
@@ -51,6 +56,7 @@ const ORBS: readonly OrbConfig[] = [
     opacity: 0.11,
     blur: 100,
     durationSeconds: 38,
+    depth: 55,
     colorSlot: 1,
   },
   {
@@ -64,6 +70,7 @@ const ORBS: readonly OrbConfig[] = [
     opacity: 0.12,
     blur: 110,
     durationSeconds: 42,
+    depth: -75,
     colorSlot: 2,
   },
   // Tertiary accent orbs - smaller, more vibrant
@@ -78,6 +85,7 @@ const ORBS: readonly OrbConfig[] = [
     opacity: 0.1,
     blur: 90,
     durationSeconds: 40,
+    depth: 95,
     colorSlot: 3,
   },
   {
@@ -91,6 +99,7 @@ const ORBS: readonly OrbConfig[] = [
     opacity: 0.11,
     blur: 95,
     durationSeconds: 36,
+    depth: -45,
     colorSlot: 4,
   },
   // Extreme hue shifts for maximum variation
@@ -105,6 +114,7 @@ const ORBS: readonly OrbConfig[] = [
     opacity: 0.12,
     blur: 115,
     durationSeconds: 44,
+    depth: 120,
     colorSlot: 5,
   },
   {
@@ -118,6 +128,7 @@ const ORBS: readonly OrbConfig[] = [
     opacity: 0.11,
     blur: 105,
     durationSeconds: 50,
+    depth: -110,
     colorSlot: 6,
   },
   {
@@ -131,11 +142,10 @@ const ORBS: readonly OrbConfig[] = [
     opacity: 0.1,
     blur: 100,
     durationSeconds: 46,
+    depth: 65,
     colorSlot: 1,
   },
 ]
-
-const TRACKED_STORAGE_KEYS = new Set(['color_variation'])
 
 /** CSS custom property holding the color of an orb slot, written on :root while scrolling. */
 const orbColorVar = (slot: number) => `--orb-c${slot}`
@@ -165,13 +175,9 @@ function getOrbStyle(orb: OrbConfig): CSSProperties {
     '--orb-alpha': orb.opacity,
     '--orb-blur-px': orb.blur,
     '--orb-duration': orb.durationSeconds,
+    '--orb-depth': orb.depth,
     '--orb-color': `var(${orbColorVar(orb.colorSlot)}, ${INITIAL_SLOT_COLORS[orb.colorSlot]})`,
   } as CSSProperties
-}
-
-function readColorVariationFromCss() {
-  const value = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--color-variation'))
-  return Number.isNaN(value) ? DEFAULT_COLOR_VARIATION : value
 }
 
 /**
@@ -179,7 +185,6 @@ function readColorVariationFromCss() {
  * Nothing here touches React state, so scrolling never re-renders the background.
  */
 function useScrollDrivenOrbColors() {
-  const colorVariationRef = useRef(DEFAULT_COLOR_VARIATION)
   const currentPercentRef = useRef(0)
 
   useEffect(() => {
@@ -199,7 +204,8 @@ function useScrollDrivenOrbColors() {
     const apply = (percent: number) => {
       currentPercentRef.current = percent
 
-      const base = resolveOrbBaseColor(percent)
+      const { colorVariation, hue, saturation } = getOrbSettings()
+      const base = adjustOrbColor(resolveOrbBaseColor(percent), hue, saturation)
       const rounded = Math.round(percent * 20) / 20
 
       setVar('--scroll-progress', String(rounded / 100))
@@ -209,7 +215,7 @@ function useScrollDrivenOrbColors() {
       setVar('--orb-b', String(base.b))
       setVar(orbColorVar(0), `rgb(${base.r}, ${base.g}, ${base.b})`)
 
-      resolveOrbVariantColors(base, colorVariationRef.current).forEach((color, index) => {
+      resolveOrbVariantColors(base, colorVariation / 100).forEach((color, index) => {
         setVar(orbColorVar(index + 1), color)
       })
     }
@@ -241,18 +247,6 @@ function useScrollDrivenOrbColors() {
       }
     }
 
-    // Color variation is a developer-console setting: re-tint immediately when it changes
-    const syncColorVariation = () => {
-      colorVariationRef.current = readColorVariationFromCss()
-      apply(currentPercentRef.current)
-    }
-
-    const handleStorage = (event: StorageEvent) => {
-      if (!event.key || TRACKED_STORAGE_KEYS.has(event.key)) {
-        syncColorVariation()
-      }
-    }
-
     const unsubscribe = subscribeToScrollMetrics((metrics) => {
       // Mobile menu locks the body with position: fixed, which reports scrollY 0 – ignore to avoid a jump to the top color
       if (document.body.style.position === 'fixed') {
@@ -275,16 +269,17 @@ function useScrollDrivenOrbColors() {
       }
     }
 
-    syncColorVariation()
+    // Palette settings (hue, saturation, color variation) re-tint immediately
+    const unsubscribeSettings = subscribeToOrbSettings(() => apply(currentPercentRef.current))
+
+    hydrateOrbSettings()
+    apply(currentPercentRef.current)
     document.addEventListener('visibilitychange', handleVisibilityChange)
-    window.addEventListener('orb-settings-change', syncColorVariation)
-    window.addEventListener('storage', handleStorage)
 
     return () => {
       unsubscribe()
+      unsubscribeSettings()
       document.removeEventListener('visibilitychange', handleVisibilityChange)
-      window.removeEventListener('orb-settings-change', syncColorVariation)
-      window.removeEventListener('storage', handleStorage)
 
       if (frameId !== null) {
         cancelAnimationFrame(frameId)
@@ -294,13 +289,27 @@ function useScrollDrivenOrbColors() {
 }
 
 export function AnimatedBackground() {
+  const rippleLayerRef = useRef<HTMLDivElement>(null)
+
   useScrollDrivenOrbColors()
+
+  useEffect(() => {
+    const rippleLayer = rippleLayerRef.current
+
+    return rippleLayer ? startOrbEffects(rippleLayer) : undefined
+  }, [])
 
   return (
     <div className='pointer-events-none fixed inset-0 z-0' style={{ backgroundColor: '#030712' }}>
       {ORBS.map((orb) => (
         <div key={orb.className} className={`orb ${orb.className}`} style={getOrbStyle(orb)} />
       ))}
+
+      {/* Click ripples are appended here by orb-effects */}
+      <div ref={rippleLayerRef} className='pointer-events-none absolute inset-0 overflow-hidden' />
+
+      {/* Film grain – invisible until the grain setting is raised */}
+      <div className='orb-grain pointer-events-none absolute inset-0' />
 
       {/* Subtle overlay for depth – reduced to keep orbs visible */}
       <div className='pointer-events-none absolute inset-0 bg-linear-to-b from-gray-950/20 via-transparent to-gray-950/20 md:from-gray-950/40 md:to-gray-950/40' />

@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import { ORB_COLORS } from '@/lib/section-config'
 
-import { resolveOrbBaseColor, resolveOrbVariantColors, shiftHue } from './orb-color'
+import { adjustOrbColor, resolveOrbBaseColor, resolveOrbVariantColors, shiftHue } from './orb-color'
 
 describe('resolveOrbBaseColor', () => {
   it('returns the hero color at the top and the contact color at the bottom', () => {
@@ -40,5 +40,32 @@ describe('shiftHue', () => {
 describe('resolveOrbVariantColors', () => {
   it('returns six variants', () => {
     expect(resolveOrbVariantColors(ORB_COLORS[0], 0.4)).toHaveLength(6)
+  })
+})
+
+describe('adjustOrbColor', () => {
+  const pink = { r: 236, g: 72, b: 153 }
+
+  it('is the identity at hue 0 and saturation 1', () => {
+    expect(adjustOrbColor(pink, 0, 1)).toBe(pink)
+  })
+
+  it('removes all color at saturation 0', () => {
+    const { r, g, b } = adjustOrbColor(pink, 0, 0)
+    expect(r).toBe(g)
+    expect(g).toBe(b)
+  })
+
+  it('rotates a full circle back to (almost) the same color', () => {
+    const rotated = adjustOrbColor(pink, 360, 1)
+    expect(Math.abs(rotated.r - pink.r)).toBeLessThanOrEqual(1)
+    expect(Math.abs(rotated.g - pink.g)).toBeLessThanOrEqual(1)
+    expect(Math.abs(rotated.b - pink.b)).toBeLessThanOrEqual(1)
+  })
+
+  it('moves pink toward orange when rotating forward', () => {
+    const warm = adjustOrbColor(pink, 40, 1)
+    expect(warm.b).toBeLessThan(pink.b)
+    expect(warm.g).toBeGreaterThan(pink.g)
   })
 })

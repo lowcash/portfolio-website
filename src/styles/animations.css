@@ -442,8 +442,10 @@
  * Orb layout, color and motion driven entirely by CSS custom properties.
  *
  * Per-orb values (--orb-top/left[-m], --orb-rand-x/y, --orb-diameter, --orb-alpha, --orb-blur-px, --orb-duration,
- * --orb-color) are set inline by AnimatedBackground; user tunables (--orb-size, --orb-blur, --orb-opacity,
- * --orb-brightness, --animation-speed, --position-variation) are written to :root by the developer console.
+ * --orb-depth, --orb-color) are set inline by AnimatedBackground; user tunables (--orb-size, --orb-blur,
+ * --orb-opacity, --orb-brightness, --position-variation, --orb-magnetism, --orb-grain) are written to :root by
+ * the orb settings store. Animation speed is applied as playbackRate (see orb-effects.ts) so changing it never
+ * restarts or jumps the animation; durations here are authored for the default speed of 3.
  * Keeping mobile/desktop/reduced-motion differences in media queries means the server HTML already matches the
  * final layout, so hydration never moves the orbs (no layout shift).
  * Must stay after the .orb-N animation rules so animation-duration wins over their shorthand.
@@ -456,6 +458,10 @@
   --orb-blur: 1;
   --orb-opacity: 0.85;
   --position-variation: 1;
+  --orb-magnetism: 0;
+  --orb-grain: 0;
+  --orb-pointer-x: 0;
+  --orb-pointer-y: 0;
 }
 
 .orb {
@@ -465,10 +471,18 @@
   width: calc(var(--orb-diameter) * var(--orb-size) * 1px);
   height: calc(var(--orb-diameter) * var(--orb-size) * 1px);
   transform: translate(-50%, -50%);
-  background: radial-gradient(circle, var(--orb-color) 0%, transparent 70%);
-  opacity: calc(var(--orb-alpha) * var(--orb-opacity));
+  /* Below 1x blur the gradient grows a solid core, so low blur reads as crisp discs instead of a barely changed haze */
+  --orb-core: calc(max(0, 1 - var(--orb-blur)) * 66%);
+  /* Above the default opacity the ramp steepens, and crisp (low blur) orbs get extra density, so both ends of those
+     sliders are clearly visible instead of dissolving into the dark background */
+  --orb-opacity-boost: calc(1 + max(0, var(--orb-opacity) - 0.85) * 3 + max(0, 1 - var(--orb-blur)) * 3);
+  background: radial-gradient(circle, var(--orb-color) 0%, var(--orb-color) var(--orb-core), transparent 70%);
+  opacity: calc(var(--orb-alpha) * var(--orb-opacity) * var(--orb-opacity-boost));
   filter: blur(calc(var(--orb-blur-px) * var(--orb-blur) * 1px)) brightness(var(--orb-brightness));
-  animation-duration: calc(var(--orb-duration) / var(--animation-speed) * 1s);
+  animation-duration: calc(var(--orb-duration) / 3 * 1s);
+  /* Individual `translate` composes with the keyframed `transform`, so magnetism never fights the float animation */
+  translate: calc(var(--orb-pointer-x) * var(--orb-depth) * var(--orb-magnetism) * 1px)
+    calc(var(--orb-pointer-y) * var(--orb-depth) * var(--orb-magnetism) * 1px);
   will-change: transform;
 }
 
@@ -478,7 +492,7 @@
     left: calc(var(--orb-left-m) * 1% + var(--orb-rand-x) * (var(--position-variation) - 1) * 8%);
     width: calc(var(--orb-diameter) * var(--orb-size) * 0.4px);
     height: calc(var(--orb-diameter) * var(--orb-size) * 0.4px);
-    opacity: calc(var(--orb-alpha) * var(--orb-opacity) * 0.8);
+    opacity: calc(var(--orb-alpha) * var(--orb-opacity) * var(--orb-opacity-boost) * 0.8);
     filter: blur(calc(var(--orb-blur-px) * var(--orb-blur) * 0.62px))
       brightness(clamp(0.72, calc(var(--orb-brightness) * 1.2), 0.95));
   }
@@ -754,4 +768,24 @@
     background-position: 100% 0;
     opacity: 1;
   }
+}
+
+/* Film grain: static SVG noise, invisible at the default setting */
+.orb-grain {
+  opacity: calc(var(--orb-grain) * 0.35);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  mix-blend-mode: overlay;
+}
+
+/* Click ripple ring, animated by orb-effects via the Web Animations API */
+.orb-ripple {
+  position: absolute;
+  width: 640px;
+  height: 640px;
+  border-radius: 9999px;
+  border: 2px solid var(--orb-c0, rgb(236, 72, 153));
+  box-shadow:
+    0 0 48px var(--orb-c0, rgb(236, 72, 153)),
+    inset 0 0 48px var(--orb-c0, rgb(236, 72, 153));
+  opacity: 0;
 }

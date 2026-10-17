@@ -3,6 +3,8 @@ import { useEffect, useRef, useState } from 'react'
 import confetti from 'canvas-confetti'
 import { Trophy } from 'lucide-react'
 
+import { setOrbSetting } from '@/lib/orb-settings'
+
 /**
  * Easter Eggs System with Achievements
  *
@@ -723,9 +725,7 @@ export function EasterEggs() {
             unlockAchievementRef.current('shake')
             mouseMovements = []
 
-            const root = document.documentElement
-            const randomVariation = Math.random() * 100
-            root.style.setProperty('--color-variation', String(randomVariation / 100))
+            setOrbSetting('colorVariation', Math.random() * 100)
 
             console.log('%c🖱️ Rapid mouse movement detected! Colors shuffled!', 'color: #ec4899; font-size: 14px;')
           }

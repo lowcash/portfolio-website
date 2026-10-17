@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react'
 
 import { Terminal, Trophy, X } from 'lucide-react'
 
+import { OrbControls, OrbResetButton } from '@/components/features/devtools/orb-controls'
 import type { Achievement } from '@/components/ui/easter-eggs'
 
 /**
@@ -83,9 +84,6 @@ export function DeveloperConsole({ onVisibilityChange, isMobileMenuOpen = false 
   const [isDragging, setIsDragging] = useState(false)
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 })
 
-  // Debounce ref for settings dispatch – counts per drag-session, not per pixel change
-  const settingsDispatchTimerRef = useRef<NodeJS.Timeout | null>(null)
-
   // Panel ref for click outside detection and viewport clamping
   const panelRef = useRef<HTMLDivElement>(null)
   const panelSurfaceRef = useRef<HTMLDivElement>(null)
@@ -126,32 +124,6 @@ export function DeveloperConsole({ onVisibilityChange, isMobileMenuOpen = false 
   // Scale is session-only – not persisted, always opens at readable default
   const [scale, setScale] = useState(1.0)
 
-  // Easter egg settings
-  const [orbBrightness, setOrbBrightness] = useState(() => {
-    if (!canUseStorage) return 0.5
-    return parseFloat(localStorage.getItem('orb_brightness') || '0.5')
-  })
-  const [animationSpeed, setAnimationSpeed] = useState(() => {
-    if (!canUseStorage) return 3.0
-    return parseFloat(localStorage.getItem('animation_speed') || '3.0')
-  })
-  const [colorVariation, setColorVariation] = useState(() => {
-    if (!canUseStorage) return 40
-    return parseFloat(localStorage.getItem('color_variation') || '40')
-  })
-  const [orbSize, setOrbSize] = useState(() => {
-    if (!canUseStorage) return 1.2
-    return parseFloat(localStorage.getItem('orb_size') || '1.2')
-  })
-  const [orbBlur, setOrbBlur] = useState(() => {
-    if (!canUseStorage) return 1.0
-    return parseFloat(localStorage.getItem('orb_blur') || '1.0')
-  })
-  const [orbOpacity, setOrbOpacity] = useState(() => {
-    if (!canUseStorage) return 0.85
-    return parseFloat(localStorage.getItem('orb_opacity') || '0.85')
-  })
-
   useEffect(() => {
     const mobileMediaQuery = window.matchMedia('(max-width: 767px)')
     const belowLgMediaQuery = window.matchMedia('(max-width: 1023px)')
@@ -170,38 +142,6 @@ export function DeveloperConsole({ onVisibilityChange, isMobileMenuOpen = false 
       belowLgMediaQuery.removeEventListener('change', syncViewportFlags)
     }
   }, [])
-
-  // Apply settings to CSS custom properties
-  useEffect(() => {
-    const root = document.documentElement
-    const settingsPayload = {
-      orbBrightness,
-      animationSpeed,
-      colorVariation: colorVariation / 100,
-      orbSize,
-      orbBlur,
-      orbOpacity,
-      positionVariation: 1.0,
-    }
-
-    root.style.setProperty('--orb-brightness', String(orbBrightness))
-    root.style.setProperty('--animation-speed', String(animationSpeed))
-    root.style.setProperty('--color-variation', String(colorVariation / 100)) // normalize to 0-1
-    root.style.setProperty('--orb-size', String(orbSize))
-    root.style.setProperty('--orb-blur', String(orbBlur))
-    root.style.setProperty('--orb-opacity', String(orbOpacity))
-    root.style.setProperty('--position-variation', '1.0')
-    localStorage.setItem('orb_brightness', String(orbBrightness))
-    localStorage.setItem('animation_speed', String(animationSpeed))
-    localStorage.setItem('color_variation', String(colorVariation))
-    localStorage.setItem('orb_size', String(orbSize))
-    localStorage.setItem('orb_blur', String(orbBlur))
-    localStorage.setItem('orb_opacity', String(orbOpacity))
-    if (settingsDispatchTimerRef.current) clearTimeout(settingsDispatchTimerRef.current)
-    settingsDispatchTimerRef.current = setTimeout(() => {
-      window.dispatchEvent(new CustomEvent('orb-settings-change', { detail: settingsPayload }))
-    }, 400)
-  }, [orbBrightness, animationSpeed, colorVariation, orbSize, orbBlur, orbOpacity])
 
   // Show console hint once on load
   useEffect(() => {
@@ -848,107 +788,7 @@ export function DeveloperConsole({ onVisibilityChange, isMobileMenuOpen = false 
         <div className='space-y-3'>
           <div className='text-sm tracking-wider text-gray-500 uppercase'>⚙️ Controls</div>
 
-          {/* Animation Speed Slider */}
-          <div>
-            <div className='mb-1 flex items-center justify-between'>
-              <span className='text-[12px] text-gray-400'>ANIMATION SPEED:</span>
-              <span className='text-[12px] text-white tabular-nums'>{animationSpeed.toFixed(1)}x</span>
-            </div>
-            <input
-              type='range'
-              min='0.1'
-              max='10.0'
-              step='0.1'
-              value={animationSpeed}
-              onChange={(e) => setAnimationSpeed(parseFloat(e.target.value))}
-              className='h-1.5 w-full cursor-pointer appearance-none rounded-full bg-gray-800'
-              style={{
-                accentColor: `rgb(${orbR}, ${orbG}, ${orbB})`,
-              }}
-            />
-          </div>
-
-          {/* Color Variation Slider */}
-          <div>
-            <div className='mb-1 flex items-center justify-between'>
-              <span className='text-[12px] text-gray-400'>COLOR VARIATION:</span>
-              <span className='text-[12px] text-white tabular-nums'>{colorVariation.toFixed(0)}%</span>
-            </div>
-            <input
-              type='range'
-              min='0'
-              max='500'
-              step='10'
-              value={colorVariation}
-              onChange={(e) => setColorVariation(parseFloat(e.target.value))}
-              className='h-1.5 w-full cursor-pointer appearance-none rounded-full bg-gray-800'
-              style={{
-                accentColor: `rgb(${orbR}, ${orbG}, ${orbB})`,
-              }}
-            />
-          </div>
-
-          {/* Orb Size Slider */}
-          <div>
-            <div className='mb-1 flex items-center justify-between'>
-              <span className='text-[12px] text-gray-400'>ORB SIZE:</span>
-              <span className='text-[12px] text-white tabular-nums'>{orbSize.toFixed(1)}x</span>
-            </div>
-            <input
-              type='range'
-              min='0.1'
-              max='5.0'
-              step='0.1'
-              value={orbSize}
-              onChange={(e) => setOrbSize(parseFloat(e.target.value))}
-              className='h-1.5 w-full cursor-pointer appearance-none rounded-full bg-gray-800'
-              style={{
-                accentColor: `rgb(${orbR}, ${orbG}, ${orbB})`,
-              }}
-            />
-          </div>
-
-          {/* Orb Blur Slider */}
-          {!isMobile && (
-            <div>
-              <div className='mb-1 flex items-center justify-between'>
-                <span className='text-[12px] text-gray-400'>ORB BLUR:</span>
-                <span className='text-[12px] text-white tabular-nums'>{orbBlur.toFixed(1)}x</span>
-              </div>
-              <input
-                type='range'
-                min='0.1'
-                max='5.0'
-                step='0.1'
-                value={orbBlur}
-                onChange={(e) => setOrbBlur(parseFloat(e.target.value))}
-                className='h-1.5 w-full cursor-pointer appearance-none rounded-full bg-gray-800'
-                style={{
-                  accentColor: `rgb(${orbR}, ${orbG}, ${orbB})`,
-                }}
-              />
-            </div>
-          )}
-
-          {/* Orb Opacity Slider */}
-          <div>
-            <div className='mb-1 flex items-center justify-between'>
-              <span className='text-[12px] text-gray-400'>ORB OPACITY:</span>
-              <span className='text-[12px] text-white tabular-nums'>{(orbOpacity * 100).toFixed(0)}%</span>
-            </div>
-            <input
-              type='range'
-              min='0.0'
-              max='3.0'
-              step='0.1'
-              value={orbOpacity}
-              onChange={(e) => setOrbOpacity(parseFloat(e.target.value))}
-              className='h-1.5 w-full cursor-pointer appearance-none rounded-full bg-gray-800'
-              style={{
-                accentColor: `rgb(${orbR}, ${orbG}, ${orbB})`,
-              }}
-            />
-          </div>
+          <OrbControls accent={`rgb(${orbR}, ${orbG}, ${orbB})`} />
 
           {/* Scale Slider - RESIZABLE CONSOLE */}
           {!isMobile && (
@@ -976,37 +816,7 @@ export function DeveloperConsole({ onVisibilityChange, isMobileMenuOpen = false 
             </div>
           )}
 
-          {/* Reset Button */}
-          <button
-            onClick={() => {
-              const defaults = {
-                brightness: 0.5,
-                speed: 3.0,
-                variation: 40,
-                size: 1.2,
-                blur: 1.0,
-                opacity: 0.85,
-              }
-
-              setOrbBrightness(defaults.brightness)
-              setAnimationSpeed(defaults.speed)
-              setColorVariation(defaults.variation)
-              setOrbSize(defaults.size)
-              setOrbBlur(defaults.blur)
-              setOrbOpacity(defaults.opacity)
-
-              // Force immediate localStorage update
-              localStorage.setItem('orb_brightness', String(defaults.brightness))
-              localStorage.setItem('animation_speed', String(defaults.speed))
-              localStorage.setItem('color_variation', String(defaults.variation))
-              localStorage.setItem('orb_size', String(defaults.size))
-              localStorage.setItem('orb_blur', String(defaults.blur))
-              localStorage.setItem('orb_opacity', String(defaults.opacity))
-            }}
-            className='w-full cursor-pointer rounded border border-gray-700 px-3 py-1.5 text-[12px] text-gray-400 transition-all hover:border-gray-500 hover:text-white'
-          >
-            RESET TO DEFAULT
-          </button>
+          <OrbResetButton />
 
           {/* Reset Achievements Button - DEV ONLY */}
           <button
