@@ -1,4 +1,4 @@
-export type PortfolioSiteConfig = {
+type PortfolioSiteConfig = {
   readonly site: {
     readonly category: string
     readonly description: string
@@ -40,7 +40,7 @@ export type PortfolioSiteConfig = {
   }
 }
 
-export const SITE_CONFIG = {
+const SITE_CONFIG = {
   site: {
     url: 'https://lowcash.dev',
     name: 'lowcash.dev',

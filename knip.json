@@ -1,4 +1,5 @@
 {
   "entry": ["scripts/run-lighthouse.mjs"],
+  "ignoreDependencies": ["tailwindcss"],
   "project": ["src/**/*.{ts,tsx}", "tests/**/*.{ts,tsx}", "scripts/**/*.mjs"]
 }

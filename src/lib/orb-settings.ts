@@ -23,7 +23,7 @@ export type OrbSettingKey =
   | 'ripples'
   | 'grain'
 
-export type OrbSettings = Record<OrbSettingKey, number>
+type OrbSettings = Record<OrbSettingKey, number>
 
 export type OrbSettingGroup = 'motion' | 'look' | 'color' | 'effects'
 
@@ -238,7 +238,7 @@ export const DEFAULT_ORB_SETTINGS = Object.fromEntries(
   ORB_SETTING_DEFINITIONS.map((definition) => [definition.key, definition.defaultValue]),
 ) as OrbSettings
 
-export type OrbPreset = {
+type OrbPreset = {
   id: string
   label: string
   description: string
@@ -451,7 +451,7 @@ export function subscribeToOrbSettings(listener: Listener) {
   }
 }
 
-export function setOrbSettings(partial: Partial<OrbSettings>) {
+function setOrbSettings(partial: Partial<OrbSettings>) {
   if (typeof window === 'undefined') {
     return
   }

@@ -25,9 +25,12 @@ const DeveloperConsole = dynamic(
   () => import('@/components/features/devtools/DeveloperConsole').then((module) => module.DeveloperConsole),
   { ssr: false },
 )
-const EasterEggs = dynamic(() => import('@/components/ui/easter-eggs').then((module) => module.EasterEggs), {
-  ssr: false,
-})
+const EasterEggs = dynamic(
+  () => import('@/components/features/easter-eggs/EasterEggs').then((module) => module.EasterEggs),
+  {
+    ssr: false,
+  },
+)
 
 type AppShellProps = {
   sectionIds: string[]

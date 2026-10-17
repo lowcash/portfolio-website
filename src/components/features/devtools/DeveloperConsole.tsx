@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from 'react'
 import { Terminal, Trophy, X } from 'lucide-react'
 
 import { OrbControls, OrbResetButton } from '@/components/features/devtools/orb-controls'
-import type { Achievement } from '@/components/ui/easter-eggs'
+import type { Achievement } from '@/components/features/easter-eggs/achievements'
 
 /**
  * Debug component - Easter egg for developers
@@ -22,7 +22,7 @@ const ACHIEVEMENT_HINTS: Record<string, string> = {
   'marathon-runner': 'Scroll a total of 10,000 pixels',
   'speed-reader': 'Reach the bottom in under 2 minutes',
   'repeat-visitor': 'Visit the site 3+ times',
-  'section-hopper': 'Visit at least 5 different sections',
+  'section-hopper': 'Visit at least 3 different sections',
   'world-tour': 'Visit every section on the page',
   'settings-tinkerer': 'Tweak orb settings 5 times',
   'nav-master': 'Use navigation controls 3 times',

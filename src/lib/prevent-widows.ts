@@ -40,6 +40,3 @@ export function formatTypography(str: string): string {
       .replace(/\bInteractive\s+Dev\s+Console\b/gi, 'Interactive\u00A0Dev\u00A0Console')
   )
 }
-
-/** @deprecated Prefer `formatTypography`. */
-export const preventWidows = formatTypography

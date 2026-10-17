@@ -9,7 +9,7 @@ export const ROOT_VIEWPORT: Viewport = {
   viewportFit: 'cover',
 }
 
-export const ROOT_OPEN_GRAPH = {
+const ROOT_OPEN_GRAPH = {
   type: 'website',
   locale: SITE_IDENTITY.locale,
   url: SITE_IDENTITY.url,
@@ -26,14 +26,14 @@ export const ROOT_OPEN_GRAPH = {
   ],
 } satisfies NonNullable<Metadata['openGraph']>
 
-export const ROOT_TWITTER = {
+const ROOT_TWITTER = {
   card: 'summary_large_image',
   title: SITE_IDENTITY.title,
   description: SITE_IDENTITY.description,
   images: [OPEN_GRAPH_IMAGE.path],
 } satisfies NonNullable<Metadata['twitter']>
 
-export const ROOT_ROBOTS = {
+const ROOT_ROBOTS = {
   index: true,
   follow: true,
   googleBot: {
@@ -45,7 +45,7 @@ export const ROOT_ROBOTS = {
   },
 } satisfies NonNullable<Metadata['robots']>
 
-export const ROOT_APPLE_WEB_APP = {
+const ROOT_APPLE_WEB_APP = {
   title: SITE_IDENTITY.shortName,
   capable: true,
   statusBarStyle: 'black-translucent',

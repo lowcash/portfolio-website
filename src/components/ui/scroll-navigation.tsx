@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 
 import { Menu, X } from 'lucide-react'
 
@@ -31,6 +31,7 @@ export function ScrollNavigation({
   const scrollPositionRef = useRef(0)
   const pendingNavigationIndexRef = useRef<number | null>(null)
   const onSectionClickRef = useRef(onSectionClick)
+  const onMenuStateChangeRef = useRef(onMenuStateChange)
   const htmlStyleRestoreRef = useRef({
     scrollBehavior: '',
     scrollSnapType: '',
@@ -38,12 +39,13 @@ export function ScrollNavigation({
 
   useEffect(() => {
     onSectionClickRef.current = onSectionClick
-  }, [onSectionClick])
+    onMenuStateChangeRef.current = onMenuStateChange
+  }, [onSectionClick, onMenuStateChange])
 
-  const setMobileMenuOpenState = (nextOpen: boolean) => {
-    onMenuStateChange?.(nextOpen)
+  const setMobileMenuOpenState = useCallback((nextOpen: boolean) => {
+    onMenuStateChangeRef.current?.(nextOpen)
     setMobileMenuOpen(nextOpen)
-  }
+  }, [])
 
   const sections = Array.from({ length: totalSections }, (_, i) => ({
     id: i,
@@ -147,7 +149,7 @@ export function ScrollNavigation({
       document.removeEventListener('mousemove', handleMouseMove)
       document.removeEventListener('mouseup', handleMouseUp)
     }
-  }, [dragStartY, dragCurrentY])
+  }, [dragStartY, dragCurrentY, setMobileMenuOpenState])
 
   const getDragOffset = () => {
     if (dragStartY === null || dragCurrentY === null) return 0

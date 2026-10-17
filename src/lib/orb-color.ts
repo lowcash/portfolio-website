@@ -4,7 +4,7 @@ import { ORB_COLORS } from '@/lib/section-config'
 type Rgb = { r: number; g: number; b: number }
 
 /** Hue offsets (degrees at colorVariation = 1) for orb color slots 1..6. Slot 0 is the base color. */
-export const ORB_HUE_OFFSETS = [-90, 90, -60, 60, -120, 120] as const
+const ORB_HUE_OFFSETS = [-90, 90, -60, 60, -120, 120] as const
 
 export const DEFAULT_COLOR_VARIATION = 0.4
 

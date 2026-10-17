@@ -94,7 +94,7 @@ function SettingToggle({
   )
 }
 
-export function OrbPresets({ accent }: AccentProps) {
+function OrbPresets({ accent }: AccentProps) {
   const settings = useSyncExternalStore(subscribeToOrbSettings, getOrbSettings, getServerOrbSettings)
 
   return (

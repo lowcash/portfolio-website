@@ -49,6 +49,3 @@ export function ContentCard({
     </article>
   )
 }
-
-/** @deprecated Prefer `ContentCard`. */
-export const TwoColumnCard = ContentCard
