@@ -12,7 +12,7 @@ permissions:
 jobs:
   test:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
 
     steps:
       - uses: actions/checkout@v6
@@ -27,14 +27,26 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Install Playwright browser
-        run: pnpm exec playwright install --with-deps chromium
+      - name: Install Playwright browsers
+        run: pnpm exec playwright install --with-deps chromium webkit
+
+      - name: Lint
+        run: pnpm run lint
+
+      - name: Typecheck
+        run: pnpm run typecheck
+
+      - name: Unit tests
+        run: pnpm run test
 
       - name: Check formatting
         run: pnpm run format:check
 
-      - name: Run E2E tests
-        run: pnpm run test:e2e --project=desktop-chrome
+      - name: Build
+        run: pnpm run build
+
+      - name: Run E2E tests (all projects)
+        run: pnpm run test:e2e
 
       - uses: actions/upload-artifact@v7
         if: failure()

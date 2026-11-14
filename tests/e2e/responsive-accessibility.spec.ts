@@ -69,7 +69,7 @@ test.describe('Responsive and accessibility baseline', () => {
 
     await skipLink.press('Enter')
 
-    await expect(page.locator('#main-content')).toHaveAttribute('role', 'main')
+    await expect(page.locator('main#main-content')).toBeVisible()
     await expect.poll(() => page.evaluate(() => window.location.hash)).toBe('#main-content')
   })
 

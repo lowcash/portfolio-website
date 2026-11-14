@@ -27,7 +27,8 @@ export function ScrollNavigation({
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [dragStartY, setDragStartY] = useState<number | null>(null)
   const [dragCurrentY, setDragCurrentY] = useState<number | null>(null)
-  const drawerRef = useRef<HTMLDivElement>(null)
+  const menuButtonRef = useRef<HTMLButtonElement>(null)
+  const firstDrawerItemRef = useRef<HTMLButtonElement>(null)
   const scrollPositionRef = useRef(0)
   const pendingNavigationIndexRef = useRef<number | null>(null)
   const onSectionClickRef = useRef(onSectionClick)
@@ -36,7 +37,6 @@ export function ScrollNavigation({
     scrollBehavior: '',
     scrollSnapType: '',
   })
-
   useEffect(() => {
     onSectionClickRef.current = onSectionClick
     onMenuStateChangeRef.current = onMenuStateChange
@@ -78,7 +78,6 @@ export function ScrollNavigation({
     setDragCurrentY(null)
   }
 
-  // Swipe to close functionality
   const handleTouchStart = (e: React.TouchEvent) => {
     setDragStartY(e.touches[0].clientY)
   }
@@ -195,10 +194,44 @@ export function ScrollNavigation({
     }
   }, [mobileMenuOpen, onScrollRestore])
 
+  // Escape to close + focus management + inert background
+  useEffect(() => {
+    if (!mobileMenuOpen) {
+      return
+    }
+
+    const main = document.getElementById('main-content')
+    const previouslyFocused = document.activeElement instanceof HTMLElement ? document.activeElement : null
+    const menuButton = menuButtonRef.current
+
+    main?.setAttribute('inert', '')
+    const focusTimer = window.setTimeout(() => {
+      firstDrawerItemRef.current?.focus()
+    }, 0)
+
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        event.preventDefault()
+        pendingNavigationIndexRef.current = null
+        setMobileMenuOpenState(false)
+      }
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+
+    return () => {
+      window.clearTimeout(focusTimer)
+      window.removeEventListener('keydown', handleKeyDown)
+      main?.removeAttribute('inert')
+      const restoreTarget = previouslyFocused ?? menuButton
+      restoreTarget?.focus()
+    }
+  }, [mobileMenuOpen, setMobileMenuOpenState])
+
   return (
     <>
       <FloatingRail variant='center-right' desktopOnly childOffsetRightPx={22}>
-        <nav aria-label='Page navigation' role='navigation'>
+        <nav aria-label='Page navigation'>
           <div className='flex flex-col gap-4'>
             {sections.map((section) => (
               <NavDot
@@ -212,9 +245,10 @@ export function ScrollNavigation({
         </nav>
       </FloatingRail>
 
-      <div className='pointer-events-none fixed top-0 right-0 left-0 lg:hidden' style={{ zIndex: 60 }}>
+      <div className='pointer-events-none fixed top-0 right-0 left-0 lg:hidden' style={{ zIndex: 'var(--z-drawer)' }}>
         <div className='relative mx-auto h-0 max-w-6xl px-4 sm:px-6'>
           <button
+            ref={menuButtonRef}
             onClick={() => {
               pendingNavigationIndexRef.current = null
               setMobileMenuOpenState(!mobileMenuOpen)
@@ -258,12 +292,10 @@ export function ScrollNavigation({
       >
         <nav
           id='mobile-navigation-menu'
-          ref={drawerRef}
           className={`absolute right-0 bottom-0 left-0 touch-pan-y rounded-t-3xl bg-black/95 backdrop-blur-xl transition-all duration-300 ${
             mobileMenuOpen ? 'translate-y-0 opacity-100' : 'translate-y-full opacity-0'
           }`}
           aria-label='Mobile navigation'
-          role='navigation'
           style={{
             boxShadow: '0 -10px 60px rgba(139, 92, 246, 0.3)',
             transform: mobileMenuOpen ? `translateY(${getDragOffset()}px)` : 'translateY(100%)',
@@ -278,14 +310,15 @@ export function ScrollNavigation({
             onTouchEnd={handleTouchEnd}
             onMouseDown={handleMouseDown}
           >
-            <div className='h-1 w-12 rounded-full bg-gray-600' />
+            <div className='h-1 w-12 rounded-full bg-gray-400' />
           </div>
 
           <div className='px-6 pt-4 pb-8'>
             <div className='space-y-2'>
-              {sections.map((section) => (
+              {sections.map((section, index) => (
                 <DrawerNavItem
                   key={section.id}
+                  ref={index === 0 ? firstDrawerItemRef : undefined}
                   isActive={currentSection === section.id}
                   label={section.label}
                   onClick={() => handleMobileClick(section.id)}

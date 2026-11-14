@@ -1,10 +1,17 @@
 // style-boundary-ignore-file: dynamic orbR/orbG/orbB RGB values computed from React state – inline styles are unavoidable here
+'use client'
+
 import { useEffect, useRef, useState } from 'react'
 
-import { Terminal, Trophy, X } from 'lucide-react'
+import { Terminal, X } from 'lucide-react'
 
-import { OrbControls, OrbResetButton } from '@/components/features/devtools/orb-controls'
 import type { Achievement } from '@/components/features/easter-eggs/achievements'
+
+import { AchievementsPanel } from './achievements-panel'
+import { closeConsole, openConsole } from './console-actions'
+import { ConsoleStatsControls } from './console-stats-controls'
+import { useConsoleDrag } from './use-console-drag'
+import { useConsoleStats } from './use-console-stats'
 
 /**
  * Debug component - Easter egg for developers
@@ -12,49 +19,19 @@ import type { Achievement } from '@/components/features/easter-eggs/achievements
  * Only available in development mode or when manually enabled
  */
 
-const ACHIEVEMENT_HINTS: Record<string, string> = {
-  'triple-click': 'Triple-click the hero heading',
-  'perfectly-balanced': 'Scroll to exactly 50% of the page',
-  patience: 'Stay idle for 60 seconds',
-  'rapid-clicker': 'Click 10 times in 2 seconds',
-  'copy-cat': 'Copy some text from the page',
-  shake: 'Scroll rapidly (mobile) or move mouse fast (desktop)',
-  'marathon-runner': 'Scroll a total of 10,000 pixels',
-  'speed-reader': 'Reach the bottom in under 2 minutes',
-  'repeat-visitor': 'Visit the site 3+ times',
-  'section-hopper': 'Visit at least 3 different sections',
-  'world-tour': 'Visit every section on the page',
-  'settings-tinkerer': 'Tweak orb settings 5 times',
-  'nav-master': 'Use navigation controls 3 times',
-  'round-trip': 'Use the scroll-to-top shortcut',
-  'back-to-origin': 'Reach contact and return to hero',
-  enlightenment: 'Unlock every other achievement',
-}
-
-const ACHIEVEMENT_TOOLTIP_WIDTH = 220
-type TooltipAlign = 'center' | 'left' | 'right'
-
-function resolveTooltipAlignment(tileElement: HTMLElement, boundaryElement?: HTMLElement | null): TooltipAlign {
-  const tileRect = tileElement.getBoundingClientRect()
-  const boundaryRect = boundaryElement?.getBoundingClientRect()
-  const minLeft = (boundaryRect?.left ?? 8) + 8
-  const maxRight = (boundaryRect?.right ?? window.innerWidth) - 8
-  const centerX = tileRect.left + tileRect.width / 2
-
-  if (centerX - ACHIEVEMENT_TOOLTIP_WIDTH / 2 < minLeft) {
-    return 'left'
-  }
-
-  if (centerX + ACHIEVEMENT_TOOLTIP_WIDTH / 2 > maxRight) {
-    return 'right'
-  }
-
-  return 'center'
-}
-
 interface DeveloperConsoleProps {
   onVisibilityChange?: (isVisible: boolean) => void
   isMobileMenuOpen?: boolean
+}
+
+function loadAchievementsFromStorage(canUseStorage: boolean): Achievement[] {
+  if (!canUseStorage) return []
+  try {
+    const saved = localStorage.getItem('achievements')
+    return saved ? (JSON.parse(saved) as Achievement[]) : []
+  } catch {
+    return []
+  }
 }
 
 export function DeveloperConsole({ onVisibilityChange, isMobileMenuOpen = false }: DeveloperConsoleProps = {}) {
@@ -62,67 +39,21 @@ export function DeveloperConsole({ onVisibilityChange, isMobileMenuOpen = false 
   const [isMobileViewport, setIsMobileViewport] = useState(false)
   const [isBelowLgViewport, setIsBelowLgViewport] = useState(false)
   const [isVisible, setIsVisible] = useState(false)
-  const [scrollPercent, setScrollPercent] = useState(0)
-  const [orbR, setOrbR] = useState(0)
-  const [orbG, setOrbG] = useState(0)
-  const [orbB, setOrbB] = useState(0)
-  const [fps, setFps] = useState(60)
-
-  // Achievements state
-  const [achievements, setAchievements] = useState<Achievement[]>(() => {
-    if (!canUseStorage) return []
-    const saved = localStorage.getItem('achievements')
-    return saved ? JSON.parse(saved) : []
-  })
-
-  // Tooltip state – anchored to the active achievement tile
-  const [activeTooltipId, setActiveTooltipId] = useState<string | null>(null)
-  const [activeTooltipAlign, setActiveTooltipAlign] = useState<TooltipAlign>('center')
-  const tooltipTimeoutRef = useRef<NodeJS.Timeout | null>(null)
-
-  // Drag & drop state
-  const [isDragging, setIsDragging] = useState(false)
-  const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 })
-
-  // Panel ref for click outside detection and viewport clamping
-  const panelRef = useRef<HTMLDivElement>(null)
-  const panelSurfaceRef = useRef<HTMLDivElement>(null)
-
-  const clampPanelPosition = (nextX: number, nextY: number) => {
-    const panel = panelSurfaceRef.current ?? panelRef.current
-    if (!panel || typeof window === 'undefined') {
-      return { x: nextX, y: nextY }
-    }
-
-    const rect = panel.getBoundingClientRect()
-    const maxX = Math.max(0, window.innerWidth - rect.width)
-    const maxY = Math.max(0, window.innerHeight - rect.height)
-
-    return {
-      x: Math.min(Math.max(0, nextX), maxX),
-      y: Math.min(Math.max(0, nextY), maxY),
-    }
-  }
-
-  // Persistent position - TOP LEFT with padding (desktop default)
-  const [position, setPosition] = useState(() => {
-    if (!canUseStorage || typeof window === 'undefined') return { x: 20, y: 20 } // Top-left with 20px padding
-    const saved = localStorage.getItem('debug_position')
-    if (saved) {
-      const parsed = JSON.parse(saved)
-      // Validate position is within viewport (not off-screen)
-      const isValidX = parsed.x >= -200 && parsed.x < window.innerWidth
-      const isValidY = parsed.y >= -200 && parsed.y < window.innerHeight
-      if (isValidX && isValidY) {
-        return clampPanelPosition(parsed.x, parsed.y)
-      }
-    }
-    // Default or invalid position
-    return { x: 20, y: 20 }
-  })
-
-  // Scale is session-only – not persisted, always opens at readable default
+  const isVisibleRef = useRef(false)
   const [scale, setScale] = useState(1.0)
+  const [achievements, setAchievements] = useState<Achievement[]>(() => loadAchievementsFromStorage(canUseStorage))
+
+  const { scrollPercent, orbR, orbG, orbB, fps } = useConsoleStats(isVisible)
+  const { position, isDragging, panelRef, panelSurfaceRef, handleMouseDown } = useConsoleDrag({
+    canUseStorage,
+    isVisible,
+    isMobileViewport,
+    scale,
+  })
+
+  useEffect(() => {
+    isVisibleRef.current = isVisible
+  }, [isVisible])
 
   useEffect(() => {
     const mobileMediaQuery = window.matchMedia('(max-width: 767px)')
@@ -143,7 +74,6 @@ export function DeveloperConsole({ onVisibilityChange, isMobileMenuOpen = false 
     }
   }, [])
 
-  // Show console hint once on load
   useEffect(() => {
     const hasSeenHint = sessionStorage.getItem('debug_hint_shown')
     if (!hasSeenHint) {
@@ -157,35 +87,29 @@ export function DeveloperConsole({ onVisibilityChange, isMobileMenuOpen = false 
     }
   }, [])
 
-  // Toggle via "D" key and 4-finger tap – local toggleVisibility keeps isVisible in deps, so listener always has fresh closure
   useEffect(() => {
-    const toggleVisibility = () => {
-      const nextValue = !isVisible
+    const handleToggle = () => {
+      const nextValue = !isVisibleRef.current
       setIsVisible(nextValue)
       if (nextValue) {
-        localStorage.setItem('dev_console_opened', 'true')
-        window.dispatchEvent(new CustomEvent('dev-console-opened'))
-        console.log('%c🎮 Achievement system activated!', 'color: #10b981; font-size: 12px; font-weight: bold;')
+        openConsole()
       } else {
-        localStorage.removeItem('dev_console_opened')
-        window.dispatchEvent(new CustomEvent('dev-console-closed'))
+        closeConsole()
       }
     }
 
     const handleKeyPress = (e: KeyboardEvent) => {
       if (e.key === 'd' || e.key === 'D') {
-        toggleVisibility()
+        handleToggle()
       }
     }
 
-    // Mobile: 4-finger tap to toggle
     let touchCount = 0
     const handleTouchStart = (e: TouchEvent) => {
       if (e.touches.length === 4) {
         touchCount++
         if (touchCount === 1) {
-          toggleVisibility()
-          // Reset after 500ms
+          handleToggle()
           setTimeout(() => {
             touchCount = 0
           }, 500)
@@ -200,225 +124,31 @@ export function DeveloperConsole({ onVisibilityChange, isMobileMenuOpen = false 
       window.removeEventListener('keydown', handleKeyPress)
       window.removeEventListener('touchstart', handleTouchStart)
     }
-  }, [isVisible])
+  }, [])
 
-  // Track scroll and orb colors
-  useEffect(() => {
-    if (!isVisible) {
-      return
-    }
-
-    const handleScroll = () => {
-      const scrollTop = window.scrollY
-      const docHeight = document.documentElement.scrollHeight
-      const winHeight = window.innerHeight
-      const maxScroll = docHeight - winHeight
-
-      const percent = maxScroll > 0 ? (scrollTop / maxScroll) * 100 : 0
-      setScrollPercent(percent)
-
-      const root = getComputedStyle(document.documentElement)
-      setOrbR(parseInt(root.getPropertyValue('--orb-r')) || 0)
-      setOrbG(parseInt(root.getPropertyValue('--orb-g')) || 0)
-      setOrbB(parseInt(root.getPropertyValue('--orb-b')) || 0)
-    }
-
-    handleScroll()
-    window.addEventListener('scroll', handleScroll, { passive: true })
-
-    return () => {
-      window.removeEventListener('scroll', handleScroll)
-    }
-  }, [isVisible])
-
-  // Smooth FPS via exponential moving average over recent frames
-  useEffect(() => {
-    if (!isVisible) {
-      return
-    }
-
-    const frameWindow = 30
-    const emaAlpha = 2 / (frameWindow + 1)
-    let lastFrameTime = performance.now()
-    let smoothedFps = 60
-    let frameId = 0
-
-    const tick = (now: number) => {
-      const delta = now - lastFrameTime
-      if (delta > 0) {
-        const instantFps = 1000 / delta
-        smoothedFps = smoothedFps * (1 - emaAlpha) + instantFps * emaAlpha
-        setFps(Math.round(smoothedFps))
-      }
-      lastFrameTime = now
-      frameId = window.requestAnimationFrame(tick)
-    }
-
-    frameId = window.requestAnimationFrame(tick)
-
-    return () => {
-      window.cancelAnimationFrame(frameId)
-    }
-  }, [isVisible])
-
-  // Listen for achievement updates
+  // Subscribe to achievement updates only (initial state loaded in useState)
   useEffect(() => {
     const handleAchievementsUpdate = (e: Event) => {
-      const customEvent = e as CustomEvent
+      const customEvent = e as CustomEvent<{ achievements: Achievement[] }>
       setAchievements(customEvent.detail.achievements)
     }
 
     window.addEventListener('achievements-updated', handleAchievementsUpdate)
-
-    // Load initial achievements
-    const saved = localStorage.getItem('achievements')
-    if (saved) {
-      setAchievements(JSON.parse(saved))
-    }
-
     return () => {
       window.removeEventListener('achievements-updated', handleAchievementsUpdate)
     }
   }, [])
 
-  // Click outside to close
-  useEffect(() => {
-    if (!isVisible) return
-
-    // REMOVED - no longer close on click outside
-    // User must click the X button to close
-  }, [isVisible])
-
-  // Drag & drop handlers
-  const handleMouseDown = (e: React.MouseEvent) => {
-    if ((e.target as HTMLElement).tagName !== 'BUTTON' && (e.target as HTMLElement).tagName !== 'INPUT') {
-      // Get button positions to avoid drag conflicts
-      const isMobile = window.innerWidth < 768
-      const hamburgerRect = { top: 24, right: 24, width: 56, height: 56 } // top-6 right-6 + button size
-      const scrollToTopRect = { bottom: 32, right: 32, width: 56, height: 56 } // bottom-8 right-8 + button size
-
-      // Check if click is in "forbidden zones"
-      const clickX = e.clientX
-      const clickY = e.clientY
-      const winWidth = window.innerWidth
-      const winHeight = window.innerHeight
-
-      // Hamburger zone (top-right on mobile, but we still check on desktop for consistency)
-      const inHamburgerZone =
-        isMobile &&
-        clickX > winWidth - hamburgerRect.right - hamburgerRect.width &&
-        clickX < winWidth - hamburgerRect.right + hamburgerRect.width &&
-        clickY > hamburgerRect.top - hamburgerRect.height &&
-        clickY < hamburgerRect.top + hamburgerRect.height
-
-      // Scroll-to-top zone (bottom-right)
-      const inScrollToTopZone =
-        clickX > winWidth - scrollToTopRect.right - scrollToTopRect.width &&
-        clickX < winWidth - scrollToTopRect.right + scrollToTopRect.width &&
-        clickY > winHeight - scrollToTopRect.bottom - scrollToTopRect.height &&
-        clickY < winHeight - scrollToTopRect.bottom + scrollToTopRect.height
-
-      // Don't start drag if in forbidden zones
-      if (inHamburgerZone || inScrollToTopZone) {
-        return
-      }
-
-      setIsDragging(true)
-      setDragOffset({ x: e.clientX - position.x, y: e.clientY - position.y })
-    }
-  }
-
-  useEffect(() => {
-    if (!isDragging) return
-
-    // Prevent text selection while dragging
-    document.body.style.userSelect = 'none'
-    document.body.style.cursor = 'grabbing'
-
-    const handleMouseMove = (e: MouseEvent) => {
-      requestAnimationFrame(() => {
-        const nextPosition = clampPanelPosition(e.clientX - dragOffset.x, e.clientY - dragOffset.y)
-        setPosition(nextPosition)
-      })
-    }
-
-    const handleMouseUp = () => {
-      setIsDragging(false)
-      // Restore text selection
-      document.body.style.userSelect = ''
-      document.body.style.cursor = ''
-    }
-
-    document.addEventListener('mousemove', handleMouseMove)
-    document.addEventListener('mouseup', handleMouseUp)
-
-    return () => {
-      document.removeEventListener('mousemove', handleMouseMove)
-      document.removeEventListener('mouseup', handleMouseUp)
-      document.body.style.userSelect = ''
-      document.body.style.cursor = ''
-    }
-  }, [isDragging, dragOffset])
-
-  // Keep saved position within viewport after resize or scale changes
-  useEffect(() => {
-    if (isMobileViewport || !isVisible) {
-      return
-    }
-
-    const handleViewportChange = () => {
-      setPosition((current) => clampPanelPosition(current.x, current.y))
-    }
-
-    handleViewportChange()
-    window.addEventListener('resize', handleViewportChange)
-
-    return () => {
-      window.removeEventListener('resize', handleViewportChange)
-    }
-  }, [isVisible, isMobileViewport, scale])
-
-  // Save position on drag end
-  useEffect(() => {
-    if (!isDragging) {
-      localStorage.setItem('debug_position', JSON.stringify(position))
-    }
-  }, [isDragging, position])
-
-  // Save scale on resize end
   useEffect(() => {
     localStorage.setItem('debug_scale', String(scale))
   }, [scale])
 
-  // Notify parent about visibility change
   useEffect(() => {
     if (onVisibilityChange) {
       onVisibilityChange(isVisible)
     }
   }, [isVisible, onVisibilityChange])
 
-  // Mobile: Auto-close tooltip on scroll
-  useEffect(() => {
-    const checkMobile = window.innerWidth < 768
-    if (!checkMobile || !activeTooltipId) return
-
-    const handleScroll = () => {
-      if (tooltipTimeoutRef.current) {
-        clearTimeout(tooltipTimeoutRef.current)
-      }
-      setActiveTooltipId(null)
-    }
-
-    const consoleContent = document.querySelector('.devtools-mobile-scroll')
-    if (consoleContent) {
-      consoleContent.addEventListener('scroll', handleScroll, { passive: true })
-      return () => {
-        consoleContent.removeEventListener('scroll', handleScroll)
-      }
-    }
-  }, [activeTooltipId])
-
-  // Check if mobile (before render)
   const isMobile = isMobileViewport
   const isTriggerSuppressed = isBelowLgViewport && isMobileMenuOpen
   const triggerInsetInline =
@@ -430,24 +160,40 @@ export function DeveloperConsole({ onVisibilityChange, isMobileMenuOpen = false 
       ? 'max(0.875rem, calc(env(safe-area-inset-bottom) + 0.625rem))'
       : 'max(0.25rem, env(safe-area-inset-bottom))'
 
+  const handleOpen = () => {
+    setIsVisible(true)
+    openConsole()
+  }
+
+  const handleClose = () => {
+    setIsVisible(false)
+    closeConsole()
+  }
+
+  const handleResetAchievements = () => {
+    localStorage.removeItem('achievements')
+    setAchievements([])
+    window.dispatchEvent(new CustomEvent('achievements-reset'))
+    console.log(
+      '%c🔄 Achievements reset! All achievements cleared.',
+      'color: #ef4444; font-size: 14px; font-weight: bold;',
+    )
+  }
+
+  const handleScaleChange = (newScale: number) => {
+    setScale(newScale)
+    localStorage.setItem('debug_scale', String(newScale))
+  }
+
   if (!isVisible) {
     return (
       <button
         type='button'
         className='fixed cursor-pointer border-none bg-transparent'
-        onClick={() => {
-          setIsVisible(true)
-          // Mark dev console as opened (enables achievement system)
-          localStorage.setItem('dev_console_opened', 'true')
-          window.dispatchEvent(new CustomEvent('dev-console-opened'))
-          console.log('%c🎮 Achievement system activated!', 'color: #10b981; font-size: 12px; font-weight: bold;')
-        }}
+        onClick={handleOpen}
         onTouchEnd={(e) => {
           e.preventDefault()
-          setIsVisible(true)
-          localStorage.setItem('dev_console_opened', 'true')
-          window.dispatchEvent(new CustomEvent('dev-console-opened'))
-          console.log('%c🎮 Achievement system activated!', 'color: #10b981; font-size: 12px; font-weight: bold;')
+          handleOpen()
         }}
         title="Tap to open dev console (or press 'D' on desktop)"
         aria-label='Toggle debug console'
@@ -469,9 +215,32 @@ export function DeveloperConsole({ onVisibilityChange, isMobileMenuOpen = false 
     )
   }
 
+  const statsAndAchievements = (
+    <>
+      <ConsoleStatsControls
+        scrollPercent={scrollPercent}
+        orbR={orbR}
+        orbG={orbG}
+        orbB={orbB}
+        fps={fps}
+        isMobile={isMobile}
+        scale={scale}
+        onScaleChange={handleScaleChange}
+        onResetAchievements={handleResetAchievements}
+      />
+      <AchievementsPanel
+        achievements={achievements}
+        isMobile={isMobile}
+        orbR={orbR}
+        orbG={orbG}
+        orbB={orbB}
+        panelSurfaceRef={panelSurfaceRef}
+      />
+    </>
+  )
+
   return (
     <>
-      {/* Mobile: Fullscreen panel */}
       {isMobile && (
         <div
           className='pointer-events-auto fixed inset-0 flex flex-col font-mono'
@@ -495,7 +264,8 @@ export function DeveloperConsole({ onVisibilityChange, isMobileMenuOpen = false 
               <span className='text-white'>DEV.CONSOLE</span>
             </div>
             <button
-              onClick={() => setIsVisible(false)}
+              type='button'
+              onClick={handleClose}
               className='flex h-12 w-12 cursor-pointer items-center justify-center rounded-xl border border-white/10 bg-white/6 text-white transition-colors hover:bg-white/12'
               style={{ width: '3rem', height: '3rem', lineHeight: 1 }}
               aria-label='Close console'
@@ -505,13 +275,11 @@ export function DeveloperConsole({ onVisibilityChange, isMobileMenuOpen = false 
           </div>
 
           <div className='devtools-mobile-scroll min-h-0 flex-1 space-y-6 overflow-y-auto overscroll-contain p-6'>
-            {renderConsoleControls()}
-            {renderAchievementsSection()}
+            {statsAndAchievements}
           </div>
         </div>
       )}
 
-      {/* Desktop: Draggable panel */}
       {!isMobile && (
         <div
           ref={panelRef}
@@ -524,7 +292,6 @@ export function DeveloperConsole({ onVisibilityChange, isMobileMenuOpen = false 
             top: `${position.y}px`,
           }}
         >
-          {/* Cyber/retro styled panel */}
           <div
             ref={panelSurfaceRef}
             className='relative overflow-visible rounded-lg border-2 backdrop-blur-xl'
@@ -536,7 +303,6 @@ export function DeveloperConsole({ onVisibilityChange, isMobileMenuOpen = false 
               transformOrigin: 'top left',
             }}
           >
-            {/* Header */}
             <div
               className='flex items-center justify-between border-b-2 px-4 py-2'
               onMouseDown={handleMouseDown}
@@ -549,10 +315,11 @@ export function DeveloperConsole({ onVisibilityChange, isMobileMenuOpen = false 
               <div className='flex items-center gap-2'>
                 <Terminal className='h-4 w-4' style={{ color: `rgb(${orbR}, ${orbG}, ${orbB})` }} />
                 <span className='text-white'>DEV.CONSOLE</span>
-                <span className='text-[8px] text-gray-500'>(drag to move)</span>
+                <span className='text-[11px] text-gray-400'>(drag to move)</span>
               </div>
               <button
-                onClick={() => setIsVisible(false)}
+                type='button'
+                onClick={handleClose}
                 className='flex h-11 w-11 cursor-pointer items-center justify-center rounded-xl border border-white/10 bg-white/5 text-white transition-colors hover:bg-white/12'
                 style={{ width: '2.75rem', height: '2.75rem', lineHeight: 1 }}
                 aria-label='Close console'
@@ -561,289 +328,16 @@ export function DeveloperConsole({ onVisibilityChange, isMobileMenuOpen = false 
               </button>
             </div>
 
-            {/* Content – single scroll container for controls + achievements */}
             <div
               data-testid='devtools-panel-content'
               className='devtools-scroll-area max-h-[85vh] space-y-6 overflow-y-auto p-6'
               style={{ minWidth: '420px', maxWidth: 'min(860px, 92vw)' }}
             >
-              {renderConsoleControls()}
-              {renderAchievementsSection()}
+              {statsAndAchievements}
             </div>
           </div>
         </div>
       )}
     </>
   )
-
-  function renderAchievementTooltip(achievement: Achievement, align: TooltipAlign) {
-    const alignClassName = align === 'left' ? 'left-0' : align === 'right' ? 'right-0' : 'left-1/2 -translate-x-1/2'
-    const arrowClassName = align === 'left' ? 'left-6' : align === 'right' ? 'right-6' : 'left-1/2 -translate-x-1/2'
-
-    return (
-      <div
-        className={`pointer-events-none absolute bottom-full z-50 mb-2 w-[220px] animate-[fadeIn_0.2s_ease-out] ${alignClassName}`}
-      >
-        <div
-          className='rounded-lg border-2 bg-gray-900 p-2 shadow-2xl'
-          style={{
-            borderColor: achievement.unlocked ? `rgb(${orbR}, ${orbG}, ${orbB})` : 'rgb(107, 114, 128)',
-            boxShadow: achievement.unlocked
-              ? `0 0 20px rgba(${orbR}, ${orbG}, ${orbB}, 0.4)`
-              : '0 4px 6px rgba(0, 0, 0, 0.3)',
-          }}
-        >
-          <div className='mb-1 flex items-start gap-2'>
-            <span className='text-lg'>{achievement.icon}</span>
-            <div className='flex-1'>
-              <div
-                className={`text-[12px] font-semibold ${achievement.unlocked ? 'text-yellow-400' : 'text-gray-400'}`}
-              >
-                {achievement.unlocked ? achievement.name : '???'}
-              </div>
-            </div>
-          </div>
-          <div className='mt-1 text-[11px] text-gray-400'>
-            {achievement.unlocked
-              ? achievement.description
-              : achievement.id === 'shake'
-                ? isMobile
-                  ? 'Scroll rapidly to shuffle colors'
-                  : 'Move mouse rapidly to shuffle colors'
-                : ACHIEVEMENT_HINTS[achievement.id] || 'Keep exploring...'}
-          </div>
-        </div>
-        <div
-          className={`absolute top-full h-0 w-0 ${arrowClassName}`}
-          style={{
-            borderLeft: '6px solid transparent',
-            borderRight: '6px solid transparent',
-            borderTop: `6px solid ${achievement.unlocked ? `rgb(${orbR}, ${orbG}, ${orbB})` : 'rgb(107, 114, 128)'}`,
-          }}
-        />
-      </div>
-    )
-  }
-
-  function renderAchievementsSection() {
-    return (
-      <>
-        <div
-          className='my-3 border-t-2 border-gray-800'
-          style={{ borderColor: `rgba(${orbR}, ${orbG}, ${orbB}, 0.3)` }}
-        />
-
-        <div className='space-y-2 overflow-visible'>
-          <div className='flex items-center gap-2'>
-            <Trophy className='h-3 w-3 text-yellow-400' />
-            <span className='text-sm tracking-wider text-gray-500 uppercase'>Achievements</span>
-            <span className='text-[11px] text-gray-600'>
-              {achievements.filter((a) => a.unlocked).length}/{achievements.length}
-            </span>
-          </div>
-
-          {achievements.length > 0 ? (
-            <div className='grid grid-cols-4 gap-1.5 overflow-visible pt-2'>
-              {achievements.map((achievement) => (
-                <div
-                  key={achievement.id}
-                  className='relative overflow-visible'
-                  onMouseEnter={(event) => {
-                    if (!isMobile) {
-                      const boundary = panelSurfaceRef.current
-                      setActiveTooltipAlign(resolveTooltipAlignment(event.currentTarget, boundary))
-                      setActiveTooltipId(achievement.id)
-                    }
-                  }}
-                  onMouseLeave={() => {
-                    if (!isMobile) {
-                      if (tooltipTimeoutRef.current) {
-                        clearTimeout(tooltipTimeoutRef.current)
-                      }
-                      setActiveTooltipId(null)
-                    }
-                  }}
-                >
-                  <div
-                    className={`flex aspect-square cursor-pointer items-center justify-center rounded border-2 transition-all ${
-                      achievement.unlocked
-                        ? 'border-yellow-400/50 bg-yellow-400/10'
-                        : 'border-gray-700 bg-gray-800/30 opacity-30 grayscale'
-                    } ${!isMobile && achievement.id === 'enlightenment' && achievement.unlocked ? 'ring-1 ring-yellow-400/40 ring-offset-1 ring-offset-black' : ''}`}
-                    style={{ fontSize: isMobile ? 'clamp(1.5rem, 6.5vw, 2.75rem)' : '1.875rem' }}
-                    title={
-                      !isMobile && achievement.id === 'enlightenment' && achievement.unlocked
-                        ? '✨ Click to celebrate!'
-                        : undefined
-                    }
-                    onClick={(e) => {
-                      if (isMobile) {
-                        e.stopPropagation()
-
-                        if (activeTooltipId === achievement.id) {
-                          setActiveTooltipId(null)
-                        } else {
-                          const tileWrapper = e.currentTarget.parentElement
-                          if (tileWrapper) {
-                            setActiveTooltipAlign(resolveTooltipAlignment(tileWrapper))
-                          }
-                          setActiveTooltipId(achievement.id)
-                          if (tooltipTimeoutRef.current) {
-                            clearTimeout(tooltipTimeoutRef.current)
-                          }
-                          tooltipTimeoutRef.current = setTimeout(() => {
-                            setActiveTooltipId(null)
-                          }, 3000)
-                        }
-
-                        if (achievement.id === 'enlightenment' && achievement.unlocked) {
-                          window.dispatchEvent(new CustomEvent('enlightenment-clicked'))
-                        }
-                      } else if (achievement.id === 'enlightenment' && achievement.unlocked) {
-                        window.dispatchEvent(new CustomEvent('enlightenment-clicked'))
-                      }
-                    }}
-                  >
-                    {achievement.unlocked ? achievement.icon : '🔒'}
-                  </div>
-
-                  {activeTooltipId === achievement.id
-                    ? renderAchievementTooltip(achievement, activeTooltipAlign)
-                    : null}
-                </div>
-              ))}
-            </div>
-          ) : (
-            <div className='py-2 text-center text-[11px] text-gray-600'>No achievements yet. Keep exploring!</div>
-          )}
-        </div>
-
-        <div className='border-t border-gray-800 pt-2 text-center text-[11px] text-gray-500'>
-          <div className='hidden md:block'>Press 'D' to toggle</div>
-        </div>
-      </>
-    )
-  }
-
-  function renderConsoleControls() {
-    return (
-      <>
-        {/* Scroll Progress */}
-        <div className='flex items-center justify-between'>
-          <span className='text-gray-400'>SCROLL:</span>
-          <div className='flex items-center gap-2'>
-            <div className='h-1.5 w-24 overflow-hidden rounded-full bg-gray-800'>
-              <div
-                className='h-full rounded-full transition-all'
-                style={{
-                  width: `${scrollPercent}%`,
-                  background: `linear-gradient(90deg, rgb(${orbR}, ${orbG}, ${orbB}), rgba(${orbR}, ${orbG}, ${orbB}, 0.6))`,
-                }}
-              />
-            </div>
-            <span className='w-12 text-right text-white tabular-nums'>{scrollPercent.toFixed(1)}%</span>
-          </div>
-        </div>
-
-        {/* RGB Values */}
-        <div className='flex items-center justify-between'>
-          <span className='text-gray-400'>ORB_RGB:</span>
-          <div className='flex gap-2 text-white tabular-nums'>
-            <span style={{ color: `rgb(255, ${orbG}, ${orbB})` }}>{orbR.toString().padStart(3, '0')}</span>
-            <span style={{ color: `rgb(${orbR}, 255, ${orbB})` }}>{orbG.toString().padStart(3, '0')}</span>
-            <span style={{ color: `rgb(${orbR}, ${orbG}, 255)` }}>{orbB.toString().padStart(3, '0')}</span>
-          </div>
-        </div>
-
-        {/* Color Preview */}
-        <div className='flex items-center justify-between'>
-          <span className='text-gray-400'>COLOR:</span>
-          <div
-            className='h-6 w-32 rounded border-2 border-gray-700'
-            style={{
-              background: `rgb(${orbR}, ${orbG}, ${orbB})`,
-              boxShadow: `0 0 10px rgba(${orbR}, ${orbG}, ${orbB}, 0.5)`,
-            }}
-          />
-        </div>
-
-        {/* FPS */}
-        <div className='flex items-center justify-between'>
-          <span className='text-gray-400'>FPS:</span>
-          <span
-            className='text-white tabular-nums'
-            style={{ color: fps < 30 ? '#ef4444' : fps < 50 ? '#f59e0b' : '#10b981' }}
-          >
-            {fps}
-          </span>
-        </div>
-
-        {/* DIVIDER */}
-        <div
-          className='my-3 border-t-2 border-gray-800'
-          style={{ borderColor: `rgba(${orbR}, ${orbG}, ${orbB}, 0.3)` }}
-        />
-
-        {/* CONTROLS SECTION */}
-        <div className='space-y-3'>
-          <div className='text-sm tracking-wider text-gray-500 uppercase'>⚙️ Controls</div>
-
-          <OrbControls accent={`rgb(${orbR}, ${orbG}, ${orbB})`} />
-
-          {/* Scale Slider - RESIZABLE CONSOLE */}
-          {!isMobile && (
-            <div>
-              <div className='mb-1 flex items-center justify-between'>
-                <span className='text-[12px] text-gray-400'>CONSOLE SCALE:</span>
-                <span className='text-[12px] text-white tabular-nums'>{((scale / 0.8) * 100).toFixed(0)}%</span>
-              </div>
-              <input
-                type='range'
-                min='0.4'
-                max='1.2'
-                step='0.05'
-                value={scale}
-                onChange={(e) => {
-                  const newScale = parseFloat(e.target.value)
-                  setScale(newScale)
-                  localStorage.setItem('debug_scale', String(newScale))
-                }}
-                className='h-1.5 w-full cursor-pointer appearance-none rounded-full bg-gray-800'
-                style={{
-                  accentColor: `rgb(${orbR}, ${orbG}, ${orbB})`,
-                }}
-              />
-            </div>
-          )}
-
-          <OrbResetButton />
-
-          {/* Reset Achievements Button - DEV ONLY */}
-          <button
-            onClick={() => {
-              if (confirm('⚠️ Reset all achievements? This cannot be undone!')) {
-                // Clear localStorage
-                localStorage.removeItem('achievements')
-
-                // Clear local state
-                setAchievements([])
-
-                // Dispatch event to notify EasterEggs component
-                window.dispatchEvent(new CustomEvent('achievements-reset'))
-
-                // Show confirmation message
-                console.log(
-                  '%c🔄 Achievements reset! All achievements cleared.',
-                  'color: #ef4444; font-size: 14px; font-weight: bold;',
-                )
-              }
-            }}
-            className='w-full cursor-pointer rounded border border-red-700 px-3 py-1.5 text-[12px] text-red-400 transition-all hover:border-red-500 hover:text-red-300'
-          >
-            RESET ACHIEVEMENTS
-          </button>
-        </div>
-      </>
-    )
-  }
 }

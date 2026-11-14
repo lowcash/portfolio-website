@@ -11,7 +11,6 @@ interface CardProps {
   icon?: LucideIcon
   iconColor?: string
   title: string
-  eyebrow?: string
   badges?: readonly string[]
   description?: string
   bullets?: readonly string[]
@@ -24,7 +23,6 @@ export function Card({
   icon,
   iconColor = 'text-zinc-400',
   title,
-  eyebrow,
   badges = [],
   description,
   bullets,
@@ -34,8 +32,6 @@ export function Card({
 }: CardProps) {
   return (
     <ContentCard icon={icon} iconColor={iconColor} title={title} badges={badges} fullHeight={fullHeight} style={style}>
-      {eyebrow ? <p className={CARD_BODY_CLASS}>{formatTypography(eyebrow)}</p> : null}
-
       {bullets?.length ? (
         <ul className={`list-disc space-y-2 pl-5 ${CARD_BODY_CLASS}`}>
           {bullets.map((bullet, index) => (

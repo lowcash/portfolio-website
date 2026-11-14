@@ -1,0 +1,18 @@
+export const ACHIEVEMENT_HINTS: Record<string, string> = {
+  'triple-click': 'Triple-click the hero heading',
+  'perfectly-balanced': 'Scroll to exactly 50% of the page',
+  patience: 'Stay idle for 60 seconds',
+  'rapid-clicker': 'Click 10 times in 2 seconds',
+  'copy-cat': 'Copy some text from the page',
+  shake: 'Scroll rapidly (mobile) or move mouse fast (desktop)',
+  'marathon-runner': 'Scroll a total of 10,000 pixels',
+  'speed-reader': 'Reach the bottom in under 2 minutes',
+  'repeat-visitor': 'Visit the site 3+ times',
+  'section-hopper': 'Visit at least 3 different sections',
+  'world-tour': 'Visit every section on the page',
+  'settings-tinkerer': 'Tweak orb settings 5 times',
+  'nav-master': 'Use navigation controls 3 times',
+  'round-trip': 'Use the scroll-to-top shortcut',
+  'back-to-origin': 'Reach contact and return to hero',
+  enlightenment: 'Unlock every other achievement',
+}

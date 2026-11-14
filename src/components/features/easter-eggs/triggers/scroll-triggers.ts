@@ -1,5 +1,7 @@
 import { useEffect, useRef } from 'react'
 
+import { SECTION_IDS } from '@/lib/content'
+
 import type { UnlockRef } from './types'
 
 /** 2. Rest at (about) 50% of the page */
@@ -59,7 +61,7 @@ export function useSectionExploration(enabled: boolean, unlockAchievementRef: Un
       return
     }
 
-    const sectionIds = ['hero', 'featured-projects', 'experience', 'contact']
+    const sectionIds = SECTION_IDS
 
     const checkSections = () => {
       const viewportMiddle = window.innerHeight / 2

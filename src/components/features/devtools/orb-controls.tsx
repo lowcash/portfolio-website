@@ -52,7 +52,7 @@ function SettingSlider({
         className='h-1.5 w-full cursor-pointer appearance-none rounded-full bg-gray-800'
         style={{ accentColor: accent }}
       />
-      <p id={`orb-setting-${definition.key}-hint`} className='mt-1 text-[10px] leading-tight text-gray-600'>
+      <p id={`orb-setting-${definition.key}-hint`} className='mt-1 text-xs leading-tight text-gray-400'>
         {definition.hint}
       </p>
     </div>
@@ -87,7 +87,7 @@ function SettingToggle({
           {definition.format(value)}
         </button>
       </div>
-      <p id={`orb-setting-${definition.key}-hint`} className='mt-1 text-[10px] leading-tight text-gray-600'>
+      <p id={`orb-setting-${definition.key}-hint`} className='mt-1 text-xs leading-tight text-gray-400'>
         {definition.hint}
       </p>
     </div>
@@ -136,7 +136,7 @@ export function OrbControls({ accent }: AccentProps) {
 
       {GROUPS.map((group) => (
         <div key={group.id} className='space-y-3'>
-          <div className='pt-1 text-[11px] tracking-wider text-gray-600 uppercase'>{group.title}</div>
+          <div className='pt-1 text-[11px] tracking-wider text-gray-400 uppercase'>{group.title}</div>
           {ORB_SETTING_DEFINITIONS.filter((definition) => definition.group === group.id && !definition.hidden).map(
             (definition) =>
               definition.kind === 'toggle' ? (

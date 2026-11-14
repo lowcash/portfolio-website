@@ -3,8 +3,6 @@ import { buildSectionUrl, normalizeHash, resolveScrollBehavior } from './section
 export { resolveActiveSectionIndex } from './scroll-spy'
 export { useActiveSection } from './use-active-section'
 
-type HashWriteMode = 'replace' | 'push'
-
 type ScrollTargetOptions = {
   behavior?: ScrollBehavior
   updateHash?: boolean
@@ -20,7 +18,7 @@ export function resolveHashSectionIndex(sectionIds: readonly string[]) {
   return index === -1 ? null : index
 }
 
-export function setSectionHashByIndex(sectionIds: readonly string[], index: number, mode: HashWriteMode = 'replace') {
+export function setSectionHashByIndex(sectionIds: readonly string[], index: number) {
   if (!isIndexInRange(index, sectionIds)) {
     return false
   }
@@ -34,7 +32,7 @@ export function setSectionHashByIndex(sectionIds: readonly string[], index: numb
   })
 
   if (currentUrl !== nextUrl) {
-    window.history[mode === 'push' ? 'pushState' : 'replaceState'](null, '', nextUrl)
+    window.history.replaceState(null, '', nextUrl)
   }
 
   return true

@@ -243,18 +243,30 @@
  * restarts or jumps the animation; durations here are authored for the default speed of 3.
  * Keeping mobile/desktop/reduced-motion differences in media queries means the server HTML already matches the
  * final layout, so hydration never moves the orbs (no layout shift).
- * Must stay after the .orb-N animation rules so animation-duration wins over their shorthand.
+ * .orb-N / mobile media queries own animation-duration; .orb must not override them.
  */
 :root {
   --orb-brightness: 0.5;
   --animation-speed: 3;
-  --color-variation: 0.4;
   --orb-size: 1.2;
   --orb-blur: 1;
   --orb-opacity: 1.05;
   --orb-magnetism: 0;
   --orb-pointer-x: 0;
   --orb-pointer-y: 0;
+
+  /* Stacking scale (low → high) */
+  --z-base: 0;
+  --z-rail: 40;
+  --z-nav: 50;
+  --z-drawer: 60;
+  --z-progress: 70;
+  --z-console: 120;
+  --z-console-mobile: 130;
+  --z-particles: 90;
+  --z-popup: 9999;
+  --z-confetti: 200;
+  --z-skip: 100;
 }
 
 .orb {
@@ -272,11 +284,10 @@
   background: radial-gradient(circle, var(--orb-color) 0%, var(--orb-color) var(--orb-core), transparent 70%);
   opacity: calc(var(--orb-alpha) * var(--orb-opacity) * var(--orb-opacity-boost));
   filter: blur(calc(var(--orb-blur-px) * var(--orb-blur) * 1px)) brightness(var(--orb-brightness));
-  animation-duration: calc(var(--orb-duration) / 3 * 1s);
+  /* Duration comes from .orb-N / mobile shorthand rules; do not override here or authored cycles are lost */
   /* Individual `translate` composes with the keyframed `transform`, so magnetism never fights the float animation */
   translate: calc(var(--orb-pointer-x) * var(--orb-depth) * var(--orb-magnetism) * 1px)
     calc(var(--orb-pointer-y) * var(--orb-depth) * var(--orb-magnetism) * 1px);
-  will-change: transform;
 }
 
 @media (max-width: 767.98px) {
@@ -369,20 +380,6 @@
   }
 }
 
-/**
- * Section-Themed Links
- * Text color changes with section, creates cohesive visual flow
- */
-.section-link {
-  color: rgb(var(--orb-r), var(--orb-g), var(--orb-b));
-  transition: all 0.3s ease-out;
-}
-
-.section-link:hover {
-  color: rgba(var(--orb-r), var(--orb-g), var(--orb-b), 0.8);
-  filter: brightness(1.2);
-}
-
 /* Desktop devtools panel should expose scroll affordance when content overflows. */
 .devtools-scroll-area {
   scrollbar-width: thin;
@@ -410,6 +407,15 @@
 /* ============================================
    EASTER EGGS & ACHIEVEMENT ANIMATIONS
    ============================================ */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
 
 @keyframes slideInRight {
   from {

@@ -1,14 +1,21 @@
 export type ContactIconKey = 'github' | 'linkedin'
 export type FeaturedProjectIconKey = 'trendingUp' | 'globe' | 'eye' | 'gamepad'
 
+/** Single source of truth for portfolio section ids/names/layout flags */
+export const PORTFOLIO_SECTIONS = [
+  { name: 'Intro', id: 'hero', centered: false },
+  { name: 'Projects', id: 'featured-projects', centered: false },
+  { name: 'Experience', id: 'experience', centered: false },
+  { name: 'Contact', id: 'contact', centered: true },
+] as const
+
+export type PortfolioSectionId = (typeof PORTFOLIO_SECTIONS)[number]['id']
+
+export const SECTION_IDS = PORTFOLIO_SECTIONS.map((section) => section.id)
+
 export const siteContent = {
   navigation: {
-    sections: [
-      { name: 'Intro', id: 'hero' },
-      { name: 'Projects', id: 'featured-projects' },
-      { name: 'Experience', id: 'experience' },
-      { name: 'Contact', id: 'contact' },
-    ],
+    sections: PORTFOLIO_SECTIONS.map(({ name, id }) => ({ name, id })),
   },
   hero: {
     heading: "Hey, I'm Lukáš Machala",
