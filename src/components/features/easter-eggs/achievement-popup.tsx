@@ -18,8 +18,15 @@ export function AchievementPopup({ achievement, isHiding, onEnlightenmentClick }
     return (
       <div
         onClick={onEnlightenmentClick}
-        role='alert'
+        onKeyDown={(event) => {
+          if (achievement.id === 'enlightenment' && (event.key === 'Enter' || event.key === ' ')) {
+            event.preventDefault()
+            onEnlightenmentClick()
+          }
+        }}
+        role='status'
         aria-live='polite'
+        tabIndex={achievement.id === 'enlightenment' ? 0 : undefined}
         className={`pointer-events-auto rounded-xl border border-purple-500/50 p-4 shadow-2xl transition-all ${achievement.id === 'enlightenment' ? 'cursor-pointer hover:shadow-[0_0_60px_rgba(251,191,36,0.4)]' : ''}`}
         style={{
           width,

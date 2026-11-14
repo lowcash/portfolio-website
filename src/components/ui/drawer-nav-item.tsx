@@ -1,12 +1,18 @@
+import { forwardRef } from 'react'
+
 interface DrawerNavItemProps {
   isActive: boolean
   label: string
   onClick: () => void
 }
 
-export function DrawerNavItem({ isActive, label, onClick }: DrawerNavItemProps) {
+export const DrawerNavItem = forwardRef<HTMLButtonElement, DrawerNavItemProps>(function DrawerNavItem(
+  { isActive, label, onClick },
+  ref,
+) {
   return (
     <button
+      ref={ref}
       onClick={onClick}
       aria-current={isActive ? 'page' : undefined}
       className={`pointer-events-auto relative z-20 w-full rounded-xl px-4 py-4 text-left transition-all duration-300 ${
@@ -16,7 +22,6 @@ export function DrawerNavItem({ isActive, label, onClick }: DrawerNavItemProps) 
     >
       {isActive && (
         <>
-          {/* Outer glow shimmer - same pattern as scroll-to-top / hamburger */}
           <div
             className='animate-glow-shimmer pointer-events-none absolute inset-0 -z-10 rounded-xl'
             style={{
@@ -25,7 +30,6 @@ export function DrawerNavItem({ isActive, label, onClick }: DrawerNavItemProps) 
               transition: 'box-shadow 0.3s ease-out',
             }}
           />
-          {/* Inner colored background */}
           <div
             className='absolute inset-0 -z-10 rounded-xl bg-black/40 backdrop-blur-sm'
             style={{
@@ -52,4 +56,4 @@ export function DrawerNavItem({ isActive, label, onClick }: DrawerNavItemProps) 
       </div>
     </button>
   )
-}
+})

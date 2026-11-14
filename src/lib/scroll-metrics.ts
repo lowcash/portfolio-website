@@ -81,14 +81,7 @@ function stopListening() {
   isListening = false
 }
 
-interface SubscribeOptions {
-  immediate?: boolean
-}
-
-export function subscribeToScrollMetrics(
-  subscriber: ScrollMetricsSubscriber,
-  { immediate = true }: SubscribeOptions = {},
-) {
+export function subscribeToScrollMetrics(subscriber: ScrollMetricsSubscriber) {
   if (typeof window === 'undefined') {
     return () => {}
   }
@@ -99,9 +92,7 @@ export function subscribeToScrollMetrics(
     startListening()
   }
 
-  if (immediate) {
-    subscriber(latestMetrics)
-  }
+  subscriber(latestMetrics)
 
   return () => {
     subscribers.delete(subscriber)

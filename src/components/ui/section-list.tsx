@@ -3,7 +3,6 @@ type SectionListWidth = '3xl' | '5xl'
 interface SectionListProps {
   children: React.ReactNode
   width?: SectionListWidth
-  centered?: boolean
 }
 
 const WIDTH_CLASS: Record<SectionListWidth, string> = {
@@ -11,6 +10,6 @@ const WIDTH_CLASS: Record<SectionListWidth, string> = {
   '5xl': 'max-w-5xl',
 }
 
-export function SectionList({ children, width = '5xl', centered = true }: SectionListProps) {
-  return <div className={`space-y-3 ${WIDTH_CLASS[width]} ${centered ? 'mx-auto' : ''}`}>{children}</div>
+export function SectionList({ children, width = '5xl' }: SectionListProps) {
+  return <div className={`mx-auto space-y-3 ${WIDTH_CLASS[width]}`}>{children}</div>
 }

@@ -25,9 +25,8 @@ type OrbConfig = {
   colorSlot: number
 }
 
-// Orbs 7 and 8 are hidden on mobile via CSS to reduce rendering cost
+// Cap at 4 orbs for paint/compositor cost; mobile CSS still hides 7–8 if reintroduced
 const ORBS: readonly OrbConfig[] = [
-  // Central main orb - biggest, primary color
   {
     className: 'orb-1',
     top: 50,
@@ -41,7 +40,6 @@ const ORBS: readonly OrbConfig[] = [
     depth: -30,
     colorSlot: 0,
   },
-  // Secondary orbs - hue shifted variations
   {
     className: 'orb-2',
     top: 25,
@@ -68,7 +66,6 @@ const ORBS: readonly OrbConfig[] = [
     depth: -75,
     colorSlot: 2,
   },
-  // Tertiary accent orbs - smaller, more vibrant
   {
     className: 'orb-4',
     top: 33,
@@ -81,59 +78,6 @@ const ORBS: readonly OrbConfig[] = [
     durationSeconds: 40,
     depth: 95,
     colorSlot: 3,
-  },
-  {
-    className: 'orb-5',
-    top: 75,
-    left: 33,
-    mobileTop: 74,
-    mobileLeft: 28,
-    diameter: 550,
-    opacity: 0.11,
-    blur: 95,
-    durationSeconds: 36,
-    depth: -45,
-    colorSlot: 4,
-  },
-  // Extreme hue shifts for maximum variation
-  {
-    className: 'orb-6',
-    top: 66,
-    left: 66,
-    mobileTop: 72,
-    mobileLeft: 72,
-    diameter: 700,
-    opacity: 0.12,
-    blur: 115,
-    durationSeconds: 44,
-    depth: 120,
-    colorSlot: 5,
-  },
-  {
-    className: 'orb-7',
-    top: 50,
-    left: 50,
-    mobileTop: 58,
-    mobileLeft: 50,
-    diameter: 600,
-    opacity: 0.11,
-    blur: 105,
-    durationSeconds: 50,
-    depth: -110,
-    colorSlot: 6,
-  },
-  {
-    className: 'orb-8',
-    top: 66,
-    left: 33,
-    mobileTop: 32,
-    mobileLeft: 54,
-    diameter: 550,
-    opacity: 0.1,
-    blur: 100,
-    durationSeconds: 46,
-    depth: 65,
-    colorSlot: 1,
   },
 ]
 
@@ -173,14 +117,25 @@ function useScrollDrivenOrbColors() {
     const root = document.documentElement
     const reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
     const lastValues = new Map<string, string>()
+    const pending = new Map<string, string>()
 
-    const setVar = (name: string, value: string) => {
+    const queueVar = (name: string, value: string) => {
       if (lastValues.get(name) === value) {
         return
       }
+      pending.set(name, value)
+    }
 
-      lastValues.set(name, value)
-      root.style.setProperty(name, value)
+    const flushVars = () => {
+      if (pending.size === 0) {
+        return
+      }
+
+      for (const [name, value] of pending) {
+        lastValues.set(name, value)
+        root.style.setProperty(name, value)
+      }
+      pending.clear()
     }
 
     const apply = (percent: number) => {
@@ -190,16 +145,18 @@ function useScrollDrivenOrbColors() {
       const base = adjustOrbColor(resolveOrbBaseColor(percent), hue, saturation)
       const rounded = Math.round(percent * 20) / 20
 
-      setVar('--scroll-progress', String(rounded / 100))
-      setVar('--scroll-percent', String(rounded))
-      setVar('--orb-r', String(base.r))
-      setVar('--orb-g', String(base.g))
-      setVar('--orb-b', String(base.b))
-      setVar(orbColorVar(0), `rgb(${base.r}, ${base.g}, ${base.b})`)
+      queueVar('--scroll-progress', String(rounded / 100))
+      queueVar('--scroll-percent', String(rounded))
+      queueVar('--orb-r', String(base.r))
+      queueVar('--orb-g', String(base.g))
+      queueVar('--orb-b', String(base.b))
+      queueVar(orbColorVar(0), `rgb(${base.r}, ${base.g}, ${base.b})`)
 
       resolveOrbVariantColors(base, colorVariation / 100).forEach((color, index) => {
-        setVar(orbColorVar(index + 1), color)
+        queueVar(orbColorVar(index + 1), color)
       })
+
+      flushVars()
     }
 
     let target = currentPercentRef.current

@@ -1,4 +1,4 @@
-type FloatingRailVariant = 'center-right' | 'bottom-right' | 'bottom-left'
+type FloatingRailVariant = 'center-right' | 'bottom-right'
 
 interface FloatingRailProps {
   children: React.ReactNode
@@ -29,8 +29,6 @@ export function FloatingRail({
           bottom: 0,
         }
 
-  const isBottomLeft = variant === 'bottom-left'
-
   return (
     <div
       className={`fixed ${desktopOnly ? 'hidden lg:block' : ''} pointer-events-none inset-x-0 z-40 lg:z-50`}
@@ -41,16 +39,11 @@ export function FloatingRail({
         style={{
           width: '100%',
           maxWidth: '72rem',
-          paddingLeft: isBottomLeft ? '0.5rem' : '1.5rem',
-          paddingRight: isBottomLeft ? '1.5rem' : '0.5rem',
-          paddingBottom:
-            variant === 'bottom-right'
-              ? 'max(1.75rem, env(safe-area-inset-bottom))'
-              : variant === 'bottom-left'
-                ? 'max(2rem, calc(env(safe-area-inset-bottom) + 0.75rem))'
-                : undefined,
+          paddingLeft: '1.5rem',
+          paddingRight: '0.5rem',
+          paddingBottom: variant === 'bottom-right' ? 'max(1.75rem, env(safe-area-inset-bottom))' : undefined,
           display: 'flex',
-          justifyContent: isBottomLeft ? 'flex-start' : 'flex-end',
+          justifyContent: 'flex-end',
         }}
       >
         <div

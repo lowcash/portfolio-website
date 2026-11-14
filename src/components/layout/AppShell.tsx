@@ -40,7 +40,6 @@ export function AppShell({ sectionIds }: AppShellProps) {
   const sectionMeta = siteContent.navigation.sections
   const areExtrasReady = useIdleReady()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-  const [, setIsDevConsoleOpen] = useState(false)
   const [isRestoringScroll, setIsRestoringScroll] = useState(false)
   const hasInitializedHash = useRef(false)
   const hashRestoreTimeoutRef = useRef<number | null>(null)
@@ -190,9 +189,7 @@ export function AppShell({ sectionIds }: AppShellProps) {
         onScrollRestore={setIsRestoringScroll}
       />
 
-      {areExtrasReady ? (
-        <DeveloperConsole onVisibilityChange={setIsDevConsoleOpen} isMobileMenuOpen={isMobileMenuOpen} />
-      ) : null}
+      {areExtrasReady ? <DeveloperConsole isMobileMenuOpen={isMobileMenuOpen} /> : null}
       <ScrollProgress />
     </>
   )

@@ -51,7 +51,7 @@ export function ContactContent({ title, email, hint, socials, gradient, glowColo
           return (
             <span key={social.label} className='inline-flex items-center gap-3'>
               {index > 0 ? (
-                <span aria-hidden='true' className='text-gray-600'>
+                <span aria-hidden='true' className='text-gray-400'>
                   ·
                 </span>
               ) : null}
@@ -75,8 +75,14 @@ export function ContactContent({ title, email, hint, socials, gradient, glowColo
 
       <p className='mx-auto max-w-xs px-4 text-center font-mono text-xs leading-normal text-zinc-500 sm:max-w-md'>
         <span className='cursor-default opacity-70 transition-opacity hover:opacity-100'>
-          <span className='sm:hidden'>💡 {formatTypography(hint.mobile)}</span>
-          <span className='hidden sm:inline'>💡 {formatTypography(hint.desktop)}</span>
+          <span className='sm:hidden'>
+            <span aria-hidden='true'>💡 </span>
+            {formatTypography(hint.mobile)}
+          </span>
+          <span className='hidden sm:inline'>
+            <span aria-hidden='true'>💡 </span>
+            {formatTypography(hint.desktop)}
+          </span>
         </span>
       </p>
     </div>

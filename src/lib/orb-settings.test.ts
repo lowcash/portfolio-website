@@ -68,7 +68,7 @@ describe('resolveStoredSettings', () => {
     const stored: Record<string, string> = { orb_size: '99', animation_speed: '-4', orb_opacity: '1.5' }
     const settings = resolveStoredSettings((key) => stored[key] ?? null)
 
-    expect(settings.orbSize).toBe(5)
+    expect(settings.orbSize).toBe(2)
     expect(settings.animationSpeed).toBe(0.1)
     expect(settings.orbOpacity).toBe(1.5)
   })

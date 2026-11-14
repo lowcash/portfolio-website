@@ -7,9 +7,10 @@ interface MobileDrawerBackdropProps {
 export function MobileDrawerBackdrop({ isOpen, onClose, children }: MobileDrawerBackdropProps) {
   return (
     <div
-      className={`fixed inset-0 z-[60] transition-all duration-300 lg:hidden ${
+      className={`fixed inset-0 transition-all duration-300 lg:hidden ${
         isOpen ? 'pointer-events-auto' : 'pointer-events-none'
       }`}
+      style={{ zIndex: 'var(--z-drawer)' }}
       aria-hidden={!isOpen}
     >
       {/* Semi-transparent backdrop */}

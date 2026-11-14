@@ -88,8 +88,6 @@ export function useShake(enabled: boolean, unlockAchievementRef: UnlockRef) {
     }
 
     const mobileMode = isMobileDevice()
-    let scrollTimer: NodeJS.Timeout | undefined
-    let mouseTimer: NodeJS.Timeout | undefined
 
     // MOBILE: Scroll detection
     let scrollEvents: Array<{ time: number; scrollY: number }> = []
@@ -110,7 +108,6 @@ export function useShake(enabled: boolean, unlockAchievementRef: UnlockRef) {
         const scrollDistance = Math.abs(lastEvent.scrollY - firstEvent.scrollY)
 
         if (scrollDistance > 500) {
-          if (scrollTimer) clearTimeout(scrollTimer)
           unlockAchievementRef.current('shake')
           scrollEvents = []
 
@@ -142,7 +139,6 @@ export function useShake(enabled: boolean, unlockAchievementRef: UnlockRef) {
           const totalDistance = mouseMovements.reduce((sum, m) => sum + m.distance, 0)
 
           if (totalDistance > 2000) {
-            if (mouseTimer) clearTimeout(mouseTimer)
             unlockAchievementRef.current('shake')
             mouseMovements = []
 
@@ -166,10 +162,8 @@ export function useShake(enabled: boolean, unlockAchievementRef: UnlockRef) {
     return () => {
       if (mobileMode) {
         window.removeEventListener('scroll', handleScroll)
-        if (scrollTimer) clearTimeout(scrollTimer)
       } else {
         window.removeEventListener('mousemove', handleMouseMove)
-        if (mouseTimer) clearTimeout(mouseTimer)
       }
     }
   }, [enabled, unlockAchievementRef])
