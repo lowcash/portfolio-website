@@ -13,6 +13,7 @@ export function BackgroundExperience() {
       <SectionHeader
         id='experience-h'
         index='02'
+        eyebrow='Roles and education'
         title={title}
         meta={`${experiences.length} roles · ${education.degrees.length} degrees`}
       />

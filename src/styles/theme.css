@@ -21,20 +21,20 @@
   --font-serif: var(--font-fraunces), 'Iowan Old Style', Palatino, Georgia, serif;
   --font-serif-italic: var(--font-fraunces-italic), 'Iowan Old Style', Palatino, Georgia, serif;
   --font-mono: var(--font-martian), ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
-  --text-mono: 0.75rem;
+  --text-mono: 0.8125rem;
   --text-mono--line-height: 1.5;
   --text-body: 1.0625rem;
   --text-body--line-height: 1.6;
-  --text-lead: clamp(1.1875rem, 1rem + 0.7vw, 1.5rem);
-  --text-lead--line-height: 1.42;
-  --text-h3: clamp(1.5rem, 1.15rem + 1.25vw, 2.25rem);
-  --text-h3--line-height: 1.1;
-  --text-h3-lead: clamp(2rem, 1.2rem + 3.4vw, 4.25rem);
-  --text-h3-lead--line-height: 1;
-  --text-h2: clamp(3rem, 1.6rem + 6.4vw, 7.5rem);
-  --text-h2--line-height: 0.92;
-  --tracking-display: -0.045em;
-  --tracking-title: -0.035em;
+  --text-lead: clamp(1.125rem, 1.04rem + 0.35vw, 1.3125rem);
+  --text-lead--line-height: 1.5;
+  --text-h3: clamp(1.25rem, 1.1rem + 0.6vw, 1.625rem);
+  --text-h3--line-height: 1.2;
+  --text-h3-lead: clamp(1.625rem, 1.2rem + 1.6vw, 2.5rem);
+  --text-h3-lead--line-height: 1.1;
+  --text-h2: clamp(2rem, 1.5rem + 2vw, 3.25rem);
+  --text-h2--line-height: 1.05;
+  --tracking-display: -0.03em;
+  --tracking-title: -0.025em;
   --tracking-caps: 0.09em;
 
   /* space, shape, layers */
@@ -119,12 +119,10 @@
     --s-8: calc(var(--spacing) * 18);
     --s-9: calc(var(--spacing) * 28);
     --s-10: calc(var(--spacing) * 42);
-    --section-pad: clamp(var(--s-8), 12vw, var(--s-10));
-    --edge: max(var(--gutter), calc((100vw - 86rem) / 2 + var(--gutter)));
-    --axis: 2.75rem;
+    --section-pad: clamp(var(--s-8), 9vw, var(--s-9));
 
-    --text-display: min(calc((100vw - 2 * var(--gutter)) / 2.95), 30vh);
-    --text-small: 0.9375rem;
+    --text-display: clamp(2.75rem, 1.5rem + 5.4vw, 6rem);
+    --text-measure: 68ch;
   }
 
   @media (width >= 48rem) {
@@ -133,7 +131,6 @@
       --col-gap: 1.5rem;
       --bar-h: 2.5rem;
       --top-h: 2.5rem;
-      --text-display: min(calc((100vw - 2 * var(--gutter)) / 5.12), 16rem, 30vh);
     }
   }
 }

@@ -17,7 +17,7 @@ src/
 │   │   ├── devtools/           # console-pane (popover shell), console-controls (lazy), console-actions, use-console-stats
 │   │   └── easter-eggs/        # EasterEggs state, achievement toast, achievements data, confetti, triggers/ (one hook per egg)
 │   ├── shared/                 # AnimatedBackground (three lights + grain)
-│   ├── ui/                     # entry, section-header, hero-chart (server SVG), hero-crosshair, top-bar, status-line, copy-address
+│   ├── ui/                     # entry, section-header (index, eyebrow, title), top-bar, status-line, copy-address
 │   └── layout/                 # AppShell client orchestration
 ├── hooks/                      # use-idle-ready
 ├── lib/
@@ -25,7 +25,6 @@ src/
 │   ├── content.ts              # All copy, section ids/scenes/tones, entry tones
 │   ├── orb-settings.ts         # Settings of the lights: definitions, presets, persistence, CSS variables (tested)
 │   ├── orb-effects.ts          # Magnetism, section burst, click ripples, animation playback rate (opt-in)
-│   ├── series.ts               # Seeded random walk (seed 174) and chart geometry (tested)
 │   ├── shortcuts.ts            # D / 0-3 / Esc key mapping (tested)
 │   └── scroll-metrics.ts       # One rAF-throttled scroll listener shared by subscribers
 └── styles/                     # theme (Tailwind 4 @theme tokens), base, layout, chrome, animations
@@ -73,12 +72,14 @@ python3 -m fontTools.varLib.instancer MartianMono.ttf wdth=87.5 wght=400:600 -o 
 pyftsubset r.ttf --unicodes="$U" --layout-features='kern,liga,ccmp,locl,mark,mkmk' --flavor=woff2 --output-file=fraunces-roman.woff2
 ```
 
-The two fitted sizes (hero name 5.04em, contact email 8.9em of container width) were measured with these files; re-measure if the font or the copy changes.
+## Type and orientation
+
+The scale is deliberately restrained and lives in `theme.css`: body 17px, lead 18-21px, h3 20-26px, h2 32-52px, hero name 44-96px (fluid, one line from about 390px up), contact email up to 52px, mono 13px. Running text is capped at `--text-measure` (68ch). The hero is name, one-line role, stack and two actions (See projects, Dev Console); there is no chart there, because a seeded random walk carried no information. Each section opens with a rule, an index (01-03), an eyebrow ("Selected work", "Roles and education", "Get in touch") and the h2; the top bar and the status line both mark the active section with `aria-current`.
 
 ## Testing
 
 - `pnpm test` - unit tests for pure logic (colors, settings, URLs, typography).
-- `pnpm run test:e2e` - Playwright (desktop, tablet, mobile), including navigation, `lights-and-chart`, `orb-settings` and `easter-eggs` specs.
+- `pnpm run test:e2e` - Playwright (desktop, tablet, mobile), including navigation, `lights-and-hero`, `orb-settings` and `easter-eggs` specs.
 - `visual-baseline.spec.ts` - local-only screenshot regression (macOS snapshots, skipped in CI). Update intentionally with `pnpm exec playwright test visual-baseline --update-snapshots=all`.
 - `docs/PERF-BASELINE.md` - Lighthouse numbers before/after the optimization work.
 

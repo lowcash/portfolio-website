@@ -93,7 +93,13 @@ export function FeaturedProjects() {
 
   return (
     <section id='featured-projects' className='section tone tone-violet' aria-labelledby='projects-h'>
-      <SectionHeader id='projects-h' index='01' title={title} meta={`${projects.length} entries`} />
+      <SectionHeader
+        id='projects-h'
+        index='01'
+        eyebrow='Selected work'
+        title={title}
+        meta={`${projects.length} entries`}
+      />
 
       <div className='wrap'>
         {projects.map((project, index) => (

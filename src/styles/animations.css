@@ -1,5 +1,5 @@
 /**
- * Lights, grain and motion. Nothing here animates anything but transform, opacity and one clip-path wipe.
+ * Lights, grain and motion. Nothing here animates anything but transform, opacity.
  * The default state is the final, visible state; every animation sits behind prefers-reduced-motion and,
  * where the effect is new, behind @supports with a static fallback.
  */
@@ -265,24 +265,6 @@
       transform: scale(1);
     }
   }
-  @keyframes ping {
-    0% {
-      transform: scale(0.4);
-      opacity: 0.9;
-    }
-    100% {
-      transform: scale(1.5);
-      opacity: 0;
-    }
-  }
-  @keyframes wipe {
-    from {
-      clip-path: inset(-10% 100% -10% 0);
-    }
-    to {
-      clip-path: inset(-10% 0 -10% 0);
-    }
-  }
   @keyframes rise {
     from {
       opacity: 0;
@@ -322,12 +304,6 @@
     }
     .orb-c i {
       animation: var(--animate-drift-c);
-    }
-    .last::after {
-      animation: ping 2.4s var(--ease-out-expo) infinite;
-    }
-    .chart svg {
-      animation: wipe 1800ms var(--ease-glide) 150ms both;
     }
     /* 174 BPM: hovering the drum & bass link makes the room keep time */
     html:has(.dnb:hover) .orbs,

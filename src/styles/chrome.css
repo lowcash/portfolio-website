@@ -41,6 +41,7 @@
     background: var(--color-bg-sunk);
     border-bottom: 1px solid var(--color-line-strong);
     color: var(--color-ink-2);
+    font-size: 0.75rem;
   }
   .topbar > div {
     display: flex;
@@ -87,6 +88,9 @@
     white-space: nowrap;
   }
   @media (width >= 48rem) {
+    .topbar {
+      font-size: var(--text-mono);
+    }
     .topbar > div {
       gap: var(--s-4);
     }

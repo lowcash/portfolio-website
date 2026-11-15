@@ -11,7 +11,7 @@ export function Contact() {
 
   return (
     <section id='contact' className='section contact tone tone-fuchsia' aria-labelledby='contact-h'>
-      <SectionHeader id='contact-h' index='03' title={title} />
+      <SectionHeader id='contact-h' index='03' eyebrow='Get in touch' title={title} />
 
       <div className='contact-body wrap grid-12'>
         <a className='mail' href={`mailto:${email}`}>

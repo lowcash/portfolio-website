@@ -1,6 +1,6 @@
 import { expect, test } from '@playwright/test'
 
-test.describe('Lights, scenes and the hero chart', () => {
+test.describe('Lights, scenes and the hero', () => {
   test.beforeEach(async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 800 })
     await page.goto('/')
@@ -40,27 +40,43 @@ test.describe('Lights, scenes and the hero chart', () => {
       .not.toBe(first)
   })
 
-  test('the chart is in the server HTML: 160 points, seed caption, grid lines', async ({ request }) => {
-    const html = await (await request.get('/')).text()
+  test('the hero has no chart: name, role, stack and two actions only', async ({ page }) => {
+    await expect(page.locator('#hero svg, #hero .chart, #hero .xh')).toHaveCount(0)
 
-    expect(html).toContain('fig. 0 — a random walk, seed ')
-    expect(html).toMatch(/id="series"[^>]*points="([^"]+)"/)
-    const points = html
-      .match(/id="series"[^>]*points="([^"]+)"/)![1]
-      .trim()
-      .split(' ')
-    expect(points).toHaveLength(160)
-    expect(html).toContain('class="gl"')
+    const hero = page.locator('#hero')
+    await expect(hero.getByRole('heading', { level: 1 })).toBeVisible()
+    await expect(hero.getByRole('link', { name: 'See projects' })).toHaveAttribute('href', '#featured-projects')
+    await expect(hero.getByRole('button', { name: /Dev Console/ })).toBeVisible()
   })
 
-  test('the crosshair snaps a readout to the series on fine pointers', async ({ page, isMobile }) => {
-    test.skip(isMobile, 'The crosshair is for fine pointers only')
-    const hero = await page.locator('#hero').boundingBox()
-    await page.mouse.move(hero!.x + 400, hero!.y + 300)
-    await page.mouse.move(hero!.x + 640, hero!.y + 320, { steps: 4 })
+  test('See projects scrolls to the projects section', async ({ page }) => {
+    await page.locator('#hero').getByRole('link', { name: 'See projects' }).click()
+    await expect(page.locator('#featured-projects')).toBeInViewport({ ratio: 0.2 })
+  })
 
-    await expect(page.locator('.xh')).toHaveClass(/on/)
-    await expect(page.locator('.xh-read')).toHaveText(/^t\+\d{3}\s+\d\.\d{4}$/)
+  test('the Dev Console button in the hero opens the console', async ({ page }) => {
+    await page
+      .locator('#hero')
+      .getByRole('button', { name: /Dev Console/ })
+      .click()
+    await expect(page.getByRole('region', { name: 'Developer console' })).toBeVisible()
+  })
+
+  test('type stays restrained: body 16-18px, h1 <= 96px, sections announce themselves', async ({ page }) => {
+    const sizes = await page.evaluate(() => {
+      const px = (selector: string) => parseFloat(getComputedStyle(document.querySelector(selector)!).fontSize)
+      return { body: px('body'), name: px('#hero .name'), h2: px('#featured-projects h2') }
+    })
+    expect(sizes.body).toBeGreaterThanOrEqual(16)
+    expect(sizes.body).toBeLessThanOrEqual(18)
+    expect(sizes.name).toBeLessThanOrEqual(96)
+    expect(sizes.h2).toBeLessThanOrEqual(52)
+
+    await expect(page.locator('.sec-head .eyebrow')).toHaveCount(3)
+    const overflow = await page.evaluate(
+      () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+    )
+    expect(overflow).toBeLessThanOrEqual(0)
   })
 
   test('the name is the largest contentful element and is never animated', async ({ page }) => {
@@ -72,8 +88,9 @@ test.describe('Lights, scenes and the hero chart', () => {
   })
 
   test('hovering the drum and bass link makes the lights beat at 174 BPM', async ({ page }) => {
-    await page.locator('#experience').scrollIntoViewIfNeeded()
-    await page.getByRole('link', { name: /^Lowcash$/ }).hover()
+    const link = page.getByRole('link', { name: /^Lowcash$/ })
+    await link.evaluate((element) => element.scrollIntoView({ block: 'center', behavior: 'instant' }))
+    await link.hover()
 
     await expect
       .poll(() => page.evaluate(() => getComputedStyle(document.querySelector('.orbs')!).animationName))

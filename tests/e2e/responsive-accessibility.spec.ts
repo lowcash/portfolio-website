@@ -71,7 +71,7 @@ test.describe('Responsive and accessibility baseline', () => {
     await expect.poll(() => page.evaluate(() => window.location.hash)).toBe('#main-content')
   })
 
-  test('reduced motion disables smooth scrolling, drift, wipe and the crosshair', async ({ page }) => {
+  test('reduced motion disables smooth scrolling, drift and reveals', async ({ page }) => {
     await page.emulateMedia({ reducedMotion: 'reduce' })
     await page.goto('/')
     await page.waitForLoadState('networkidle')
@@ -80,13 +80,11 @@ test.describe('Responsive and accessibility baseline', () => {
       scrollBehavior: getComputedStyle(document.documentElement).scrollBehavior,
       drift: document.getAnimations().filter((a) => a instanceof CSSAnimation && a.animationName.startsWith('drift'))
         .length,
-      wipe: getComputedStyle(document.querySelector('.chart svg')!).animationName,
       reveal: getComputedStyle(document.querySelector('.reveal')!).animationName,
     }))
 
     expect(state.scrollBehavior).toBe('auto')
     expect(state.drift).toBe(0)
-    expect(state.wipe).toBe('none')
     expect(state.reveal).toBe('none')
   })
 
