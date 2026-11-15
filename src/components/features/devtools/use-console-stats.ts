@@ -1,85 +1,46 @@
 'use client'
 
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import { subscribeToScrollMetrics } from '@/lib/scroll-metrics'
 
-const FPS_STATE_INTERVAL_MS = 250
+const FPS_WINDOW_MS = 500
 
-export type ConsoleStats = {
-  scrollPercent: number
-  orbR: number
-  orbG: number
-  orbB: number
-  fps: number
-}
-
-function readOrbRgb(): { r: number; g: number; b: number } {
-  const root = getComputedStyle(document.documentElement)
-  return {
-    r: parseInt(root.getPropertyValue('--orb-r')) || 0,
-    g: parseInt(root.getPropertyValue('--orb-g')) || 0,
-    b: parseInt(root.getPropertyValue('--orb-b')) || 0,
-  }
-}
-
-/** Scroll % + orb RGB via scroll-metrics when visible; FPS updates state ~4x/sec. */
-export function useConsoleStats(isVisible: boolean): ConsoleStats {
+/** Scroll percentage and measured frame rate. Only runs while the console is open. */
+export function useConsoleStats(isOpen: boolean) {
   const [scrollPercent, setScrollPercent] = useState(0)
-  const [orbR, setOrbR] = useState(0)
-  const [orbG, setOrbG] = useState(0)
-  const [orbB, setOrbB] = useState(0)
-  const [fps, setFps] = useState(60)
-  const fpsRef = useRef(60)
+  const [fps, setFps] = useState<number | null>(null)
 
   useEffect(() => {
-    if (!isVisible) {
+    if (!isOpen) {
       return
     }
 
-    return subscribeToScrollMetrics((metrics) => {
-      setScrollPercent(metrics.progress * 100)
-      const rgb = readOrbRgb()
-      setOrbR(rgb.r)
-      setOrbG(rgb.g)
-      setOrbB(rgb.b)
-    })
-  }, [isVisible])
+    return subscribeToScrollMetrics((metrics) => setScrollPercent(Math.round(metrics.progress * 100)))
+  }, [isOpen])
 
   useEffect(() => {
-    if (!isVisible) {
+    if (!isOpen) {
       return
     }
 
-    const frameWindow = 30
-    const emaAlpha = 2 / (frameWindow + 1)
-    let lastFrameTime = performance.now()
-    let smoothedFps = 60
+    let frames = 0
+    let since = performance.now()
     let frameId = 0
-    let lastStateUpdate = 0
 
-    const tick = (now: number) => {
-      const delta = now - lastFrameTime
-      if (delta > 0) {
-        const instantFps = 1000 / delta
-        smoothedFps = smoothedFps * (1 - emaAlpha) + instantFps * emaAlpha
-        fpsRef.current = Math.round(smoothedFps)
-
-        if (now - lastStateUpdate >= FPS_STATE_INTERVAL_MS) {
-          lastStateUpdate = now
-          setFps(fpsRef.current)
-        }
+    const loop = (now: number) => {
+      frames++
+      if (now - since >= FPS_WINDOW_MS) {
+        setFps(Math.round((frames * 1000) / (now - since)))
+        frames = 0
+        since = now
       }
-      lastFrameTime = now
-      frameId = window.requestAnimationFrame(tick)
+      frameId = requestAnimationFrame(loop)
     }
 
-    frameId = window.requestAnimationFrame(tick)
+    frameId = requestAnimationFrame(loop)
+    return () => cancelAnimationFrame(frameId)
+  }, [isOpen])
 
-    return () => {
-      window.cancelAnimationFrame(frameId)
-    }
-  }, [isVisible])
-
-  return { scrollPercent, orbR, orbG, orbB, fps }
+  return { scrollPercent, fps }
 }

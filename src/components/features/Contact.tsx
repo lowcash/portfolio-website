@@ -1,28 +1,37 @@
 import { siteContent } from '@/lib/content'
-import { SECTION_STYLES } from '@/lib/section-config'
+import { formatTypography } from '@/lib/prevent-widows'
 
-import { ContactContent } from '@/components/ui/contact-content'
-import { SectionWrapper } from '@/components/ui/section-wrapper'
+import { CopyAddress } from '@/components/ui/copy-address'
+import { ExternalLink } from '@/components/ui/external-link'
+import { SectionHeader } from '@/components/ui/section-header'
 
 export function Contact() {
-  const content = siteContent.contact
+  const { title, email, hint, socials } = siteContent.contact
+  const [user, domain] = email.split('@')
 
   return (
-    <SectionWrapper
-      id='contact'
-      maxWidth='4xl'
-      fullHeight
-      className='items-center justify-center text-center'
-      containerClassName='mx-auto flex w-full max-w-4xl flex-col items-center justify-center text-center'
-    >
-      <ContactContent
-        title={content.title}
-        email={content.email}
-        hint={content.hint}
-        socials={content.socials}
-        gradient={SECTION_STYLES.contact.gradient}
-        glowColors={SECTION_STYLES.contact.glowColors}
-      />
-    </SectionWrapper>
+    <section id='contact' className='section contact tone tone-fuchsia' aria-labelledby='contact-h'>
+      <SectionHeader id='contact-h' index='03' title={title} />
+
+      <div className='contact-body wrap grid-12'>
+        <a className='mail' href={`mailto:${email}`}>
+          {user}
+          <i>@</i>
+          {domain}
+        </a>
+        <div className='contact-row mono'>
+          <CopyAddress value={email} />
+          {socials.map((social) => (
+            <ExternalLink key={social.label} href={social.href} aria-label={`Connect with me on ${social.label}`}>
+              {social.label}
+            </ExternalLink>
+          ))}
+        </div>
+        <p className='hint mono'>
+          <span className='d'>{formatTypography(hint.desktop)}</span>
+          <span className='m'>{formatTypography(hint.mobile)}</span>
+        </p>
+      </div>
+    </section>
   )
 }

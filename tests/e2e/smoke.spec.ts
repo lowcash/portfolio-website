@@ -23,30 +23,20 @@ test.describe('Portfolio smoke baseline', () => {
     ).toBeVisible()
   })
 
-  test('gradient headers remain visible when dark theme is forced', async ({ page }) => {
-    await page.emulateMedia({ colorScheme: 'dark' })
-    await page.evaluate(() => {
-      document.documentElement.classList.add('dark')
-    })
-
-    const heroHeading = page.locator('#hero h1').first()
-    await expect(heroHeading).toBeVisible()
-
-    const sectionHeading = page.locator('#featured-projects h2').first()
-    await expect(sectionHeading).toBeVisible()
-
-    const headingColors = await page.evaluate(() => {
-      const hero = document.querySelector('#hero h1')
-      const section = document.querySelector('#featured-projects h2')
-
-      return {
-        heroColor: hero ? getComputedStyle(hero).color : '',
-        sectionColor: section ? getComputedStyle(section).color : '',
+  test('headings are solid, readable ink on the dark page', async ({ page }) => {
+    const colors = await page.evaluate(() => {
+      const read = (selector: string) => {
+        const element = document.querySelector(selector)
+        return element ? getComputedStyle(element).color : ''
       }
+      return { hero: read('#hero h1 .name'), section: read('#featured-projects h2') }
     })
 
-    expect(headingColors.heroColor).not.toBe('rgba(0, 0, 0, 0)')
-    expect(headingColors.sectionColor).not.toBe('rgba(0, 0, 0, 0)')
+    for (const color of Object.values(colors)) {
+      expect(color).not.toBe('')
+      expect(color).not.toBe('rgba(0, 0, 0, 0)')
+    }
+    await expect(page.locator('#featured-projects h2')).toHaveText('Projects')
   })
 
   test('contact section exposes primary external links', async ({ page }) => {
@@ -67,15 +57,24 @@ test.describe('Portfolio smoke baseline', () => {
     )
   })
 
-  test('debug console toggles from keyboard without breaking layout', async ({ page }) => {
-    // The console is code-split and mounted when the browser is idle; its trigger button signals it is ready.
-    await expect(page.getByRole('button', { name: 'Toggle debug console' })).toBeAttached()
+  test('debug console toggles from keyboard and button without breaking layout', async ({ page }) => {
+    const consolePane = page.getByRole('region', { name: 'Developer console' })
+    await expect(page.getByRole('button', { name: 'Toggle developer console' })).toBeVisible()
     await page.mouse.click(640, 400)
-    await page.keyboard.press('d')
-    await expect(page.getByRole('region', { name: 'Developer debug console' })).toBeVisible()
 
     await page.keyboard.press('d')
-    await expect(page.getByRole('region', { name: 'Developer debug console' })).not.toBeVisible()
+    await expect(consolePane).toBeVisible()
+    await page.keyboard.press('d')
+    await expect(consolePane).toBeHidden()
+
+    await page.getByRole('button', { name: 'Toggle developer console' }).click()
+    await expect(consolePane).toBeVisible()
+    await page.keyboard.press('Escape')
+    await expect(consolePane).toBeHidden()
+
+    expect(
+      await page.evaluate(() => document.documentElement.scrollWidth <= document.documentElement.clientWidth),
+    ).toBe(true)
   })
 
   test('includes canonical and person schema metadata', async ({ page }) => {

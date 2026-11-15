@@ -13,8 +13,8 @@ const countOrbWaapiAnimations = (page: Page) =>
   )
 
 async function openConsole(page: Page) {
-  await page.getByRole('button', { name: 'Toggle debug console' }).evaluate((button: HTMLElement) => button.click())
-  await expect(page.getByRole('region', { name: 'Developer debug console' })).toBeVisible()
+  await page.getByRole('button', { name: 'Toggle developer console' }).click()
+  await expect(page.getByRole('region', { name: 'Developer console' })).toBeVisible()
 }
 
 async function setSlider(page: Page, key: string, value: number) {
@@ -33,32 +33,39 @@ test.describe('Orb settings and effects', () => {
     await openConsole(page)
   })
 
-  test('size slider resizes the orbs and the value survives a reload without opening the console', async ({ page }) => {
-    const orb = page.locator('.orb-1')
+  test('size slider resizes the lights and the value survives a reload without opening the console', async ({
+    page,
+  }) => {
+    const orb = page.locator('.orb-a')
     const defaultWidth = await orb.evaluate((element) => element.getBoundingClientRect().width)
 
-    await setSlider(page, 'orbSize', 2.4)
-    await expect.poll(() => rootVar(page, '--orb-size')).toBe('2.4')
-    const widerWidth = await orb.evaluate((element) => element.getBoundingClientRect().width)
-    expect(widerWidth).toBeGreaterThan(defaultWidth * 1.5)
+    await setSlider(page, 'orbSize', 1.7)
+    await expect.poll(() => rootVar(page, '--orb-size')).toBe('1.7')
+    // The scale glides with the scene transition, so wait for it to arrive
+    await expect
+      .poll(() => orb.evaluate((element) => element.getBoundingClientRect().width), { timeout: 4000 })
+      .toBeGreaterThan(defaultWidth * 1.5)
 
     await page.reload()
     await page.waitForLoadState('networkidle')
-    await expect.poll(() => rootVar(page, '--orb-size')).toBe('2.4')
+    await expect.poll(() => rootVar(page, '--orb-size')).toBe('1.7')
   })
 
-  test('hue shift recolors the palette used by the whole page', async ({ page }) => {
-    const before = await rootVar(page, '--orb-r')
+  test('hue shift recolors the status line, accents and lights', async ({ page }) => {
+    const accentOf = () => page.evaluate(() => getComputedStyle(document.querySelector('.st-session')!).backgroundColor)
+    const before = await accentOf()
 
     await setSlider(page, 'hue', 180)
-    await expect.poll(() => rootVar(page, '--orb-r')).not.toBe(before)
+    await expect.poll(() => rootVar(page, '--hue-shift')).toBe('180')
+    await expect.poll(accentOf).not.toBe(before)
   })
 
-  test('low blur gives the orbs a solid core and extra density', async ({ page }) => {
+  test('low blur turns the lights into crisp discs', async ({ page }) => {
     await setSlider(page, 'orbBlur', 0.2)
 
-    const opacity = await page.locator('.orb-1').evaluate((element) => parseFloat(getComputedStyle(element).opacity))
-    expect(opacity).toBeGreaterThan(0.3)
+    // 0.2x blur gives the gradient a solid core: the first colour stop moves out to 80%
+    const gradient = await page.locator('.orb-a i').evaluate((element) => getComputedStyle(element).backgroundImage)
+    expect(gradient).toMatch(/\) 80%/)
   })
 
   test('animation speed changes the playback rate without restarting the animation', async ({ page }) => {
@@ -66,16 +73,17 @@ test.describe('Orb settings and effects', () => {
       page.evaluate(() =>
         document
           .getAnimations()
-          .filter((animation) => animation instanceof CSSAnimation && animation.animationName.startsWith('orb-float'))
+          .filter((animation) => animation instanceof CSSAnimation && animation.animationName.startsWith('drift'))
           .map((animation) => animation.playbackRate),
       )
 
-    await setSlider(page, 'animationSpeed', 6)
-    await expect.poll(async () => (await readRates()).every((rate) => rate === 2)).toBe(true)
+    await setSlider(page, 'animationSpeed', 3)
+    await expect.poll(async () => (await readRates()).length).toBe(3)
+    await expect.poll(async () => (await readRates()).every((rate) => rate === 3)).toBe(true)
   })
 
   test('only sliders with a clearly visible effect are shown', async ({ page }) => {
-    const consoleRegion = page.getByRole('region', { name: 'Developer debug console' })
+    const consoleRegion = page.getByRole('region', { name: 'Developer console' })
 
     for (const key of [
       'animationSpeed',
@@ -84,12 +92,13 @@ test.describe('Orb settings and effects', () => {
       'orbBlur',
       'orbBrightness',
       'hue',
+      'saturation',
       'magnetism',
       'burst',
     ]) {
       await expect(consoleRegion.locator(`#orb-setting-${key}`)).toHaveCount(1)
     }
-    for (const key of ['scatter', 'grain', 'saturation', 'colorVariation']) {
+    for (const key of ['scatter', 'grain', 'colorVariation']) {
       await expect(consoleRegion.locator(`#orb-setting-${key}`)).toHaveCount(0)
     }
   })
@@ -124,7 +133,7 @@ test.describe('Orb settings and effects', () => {
 
   test('turning ripples on plays a preview ring', async ({ page }) => {
     await page
-      .getByRole('region', { name: 'Developer debug console' })
+      .getByRole('region', { name: 'Developer console' })
       .getByRole('switch', { name: /CLICK RIPPLES/ })
       .click()
 
@@ -132,7 +141,7 @@ test.describe('Orb settings and effects', () => {
   })
 
   test('presets apply a bundle of settings and reset restores the original look', async ({ page }) => {
-    const consoleRegion = page.getByRole('region', { name: 'Developer debug console' })
+    const consoleRegion = page.getByRole('region', { name: 'Developer console' })
 
     await consoleRegion.getByRole('button', { name: 'Neon' }).click()
     await expect.poll(() => rootVar(page, '--orb-blur')).toBe('0.45')
@@ -140,7 +149,7 @@ test.describe('Orb settings and effects', () => {
 
     await consoleRegion.getByRole('button', { name: 'RESET TO DEFAULT' }).click()
     await expect.poll(() => rootVar(page, '--orb-blur')).toBe('1')
-    await expect.poll(() => rootVar(page, '--orb-size')).toBe('1.2')
+    await expect.poll(() => rootVar(page, '--orb-size')).toBe('1')
     await expect(consoleRegion.getByRole('button', { name: 'Calm' })).toHaveAttribute('aria-pressed', 'true')
   })
 
@@ -155,8 +164,8 @@ test.describe('Orb settings and effects', () => {
 
   test('click ripples spawn a ring on the background but not on interactive elements', async ({ page }) => {
     await page
-      .getByRole('region', { name: 'Developer debug console' })
-      .getByRole('button', { name: 'Close console' })
+      .getByRole('region', { name: 'Developer console' })
+      .getByRole('button', { name: 'Close developer console' })
       .first()
       .click()
 
@@ -168,7 +177,7 @@ test.describe('Orb settings and effects', () => {
     await expect(page.locator('.orb-ripple')).toHaveCount(1)
     await expect(page.locator('.orb-ripple')).toHaveCount(0)
 
-    await page.getByRole('button', { name: 'Navigate to Projects' }).click()
+    await page.getByRole('link', { name: 'Projects' }).first().click()
     await expect(page.locator('.orb-ripple')).toHaveCount(0)
   })
 

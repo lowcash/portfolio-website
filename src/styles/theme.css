@@ -1,37 +1,189 @@
 /**
- * Design Tokens & CSS Variables
- *
- * Site uses a dark canvas (#030712) with Tailwind palette utilities.
- * Kept tokens: background/foreground, radius, and live orb RGB.
+ * Design tokens (spec: Night Paper, section 10).
+ * Colour is OKLCH. Engines without oklch() get the sRGB fallbacks in the @supports block at the end.
  */
 
-:root {
-  color-scheme: dark;
+@theme {
+  /* colour */
+  --color-bg: oklch(0.155 0.014 275);
+  --color-bg-sunk: oklch(0.125 0.012 275);
+  --color-surface: oklch(0.2 0.018 275);
+  --color-ink: oklch(0.945 0.012 85);
+  --color-ink-2: oklch(0.81 0.014 85);
+  --color-ink-3: oklch(0.72 0.02 275);
+  --color-line: oklch(0.945 0.012 85 / 0.12);
+  --color-line-strong: oklch(0.945 0.012 85 / 0.26);
+  --color-light-a: oklch(0.66 0.22 350);
+  --color-light-b: oklch(0.58 0.22 282);
+  --color-light-c: oklch(0.7 0.13 190);
 
-  --background: #030712;
-  --foreground: #f4f4f5;
-  --border: rgba(255, 255, 255, 0.1);
-  --ring: #a855f7;
-  --radius: 0.625rem;
+  /* type */
+  --font-serif: var(--font-fraunces), 'Iowan Old Style', Palatino, Georgia, serif;
+  --font-serif-italic: var(--font-fraunces-italic), 'Iowan Old Style', Palatino, Georgia, serif;
+  --font-mono: var(--font-martian), ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
+  --text-mono: 0.75rem;
+  --text-mono--line-height: 1.5;
+  --text-body: 1.0625rem;
+  --text-body--line-height: 1.6;
+  --text-lead: clamp(1.1875rem, 1rem + 0.7vw, 1.5rem);
+  --text-lead--line-height: 1.42;
+  --text-h3: clamp(1.5rem, 1.15rem + 1.25vw, 2.25rem);
+  --text-h3--line-height: 1.1;
+  --text-h3-lead: clamp(2rem, 1.2rem + 3.4vw, 4.25rem);
+  --text-h3-lead--line-height: 1;
+  --text-h2: clamp(3rem, 1.6rem + 6.4vw, 7.5rem);
+  --text-h2--line-height: 0.92;
+  --tracking-display: -0.045em;
+  --tracking-title: -0.035em;
+  --tracking-caps: 0.09em;
 
-  /* Dynamic Section Colors (set by JavaScript) */
-  --orb-r: 255;
-  --orb-g: 100;
-  --orb-b: 50;
+  /* space, shape, layers */
+  --spacing: 0.25rem;
+  --breakpoint-md: 48rem;
+  --breakpoint-lg: 64rem;
+  --container-page: 86rem;
+  --radius-none: 0;
+  --radius-xs: 2px;
+  --radius-full: 999px;
+  --shadow-pane: 0 -28px 72px -24px rgb(2 3 8 / 0.85);
+  --z-index-orbs: -1;
+  --z-index-content: 1;
+  --z-index-status: 40;
+  --z-index-toast: 45;
+  --z-index-console: 50;
+  --z-index-skip: 60;
+
+  /* motion */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --ease-glide: cubic-bezier(0.45, 0.05, 0.2, 1);
+  --animate-drift-a: drift-a 37s ease-in-out infinite alternate;
+  --animate-drift-b: drift-b 43s ease-in-out infinite alternate;
+  --animate-drift-c: drift-c 31s ease-in-out infinite alternate;
+
+  @keyframes drift-a {
+    to {
+      transform: translate3d(-7%, 5%, 0) scale(1.08);
+    }
+  }
+  @keyframes drift-b {
+    to {
+      transform: translate3d(6%, -6%, 0) scale(0.93);
+    }
+  }
+  @keyframes drift-c {
+    to {
+      transform: translate3d(-5%, -7%, 0) scale(1.1);
+    }
+  }
 }
 
-/**
- * Tailwind Theme Integration
- */
+/* The accent depends on runtime variables (tone hue, console hue shift and saturation), so it is inline */
 @theme inline {
-  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
-  --font-mono: var(--font-jetbrains), ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-border: var(--border);
-  --color-ring: var(--ring);
-  --radius-sm: calc(var(--radius) - 4px);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-lg: var(--radius);
-  --radius-xl: calc(var(--radius) + 4px);
+  --color-accent: var(--accent);
+}
+
+@layer base {
+  :root {
+    color-scheme: dark;
+    --hue: 350;
+    --hue-shift: 0;
+    --sat: 1;
+    --orb-size: 1;
+    --orb-opacity: 1;
+    --orb-glow: 1;
+    --orb-blur: 1;
+    --orb-core: calc((1 - var(--orb-blur)) * 100%);
+    --orb-magnetism: 0;
+    --orb-pointer-x: 0;
+    --orb-pointer-y: 0;
+    --animation-speed: 1;
+    --dur-1: 120ms;
+    --dur-2: 240ms;
+    --dur-3: 480ms;
+    --dur-4: 900ms;
+    --dur-scene: 1600ms;
+    --gutter: 1rem;
+    --col-gap: 1rem;
+    --bar-h: 3rem;
+    --top-h: 2.75rem;
+
+    /* space steps: 1, 2, 3, 4, 6, 8, 12, 18, 28, 42 times the 4px base */
+    --s-1: calc(var(--spacing) * 1);
+    --s-2: calc(var(--spacing) * 2);
+    --s-3: calc(var(--spacing) * 3);
+    --s-4: calc(var(--spacing) * 4);
+    --s-5: calc(var(--spacing) * 6);
+    --s-6: calc(var(--spacing) * 8);
+    --s-7: calc(var(--spacing) * 12);
+    --s-8: calc(var(--spacing) * 18);
+    --s-9: calc(var(--spacing) * 28);
+    --s-10: calc(var(--spacing) * 42);
+    --section-pad: clamp(var(--s-8), 12vw, var(--s-10));
+    --edge: max(var(--gutter), calc((100vw - 86rem) / 2 + var(--gutter)));
+    --axis: 2.75rem;
+
+    --text-display: min(calc((100vw - 2 * var(--gutter)) / 2.95), 30vh);
+    --text-small: 0.9375rem;
+  }
+
+  @media (width >= 48rem) {
+    :root {
+      --gutter: 2rem;
+      --col-gap: 1.5rem;
+      --bar-h: 2.5rem;
+      --top-h: 2.5rem;
+      --text-display: min(calc((100vw - 2 * var(--gutter)) / 5.12), 16rem, 30vh);
+    }
+  }
+}
+
+/* Tones: every section and entry pins its own hue, only the chrome follows the scene */
+@utility tone {
+  --accent: var(--accent-fb);
+  @supports (color: oklch(0% 0 0)) {
+    --accent: oklch(0.84 calc(0.11 * var(--sat)) calc(var(--hue) + var(--hue-shift)));
+  }
+}
+@utility tone-pink {
+  --hue: 350;
+  --accent-fb: #ffafd4;
+}
+@utility tone-violet {
+  --hue: 285;
+  --accent-fb: #c4c4ff;
+}
+@utility tone-teal {
+  --hue: 190;
+  --accent-fb: #67e2da;
+}
+@utility tone-fuchsia {
+  --hue: 325;
+  --accent-fb: #efb2f2;
+}
+@utility tone-mint {
+  --hue: 160;
+  --accent-fb: #87e1b2;
+}
+@utility tone-sky {
+  --hue: 250;
+  --accent-fb: #a2cfff;
+}
+@utility tone-amber {
+  --hue: 80;
+  --accent-fb: #f0c374;
+}
+
+/* sRGB fallbacks for engines without oklch() */
+@supports not (color: oklch(0% 0 0)) {
+  :root {
+    --color-bg: #0a0c12;
+    --color-bg-sunk: #05060b;
+    --color-surface: #14151e;
+    --color-ink: #f0ece4;
+    --color-ink-2: #c5c0b7;
+    --color-ink-3: #a0a4b1;
+    --color-line: rgb(240 236 228 / 0.12);
+    --color-line-strong: rgb(240 236 228 / 0.26);
+  }
 }

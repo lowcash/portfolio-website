@@ -1,40 +1,141 @@
 /**
- * Base Styles & Reset
- *
- * HTML/body reset, scrollbar hiding, and foundational browser defaults.
+ * Base: document, typography and focus. Everything that is not a component.
  */
 
-html {
-  font-size: var(--font-size);
-  overflow-x: hidden;
-  -ms-overflow-style: none; /* IE and Edge */
-  scrollbar-width: none; /* Firefox */
-  scroll-behavior: smooth;
-  scroll-padding-top: 0;
-  background-color: #030712; /* Dark background - prevents white flash on overscroll */
-  overscroll-behavior: none; /* Prevents bounce effect on mobile */
-  height: 100%; /* iOS Safari fix */
+@layer base {
+  html {
+    background: var(--color-bg);
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    scroll-padding-top: 0;
+    scroll-padding-bottom: calc(var(--bar-h) + var(--s-5));
+    overscroll-behavior: none;
+  }
+
+  body {
+    margin: 0;
+    color: var(--color-ink);
+    font-family: var(--font-serif);
+    font-size: var(--text-body);
+    line-height: 1.6;
+    font-weight: 400;
+    font-optical-sizing: auto;
+    font-synthesis: none;
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+    overflow-x: clip;
+    hyphens: none;
+  }
+
+  h1,
+  h2,
+  h3 {
+    text-wrap: balance;
+  }
+
+  p,
+  li {
+    text-wrap: pretty;
+  }
+
+  ::selection {
+    background: var(--accent, #ffafd4);
+    color: var(--color-bg-sunk);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--accent, #ffafd4);
+    outline-offset: 3px;
+    border-radius: var(--radius-xs);
+  }
 }
 
-/* Hide scrollbar visual - minimalist look */
-html::-webkit-scrollbar {
-  display: none;
+@layer components {
+  .mono {
+    font-family: var(--font-mono);
+    font-size: var(--text-mono);
+    font-weight: 400;
+    line-height: 1.5;
+    letter-spacing: 0.01em;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .caps {
+    text-transform: uppercase;
+    letter-spacing: var(--tracking-caps);
+  }
+
+  .wrap {
+    width: 100%;
+    max-width: var(--container-page);
+    margin-inline: auto;
+    padding-inline: var(--gutter);
+  }
+
+  .grid-12 {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    column-gap: var(--col-gap);
+  }
+
+  kbd {
+    display: inline-block;
+    min-width: 1.6em;
+    padding: 0.1em 0.4em;
+    text-align: center;
+    font: inherit;
+    color: var(--color-ink);
+    border: 1px solid var(--color-line-strong);
+    border-radius: var(--radius-xs);
+  }
+
+  .skip {
+    position: fixed;
+    left: var(--s-4);
+    top: var(--s-4);
+    z-index: var(--z-index-skip);
+    padding: var(--s-2) var(--s-4);
+    background: var(--color-ink);
+    color: var(--color-bg-sunk);
+    transform: translateY(-300%);
+  }
+  .skip:focus {
+    transform: none;
+  }
+
+  .link {
+    color: var(--accent);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.22em;
+    text-decoration-color: color-mix(in srgb, currentColor 45%, transparent);
+    transition:
+      text-decoration-color var(--dur-2) var(--ease-standard),
+      color var(--dur-2) var(--ease-standard);
+  }
+  .link:hover {
+    text-decoration-color: currentColor;
+  }
+
+  .ext::after {
+    content: '\2197\FE0E';
+    content: '\2197\FE0E' / '';
+    display: inline-block;
+    margin-left: 0.3em;
+    font-family: var(--font-mono);
+    font-size: 0.72em;
+    transition: transform var(--dur-2) var(--ease-out-expo);
+  }
+  .ext:hover::after {
+    transform: translate(2px, -2px);
+  }
+
+  /* Controls that need JavaScript are hidden by a <noscript> style (see layout.tsx) */
+  .no-js-only {
+    display: none;
+  }
 }
 
-body::-webkit-scrollbar {
-  display: none;
-}
-
-body {
-  -ms-overflow-style: none;
-  scrollbar-width: none;
-  background-color: #030712;
-  overscroll-behavior: none;
-}
-
-/**
- * Respect user motion preferences globally
- */
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -44,35 +145,7 @@ body {
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
   }
-
-  ::view-transition-group(*),
-  ::view-transition-old(*),
-  ::view-transition-new(*) {
-    animation: none !important;
+  .xh {
+    display: none;
   }
 }
-
-/**
- * Typographic line balancing for headings and readable body copy.
- */
-*,
-*::before,
-*::after {
-  hyphens: none !important;
-  -webkit-hyphens: none !important;
-}
-
-h1,
-h2,
-h3 {
-  text-wrap: balance;
-}
-
-p,
-li,
-article p,
-article li,
-.text-pretty {
-  text-wrap: pretty;
-}
-

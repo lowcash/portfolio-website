@@ -1,16 +1,14 @@
 /**
- * Single source of truth for the background orb settings.
+ * Single source of truth for the settings of the three lights.
  *
  * - `ORB_SETTING_DEFINITIONS` drives the developer console sliders, persistence and CSS custom properties.
  * - The store writes CSS custom properties on :root (consumed by the `.orb` rules in animations.css) and persists
- *   to localStorage. Color-related settings (hue, saturation, color variation) are consumed in JS by the
- *   scroll-driven color loop; effect settings (magnetism, burst, ripples) by `orb-effects.ts`.
- * - Defaults reproduce the original look exactly, everything else is opt-in.
+ *   to localStorage. Effect settings (magnetism, burst, ripples) are consumed by `orb-effects.ts`.
+ * - Defaults are the Night Paper look, everything else is opt-in.
  */
 
 export type OrbSettingKey =
   | 'animationSpeed'
-  | 'colorVariation'
   | 'orbSize'
   | 'orbBlur'
   | 'orbOpacity'
@@ -23,42 +21,37 @@ export type OrbSettingKey =
 
 type OrbSettings = Record<OrbSettingKey, number>
 
-export type OrbSettingGroup = 'motion' | 'look' | 'color' | 'effects'
-
 export type OrbSettingDefinition = {
   key: OrbSettingKey
   label: string
-  group: OrbSettingGroup
   kind: 'slider' | 'toggle'
   min: number
   max: number
   step: number
   defaultValue: number
-  /** localStorage key (legacy keys kept so existing visitors keep their settings) */
+  /** localStorage key */
   storageKey: string
   format: (value: number) => string
   /** CSS custom property written on :root, if the setting is consumed by CSS */
   cssVar?: string
   toCssValue?: (value: number) => string
-  /** Preset-only: applied and persisted, but without a slider (too subtle to read as a control) */
-  hidden?: boolean
   /** One line shown under the label so every slider says what it visibly does */
   hint: string
 }
 
 const times = (value: number) => `${value.toFixed(1)}x`
+const times2 = (value: number) => `${value.toFixed(2)}x`
 const percent = (value: number) => `${value.toFixed(0)}%`
 
 export const ORB_SETTING_DEFINITIONS: readonly OrbSettingDefinition[] = [
   {
     key: 'animationSpeed',
     label: 'ANIMATION SPEED',
-    group: 'motion',
     kind: 'slider',
     min: 0.1,
-    max: 10,
+    max: 4,
     step: 0.1,
-    defaultValue: 3,
+    defaultValue: 1,
     storageKey: 'animation_speed',
     format: times,
     cssVar: '--animation-speed',
@@ -67,26 +60,24 @@ export const ORB_SETTING_DEFINITIONS: readonly OrbSettingDefinition[] = [
   {
     key: 'orbSize',
     label: 'ORB SIZE',
-    group: 'look',
     kind: 'slider',
-    min: 0.1,
-    max: 2,
-    step: 0.1,
-    defaultValue: 1.2,
+    min: 0.4,
+    max: 1.8,
+    step: 0.05,
+    defaultValue: 1,
     storageKey: 'orb_size',
-    format: times,
+    format: times2,
     cssVar: '--orb-size',
     hint: 'Diameter of every orb',
   },
   {
     key: 'orbOpacity',
     label: 'ORB OPACITY',
-    group: 'look',
     kind: 'slider',
     min: 0,
-    max: 3,
-    step: 0.1,
-    defaultValue: 1.05,
+    max: 1.6,
+    step: 0.05,
+    defaultValue: 1,
     storageKey: 'orb_opacity',
     format: (value) => percent(value * 100),
     cssVar: '--orb-opacity',
@@ -95,51 +86,32 @@ export const ORB_SETTING_DEFINITIONS: readonly OrbSettingDefinition[] = [
   {
     key: 'orbBlur',
     label: 'ORB BLUR',
-    group: 'look',
     kind: 'slider',
     min: 0.1,
-    max: 2,
-    step: 0.1,
+    max: 1,
+    step: 0.05,
     defaultValue: 1,
     storageKey: 'orb_blur',
-    format: times,
+    format: times2,
     cssVar: '--orb-blur',
     hint: 'Below 1x the orbs turn into crisp discs',
   },
   {
     key: 'orbBrightness',
     label: 'GLOW',
-    group: 'look',
     kind: 'slider',
     min: 0.2,
     max: 2,
     step: 0.05,
-    defaultValue: 0.5,
+    defaultValue: 1,
     storageKey: 'orb_brightness',
     format: (value) => value.toFixed(2),
-    cssVar: '--orb-brightness',
+    cssVar: '--orb-glow',
     hint: 'Brightness of the orb light',
-  },
-  {
-    key: 'colorVariation',
-    hidden: true,
-    label: 'COLOR VARIATION',
-    group: 'color',
-    kind: 'slider',
-    min: 0,
-    max: 500,
-    step: 10,
-    defaultValue: 40,
-    storageKey: 'color_variation',
-    format: percent,
-    cssVar: '--color-variation',
-    toCssValue: (value) => String(value / 100),
-    hint: 'How far each orb drifts from the section color',
   },
   {
     key: 'hue',
     label: 'HUE SHIFT',
-    group: 'color',
     kind: 'slider',
     min: 0,
     max: 360,
@@ -147,26 +119,25 @@ export const ORB_SETTING_DEFINITIONS: readonly OrbSettingDefinition[] = [
     defaultValue: 0,
     storageKey: 'orb_hue',
     format: (value) => `${value.toFixed(0)}°`,
-    hint: 'Rotates the whole palette (progress bar and glows follow)',
+    cssVar: '--hue-shift',
+    hint: 'Rotates the whole palette (status line and accents follow)',
   },
   {
     key: 'saturation',
-    hidden: true,
     label: 'SATURATION',
-    group: 'color',
     kind: 'slider',
     min: 0,
-    max: 2,
+    max: 1.3,
     step: 0.05,
     defaultValue: 1,
     storageKey: 'orb_saturation',
     format: (value) => percent(value * 100),
+    cssVar: '--sat',
     hint: '0% is monochrome, above 100% is neon',
   },
   {
     key: 'magnetism',
     label: 'MAGNETISM',
-    group: 'effects',
     kind: 'slider',
     min: 0,
     max: 100,
@@ -181,7 +152,6 @@ export const ORB_SETTING_DEFINITIONS: readonly OrbSettingDefinition[] = [
   {
     key: 'burst',
     label: 'SECTION BURST',
-    group: 'effects',
     kind: 'slider',
     min: 0,
     max: 100,
@@ -194,7 +164,6 @@ export const ORB_SETTING_DEFINITIONS: readonly OrbSettingDefinition[] = [
   {
     key: 'ripples',
     label: 'CLICK RIPPLES',
-    group: 'effects',
     kind: 'toggle',
     min: 0,
     max: 1,
@@ -224,12 +193,10 @@ export const ORB_PRESETS: readonly OrbPreset[] = [
     label: 'Aurora',
     description: 'Slow, wide, glowing curtains',
     values: {
-      animationSpeed: 1.8,
-      orbSize: 1.7,
-      orbOpacity: 1.5,
-      orbBlur: 1.6,
-      orbBrightness: 0.7,
-      colorVariation: 160,
+      animationSpeed: 0.6,
+      orbSize: 1.4,
+      orbOpacity: 1.3,
+      orbBrightness: 1.2,
       hue: 105,
       magnetism: 35,
       burst: 40,
@@ -240,13 +207,12 @@ export const ORB_PRESETS: readonly OrbPreset[] = [
     label: 'Neon',
     description: 'Crisp, saturated, fast',
     values: {
-      animationSpeed: 5,
-      orbSize: 0.9,
-      orbOpacity: 0.9,
+      animationSpeed: 1.8,
+      orbSize: 0.8,
+      orbOpacity: 1.2,
       orbBlur: 0.45,
-      orbBrightness: 1,
-      colorVariation: 120,
-      saturation: 1.5,
+      orbBrightness: 1.4,
+      saturation: 1.3,
       magnetism: 50,
       burst: 80,
       ripples: 1,
@@ -257,14 +223,12 @@ export const ORB_PRESETS: readonly OrbPreset[] = [
     label: 'Nebula',
     description: 'Heavy, glowing magenta haze',
     values: {
-      animationSpeed: 1.5,
-      orbSize: 1.7,
-      orbOpacity: 1.7,
-      orbBlur: 1.3,
-      orbBrightness: 0.75,
-      colorVariation: 70,
+      animationSpeed: 0.5,
+      orbSize: 1.4,
+      orbOpacity: 1.5,
+      orbBrightness: 1.3,
       hue: 40,
-      saturation: 1.4,
+      saturation: 1.3,
       magnetism: 20,
     },
   },
@@ -272,16 +236,7 @@ export const ORB_PRESETS: readonly OrbPreset[] = [
     id: 'mono',
     label: 'Mono',
     description: 'Black and white film',
-    values: {
-      animationSpeed: 2,
-      orbSize: 1.4,
-      orbOpacity: 1.3,
-      orbBlur: 1.2,
-      orbBrightness: 0.6,
-      colorVariation: 0,
-      saturation: 0,
-      burst: 30,
-    },
+    values: { animationSpeed: 0.7, orbSize: 1.2, orbOpacity: 1.2, saturation: 0, burst: 30 },
   },
 ]
 
@@ -382,11 +337,9 @@ function scheduleSettingsEvent() {
         detail: {
           orbBrightness: settings.orbBrightness,
           animationSpeed: settings.animationSpeed,
-          colorVariation: settings.colorVariation / 100,
           orbSize: settings.orbSize,
           orbBlur: settings.orbBlur,
           orbOpacity: settings.orbOpacity,
-          positionVariation: 1,
         },
       }),
     )

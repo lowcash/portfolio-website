@@ -1,78 +1,70 @@
-import { Briefcase, GraduationCap } from 'lucide-react'
-
 import { siteContent } from '@/lib/content'
 import { formatTypography } from '@/lib/prevent-widows'
-import { SECTION_STYLES } from '@/lib/section-config'
 
-import { Card } from '@/components/ui/card'
-import { CARD_BODY_CLASS } from '@/components/ui/card-tokens'
-import { ExternalLinkIcon } from '@/components/ui/external-link-icon'
+import { Entry, TechList } from '@/components/ui/entry'
+import { ExternalLink } from '@/components/ui/external-link'
 import { SectionHeader } from '@/components/ui/section-header'
-import { SectionList } from '@/components/ui/section-list'
-import { SectionWrapper } from '@/components/ui/section-wrapper'
-import { TagList } from '@/components/ui/tag-list'
-import { TechTag } from '@/components/ui/tech-tag'
 
 export function BackgroundExperience() {
   const { title, experiences, education, beyondCodeNote } = siteContent.backgroundExperience
 
   return (
-    <SectionWrapper id='experience' maxWidth='5xl'>
-      <SectionHeader title={title} subtitle='' {...SECTION_STYLES.backgroundExperience} />
+    <section id='experience' className='section tone tone-teal' aria-labelledby='experience-h'>
+      <SectionHeader
+        id='experience-h'
+        index='02'
+        title={title}
+        meta={`${experiences.length} roles · ${education.degrees.length} degrees`}
+      />
 
-      <SectionList width='5xl'>
-        {experiences.map((exp, index) => (
-          <Card
-            key={`exp-${index}`}
-            icon={Briefcase}
-            iconColor={exp.iconColor}
-            title={exp.title}
-            badges={[exp.period]}
-            bullets={exp.bullets}
+      <div className='wrap'>
+        {experiences.map((experience, index) => (
+          <Entry
+            key={experience.title}
+            num={`2.${index + 1}`}
+            badge={experience.period}
+            tone={experience.tone}
+            title={experience.title}
+            main={<TechList items={experience.technologies} />}
           >
-            <TagList>
-              {exp.technologies.map((tech) => (
-                <TechTag key={tech}>{tech}</TechTag>
+            <ul className='points'>
+              {experience.bullets.map((bullet) => (
+                <li key={bullet}>{formatTypography(bullet)}</li>
               ))}
-            </TagList>
-          </Card>
+            </ul>
+          </Entry>
         ))}
 
-        <Card
-          icon={GraduationCap}
-          iconColor={education.iconColor}
+        <Entry
+          num={`2.${experiences.length + 1}`}
+          badge={education.badge}
+          tone={education.tone}
           title={education.institution}
-          badges={[education.badge]}
         >
-          <ul className={`list-disc space-y-2 pl-5 ${CARD_BODY_CLASS}`}>
+          <ul className='degrees'>
             {education.degrees.map((degree) => (
               <li key={degree.label}>
-                <span className='font-medium text-zinc-100'>{degree.label}:</span>{' '}
-                {formatTypography(`${degree.field} (${degree.years})`)}
+                <span className='yrs mono'>{degree.years}</span>
+                <strong>{formatTypography(degree.label)}</strong>
+                <span className='field'>{formatTypography(degree.field)}</span>
               </li>
             ))}
           </ul>
-        </Card>
+        </Entry>
 
-        <div className='px-8 pt-2'>
-          <p className={`text-left ${CARD_BODY_CLASS}`}>
+        <div className='aside grid-12 reveal'>
+          <p>
             {formatTypography(beyondCodeNote.before)}{' '}
-            <span className='whitespace-nowrap'>
+            <span style={{ whiteSpace: 'nowrap' }}>
               as{' '}
-              <a
-                href={beyondCodeNote.link.href}
-                target='_blank'
-                rel='noreferrer'
-                className='group inline-flex items-center text-zinc-300 transition-colors duration-150 hover:text-white'
-              >
-                <span className='font-medium transition-colors duration-150'>{beyondCodeNote.link.label}</span>
-                <ExternalLinkIcon />
-              </a>
+              <ExternalLink href={beyondCodeNote.link.href} rel='noreferrer' className='dnb'>
+                {beyondCodeNote.link.label}
+              </ExternalLink>
+              {beyondCodeNote.after}
             </span>
-            {formatTypography(beyondCodeNote.after)}
           </p>
         </div>
-      </SectionList>
-    </SectionWrapper>
+      </div>
+    </section>
   )
 }

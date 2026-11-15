@@ -28,28 +28,22 @@ describe('orb setting definitions', () => {
   it('keeps legacy storage keys so existing visitors keep their settings', () => {
     const storageKeys = ORB_SETTING_DEFINITIONS.map((definition) => definition.storageKey)
 
-    for (const legacyKey of [
-      'orb_brightness',
-      'animation_speed',
-      'color_variation',
-      'orb_size',
-      'orb_blur',
-      'orb_opacity',
-    ]) {
+    for (const legacyKey of ['orb_brightness', 'animation_speed', 'orb_size', 'orb_blur', 'orb_opacity']) {
       expect(storageKeys).toContain(legacyKey)
     }
   })
 })
 
 describe('defaults', () => {
-  it('emits the original CSS custom property values', () => {
+  it('emits the Night Paper CSS custom property values', () => {
     expect(settingsToCssVars(DEFAULT_ORB_SETTINGS)).toMatchObject({
-      '--orb-brightness': '0.5',
-      '--animation-speed': '3',
-      '--color-variation': '0.4',
-      '--orb-size': '1.2',
+      '--orb-glow': '1',
+      '--animation-speed': '1',
+      '--orb-size': '1',
       '--orb-blur': '1',
-      '--orb-opacity': '1.05',
+      '--orb-opacity': '1',
+      '--hue-shift': '0',
+      '--sat': '1',
       '--orb-magnetism': '0',
     })
   })
@@ -68,7 +62,7 @@ describe('resolveStoredSettings', () => {
     const stored: Record<string, string> = { orb_size: '99', animation_speed: '-4', orb_opacity: '1.5' }
     const settings = resolveStoredSettings((key) => stored[key] ?? null)
 
-    expect(settings.orbSize).toBe(2)
+    expect(settings.orbSize).toBe(1.8)
     expect(settings.animationSpeed).toBe(0.1)
     expect(settings.orbOpacity).toBe(1.5)
   })
@@ -81,10 +75,12 @@ describe('resolveStoredSettings', () => {
 })
 
 describe('visible controls', () => {
-  it('hides only the subtle settings that presets still use', () => {
-    const hidden = ORB_SETTING_DEFINITIONS.filter((definition) => definition.hidden).map((definition) => definition.key)
-
-    expect(hidden.sort()).toEqual(['colorVariation', 'saturation'])
+  it('exposes ten settings, one of them a toggle, with the blur slider only going down', () => {
+    expect(ORB_SETTING_DEFINITIONS).toHaveLength(10)
+    expect(ORB_SETTING_DEFINITIONS.filter((definition) => definition.kind === 'toggle').map((d) => d.key)).toEqual([
+      'ripples',
+    ])
+    expect(ORB_SETTING_DEFINITIONS.find((definition) => definition.key === 'orbBlur')?.max).toBe(1)
   })
 })
 

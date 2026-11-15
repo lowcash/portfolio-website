@@ -7,40 +7,49 @@ test.describe('Mobile navigation regressions', () => {
     await page.waitForLoadState('networkidle')
   })
 
-  test('Intro from drawer returns user to hero', async ({ page }) => {
+  test('Intro tab returns the user to the hero from the bottom', async ({ page }) => {
     await page.evaluate(() => {
       document.getElementById('contact')?.scrollIntoView({ block: 'start' })
     })
     await page.waitForTimeout(900)
 
-    const trigger = page.locator('button[aria-controls="mobile-navigation-menu"]')
-    await expect(trigger).toBeVisible()
+    await page.getByRole('navigation', { name: 'Sections' }).getByRole('link', { name: 'Intro' }).click()
 
-    await trigger.click()
-    const drawer = page.getByRole('navigation', { name: 'Mobile navigation' })
-    await expect(drawer).toBeVisible()
-
-    const heroButton = drawer.getByRole('button', { name: 'Intro' })
-    await expect(heroButton).toBeVisible()
-
-    await heroButton.click()
-
-    await expect(drawer).not.toBeVisible()
     await expect.poll(() => page.evaluate(() => window.scrollY), { timeout: 3500 }).toBeLessThan(320)
     await expect(page.locator('#hero')).toBeInViewport({ ratio: 0.25 })
   })
 
-  test('scroll-to-top does not overlap contact text on mobile', async ({ page }) => {
+  test('status line does not overlap contact text on mobile', async ({ page }) => {
     await page.evaluate(() => {
       document.getElementById('contact')?.scrollIntoView({ block: 'start' })
     })
     await page.waitForTimeout(900)
+    await page.evaluate(() => window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'instant' }))
 
-    const scrollToTopButton = page.getByRole('button', { name: 'Scroll to top of page' })
-    await expect(scrollToTopButton).toBeVisible()
+    const bar = await page.locator('#status').boundingBox()
+    const hint = await page.locator('#contact .hint').boundingBox()
 
-    await scrollToTopButton.click()
-    await expect.poll(() => page.evaluate(() => window.scrollY), { timeout: 3500 }).toBeLessThan(220)
-    await expect(page.locator('#hero')).toBeInViewport({ ratio: 0.2 })
+    expect(bar).not.toBeNull()
+    expect(hint).not.toBeNull()
+    expect(hint!.y + hint!.height).toBeLessThanOrEqual(bar!.y)
+  })
+
+  test('the conventional menu fits one row inside the gutters at 390px', async ({ page }) => {
+    const menu = page.getByRole('navigation', { name: 'Main menu' })
+    const box = await menu.boundingBox()
+    const last = await menu.getByRole('link', { name: 'Contact' }).boundingBox()
+
+    expect(box).not.toBeNull()
+    expect(last).not.toBeNull()
+    expect(last!.x + last!.width).toBeLessThanOrEqual(390)
+    expect(box!.height).toBeLessThan(60)
+  })
+
+  test('the page does not scroll sideways', async ({ page }) => {
+    const { sw, cw } = await page.evaluate(() => ({
+      sw: document.documentElement.scrollWidth,
+      cw: document.documentElement.clientWidth,
+    }))
+    expect(sw).toBeLessThanOrEqual(cw)
   })
 })

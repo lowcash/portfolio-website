@@ -1,153 +1,134 @@
-import { expect, test } from '@playwright/test'
+import { type Page, expect, test } from '@playwright/test'
 
 const SECTIONS = [
-  { id: 'featured-projects', label: 'Projects' },
-  { id: 'experience', label: 'Experience' },
-  { id: 'contact', label: 'Contact' },
+  { id: 'featured-projects', label: 'Projects', scene: 'projects' },
+  { id: 'experience', label: 'Experience', scene: 'experience' },
+  { id: 'contact', label: 'Contact', scene: 'contact' },
 ] as const
 
-test.describe('Desktop navigation baseline', () => {
+const statusTabs = (page: Page) => page.getByRole('navigation', { name: 'Sections' })
+const mainMenu = (page: Page) => page.getByRole('navigation', { name: 'Main menu' })
+
+for (const [name, viewport] of [
+  ['Desktop', { width: 1280, height: 800 }],
+  ['Mobile', { width: 390, height: 844 }],
+] as const) {
+  test.describe(`${name} navigation baseline`, () => {
+    test.beforeEach(async ({ page }) => {
+      await page.setViewportSize(viewport)
+      await page.goto('/')
+      await page.waitForLoadState('networkidle')
+    })
+
+    for (const { id, label, scene } of SECTIONS) {
+      test(`status line tab for ${label} scrolls to #${id} and sets the scene`, async ({ page }) => {
+        const tab = statusTabs(page).getByRole('link', { name: label })
+        await expect(tab).toBeVisible()
+
+        await tab.click()
+
+        await expect(page.locator(`#${id}`)).toBeInViewport({ ratio: 0.15 })
+        await expect(tab).toHaveAttribute('aria-current', 'location')
+        await expect(page.locator('html')).toHaveAttribute('data-scene', scene)
+      })
+
+      test(`conventional menu item ${label} scrolls to #${id}`, async ({ page }) => {
+        const item = mainMenu(page).getByRole('link', { name: label })
+        await expect(item).toBeVisible()
+
+        await item.click()
+
+        await expect(page.locator(`#${id}`)).toBeInViewport({ ratio: 0.15 })
+        await expect(item).toHaveAttribute('aria-current', 'location')
+      })
+    }
+
+    test('the conventional menu lists Intro, Projects, Experience, Contact in page order', async ({ page }) => {
+      await expect(mainMenu(page).getByRole('link')).toHaveText(['Intro', 'Projects', 'Experience', 'Contact'])
+      await expect(statusTabs(page).getByRole('link')).toHaveText([/intro/i, /projects/i, /experience/i, /contact/i])
+    })
+
+    test('active tab follows manual scrolling', async ({ page }) => {
+      await page.locator('#experience').scrollIntoViewIfNeeded()
+      await page.waitForTimeout(1200)
+
+      await expect(statusTabs(page).getByRole('link', { name: 'Experience' })).toHaveAttribute(
+        'aria-current',
+        'location',
+      )
+      await expect(mainMenu(page).getByRole('link', { name: 'Experience' })).toHaveAttribute('aria-current', 'location')
+    })
+
+    test('contact tab is active at the bottom of the page', async ({ page }) => {
+      await page.evaluate(() => window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'instant' }))
+      await page.waitForTimeout(800)
+
+      await expect(statusTabs(page).getByRole('link', { name: 'Contact' })).toHaveAttribute('aria-current', 'location')
+    })
+
+    test('the wordmark and the Intro tab return the page to the top', async ({ page }) => {
+      await page.locator('#contact').scrollIntoViewIfNeeded()
+      await page.waitForTimeout(800)
+
+      await page.getByRole('link', { name: 'lowcash.dev' }).click()
+      await expect.poll(() => page.evaluate(() => window.scrollY), { timeout: 5000 }).toBeLessThan(120)
+      await expect(page.locator('#hero')).toBeInViewport({ ratio: 0.2 })
+
+      await page.locator('#contact').scrollIntoViewIfNeeded()
+      await page.waitForTimeout(800)
+      await statusTabs(page).getByRole('link', { name: 'Intro' }).click()
+      await expect.poll(() => page.evaluate(() => window.scrollY), { timeout: 5000 }).toBeLessThan(120)
+    })
+
+    test('status line shows the scroll percentage and a progress hairline', async ({ page }) => {
+      await expect(page.locator('.st-progress')).toBeAttached()
+      await page.evaluate(() => window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'instant' }))
+
+      if (viewport.width >= 768) {
+        await expect(page.locator('.st-right')).toContainText('100%')
+      }
+    })
+
+    test('status line stays clear of content: nothing focusable hides under it', async ({ page }) => {
+      const bar = await page.locator('#status').boundingBox()
+      const view = page.viewportSize()
+      expect(bar).not.toBeNull()
+      expect(bar!.y + bar!.height).toBeGreaterThanOrEqual(view!.height - 1)
+    })
+  })
+}
+
+test.describe('Keyboard shortcuts', () => {
   test.beforeEach(async ({ page }) => {
     await page.setViewportSize({ width: 1280, height: 800 })
     await page.goto('/')
     await page.waitForLoadState('networkidle')
   })
 
-  for (const { id, label } of SECTIONS) {
-    test(`navigation dot for ${label} scrolls to #${id}`, async ({ page }) => {
-      const navButton = page.getByRole('button', { name: `Navigate to ${label}` })
-      await expect(navButton).toBeVisible()
-      await navButton.scrollIntoViewIfNeeded()
+  for (const [key, id] of [
+    ['1', 'featured-projects'],
+    ['2', 'experience'],
+    ['3', 'contact'],
+    ['0', 'hero'],
+  ] as const) {
+    test(`pressing ${key} jumps to #${id}`, async ({ page }) => {
+      if (key === '0') {
+        await page.locator('#contact').scrollIntoViewIfNeeded()
+        await page.waitForTimeout(600)
+      }
 
-      await navButton.click()
-      await page.waitForTimeout(1500)
+      await page.keyboard.press(key)
 
       await expect(page.locator(`#${id}`)).toBeInViewport({ ratio: 0.15 })
     })
   }
 
-  test('active navigation state follows manual section scroll', async ({ page }) => {
-    await page.locator('#experience').scrollIntoViewIfNeeded()
-    await page.waitForTimeout(1200)
-
-    await expect(page.getByRole('button', { name: 'Navigate to Experience' })).toHaveAttribute('aria-current', 'true')
-  })
-
-  test('contact navigation dot activates at bottom of page', async ({ page }) => {
-    await page.evaluate(() => window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'instant' }))
-    await page.waitForTimeout(800)
-
-    await expect(page.getByRole('button', { name: 'Navigate to Contact' })).toHaveAttribute('aria-current', 'true')
-  })
-
-  test('navigation order keeps Projects before Experience', async ({ page }) => {
-    const projectsButton = page.getByRole('button', { name: 'Navigate to Projects' })
-    const experienceButton = page.getByRole('button', { name: 'Navigate to Experience' })
-
-    await expect(projectsButton).toBeVisible()
-    await expect(experienceButton).toBeVisible()
-
-    const projectsY = await projectsButton.evaluate((el) => el.getBoundingClientRect().top)
-    const experienceY = await experienceButton.evaluate((el) => el.getBoundingClientRect().top)
-
-    expect(projectsY).toBeLessThanOrEqual(experienceY)
-  })
-
-  test('scroll-to-top appears after leaving hero and returns page to top', async ({ page }) => {
-    await page.locator('#contact').scrollIntoViewIfNeeded()
-    await page.waitForTimeout(1500)
-
-    const scrollToTop = page.getByRole('button', { name: 'Scroll to top of page' })
-    await expect(scrollToTop).toBeVisible()
-
-    await scrollToTop.click()
-    await expect.poll(() => page.evaluate(() => window.scrollY), { timeout: 5000 }).toBeLessThan(120)
-    await expect(page.locator('#hero')).toBeInViewport({ ratio: 0.2 })
-  })
-})
-
-test.describe('Mobile navigation baseline', () => {
-  test.beforeEach(async ({ page }) => {
-    await page.setViewportSize({ width: 390, height: 844 })
-    await page.goto('/')
-    await page.waitForLoadState('networkidle')
-  })
-
-  test('hamburger menu opens and closes the mobile navigation', async ({ page }) => {
-    const trigger = page.locator('button[aria-controls="mobile-navigation-menu"]')
-    await expect(trigger).toBeVisible()
-    await expect(trigger).toHaveAttribute('aria-expanded', 'false')
-
-    await trigger.click()
-
-    const drawer = page.getByRole('navigation', { name: 'Mobile navigation' })
-    await expect(drawer).toBeVisible()
-    await expect(trigger).toHaveAttribute('aria-expanded', 'true')
-
-    await page.getByLabel('Close menu backdrop').click()
+  test('modifier combinations do not trigger shortcuts', async ({ page }) => {
+    await page.keyboard.press('Control+2')
+    await page.keyboard.press('Meta+d')
     await page.waitForTimeout(400)
 
-    await expect(drawer).not.toBeVisible()
-  })
-
-  test('mobile menu button scrolls to target section and closes drawer', async ({ page }) => {
-    await page.locator('button[aria-controls="mobile-navigation-menu"]').click()
-
-    const drawer = page.getByRole('navigation', { name: 'Mobile navigation' })
-    const contactButton = drawer.getByRole('button', { name: 'Contact' })
-    await expect(contactButton).toBeVisible()
-
-    await contactButton.click()
-    await page.waitForTimeout(1500)
-
-    await expect(drawer).not.toBeVisible()
-    await expect(page.locator('#contact')).toBeInViewport({ ratio: 0.15 })
-  })
-
-  test('mobile menu suppresses devtools trigger interactions', async ({ page }) => {
-    const menuTrigger = page.locator('button[aria-controls="mobile-navigation-menu"]')
-    await menuTrigger.click()
-
-    const drawer = page.getByRole('navigation', { name: 'Mobile navigation' })
-    await expect(drawer).toBeVisible()
-
-    const devtoolsTrigger = page.getByRole('button', { name: 'Toggle debug console' })
-    await expect(devtoolsTrigger).toBeVisible()
-
-    await expect
-      .poll(async () => {
-        return devtoolsTrigger.evaluate((el) => {
-          const style = getComputedStyle(el)
-          return {
-            pointerEvents: style.pointerEvents,
-            opacity: Number(style.opacity),
-            zIndex: Number(style.zIndex || '0'),
-          }
-        })
-      })
-      .toEqual({
-        pointerEvents: 'none',
-        opacity: 0,
-        zIndex: 40,
-      })
-
-    await page.getByLabel('Close menu backdrop').click()
-    await page.waitForTimeout(400)
-
-    await expect(drawer).not.toBeVisible()
-  })
-
-  test('mobile menu marks the current section as active after manual scroll', async ({ page }) => {
-    await page.locator('#experience').scrollIntoViewIfNeeded()
-    await page.waitForTimeout(1200)
-
-    const trigger = page.locator('button[aria-controls="mobile-navigation-menu"]')
-    await trigger.click()
-
-    const drawer = page.getByRole('navigation', { name: 'Mobile navigation' })
-    await expect(drawer).toBeVisible()
-
-    const activeItem = drawer.getByRole('button', { name: 'Experience' })
-    await expect(activeItem).toHaveAttribute('aria-current', 'page')
+    expect(await page.evaluate(() => window.scrollY)).toBeLessThan(50)
+    await expect(page.getByRole('region', { name: 'Developer console' })).toBeHidden()
   })
 })

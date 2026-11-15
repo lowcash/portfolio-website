@@ -1,6 +1,6 @@
 'use client'
 
-import { useEffect, useRef, useState, type MutableRefObject } from 'react'
+import { type MutableRefObject, useEffect, useRef, useState } from 'react'
 
 import { ACHIEVEMENTS, type Achievement } from './achievements'
 import { fireCasinoConfetti } from './confetti'
@@ -35,7 +35,6 @@ export type AchievementState = {
   showAchievement: Achievement | null
   isHidingAchievement: boolean
   unlockAchievementRef: MutableRefObject<(id: string) => void>
-  handleEnlightenmentClick: () => void
 }
 
 /**
@@ -249,18 +248,11 @@ export function useAchievementState(): AchievementState {
     }
   }, [])
 
-  const handleEnlightenmentClick = () => {
-    if (showAchievement?.id === 'enlightenment') {
-      fireCasinoConfetti()
-    }
-  }
-
   return {
     achievements,
     achievementsEnabled,
     showAchievement,
     isHidingAchievement,
     unlockAchievementRef,
-    handleEnlightenmentClick,
   }
 }

@@ -111,7 +111,7 @@ export function useShake(enabled: boolean, unlockAchievementRef: UnlockRef) {
           unlockAchievementRef.current('shake')
           scrollEvents = []
 
-          setOrbSetting('colorVariation', Math.random() * 100)
+          setOrbSetting('hue', Math.round(Math.random() * 72) * 5)
 
           console.log('%c📜 Rapid scroll detected! Colors shuffled!', 'color: #ec4899; font-size: 14px;')
         }
@@ -142,7 +142,7 @@ export function useShake(enabled: boolean, unlockAchievementRef: UnlockRef) {
             unlockAchievementRef.current('shake')
             mouseMovements = []
 
-            setOrbSetting('colorVariation', Math.random() * 100)
+            setOrbSetting('hue', Math.round(Math.random() * 72) * 5)
 
             console.log('%c🖱️ Rapid mouse movement detected! Colors shuffled!', 'color: #ec4899; font-size: 14px;')
           }

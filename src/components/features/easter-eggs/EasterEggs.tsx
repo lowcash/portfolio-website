@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState, useSyncExternalStore } from 'react'
 
-import { AchievementPopup } from './achievement-popup'
+import { AchievementToast } from './achievement-toast'
 import { ClickParticles } from './click-particles'
 import { bindConfettiCanvas, fireCasinoConfetti } from './confetti'
 import { EnlightenedAtmosphere } from './enlightened-atmosphere'
@@ -30,14 +30,8 @@ const subscribeToNothing = () => () => {}
  * live in useAchievementState. This component mounts triggers and overlays.
  */
 export function EasterEggs() {
-  const {
-    achievements,
-    achievementsEnabled,
-    showAchievement,
-    isHidingAchievement,
-    unlockAchievementRef,
-    handleEnlightenmentClick,
-  } = useAchievementState()
+  const { achievements, achievementsEnabled, showAchievement, isHidingAchievement, unlockAchievementRef } =
+    useAchievementState()
 
   const confettiCanvasRef = useRef<HTMLCanvasElement>(null)
   const [particles, setParticles] = useState<ClickParticle[]>([])
@@ -90,11 +84,7 @@ export function EasterEggs() {
         style={{ zIndex: 200, width: '100%', height: '100%' }}
       />
 
-      <AchievementPopup
-        achievement={showAchievement}
-        isHiding={isHidingAchievement}
-        onEnlightenmentClick={handleEnlightenmentClick}
-      />
+      <AchievementToast achievement={showAchievement} isHiding={isHidingAchievement} />
 
       <ClickParticles particles={particles} />
 

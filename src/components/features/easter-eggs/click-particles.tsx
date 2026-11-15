@@ -23,7 +23,7 @@ export function ClickParticles({ particles }: ClickParticlesProps) {
         >
           <div
             className='h-4 w-4 rounded-full'
-            style={{ backgroundColor: '#a855f7', animation: 'confettiBounce 2.5s ease-in forwards' }}
+            style={{ backgroundColor: '#ffafd4', animation: 'confettiBounce 2.5s ease-in forwards' }}
           />
         </div>
       ))}

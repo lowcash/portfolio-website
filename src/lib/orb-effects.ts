@@ -20,7 +20,7 @@ const clamp = (value: number, min: number, max: number) => Math.min(max, Math.ma
 
 type PermissionedOrientationEvent = typeof DeviceOrientationEvent & { requestPermission?: () => Promise<string> }
 
-/** CSS animation speed: durations are authored for the default speed, so scale the playback rate instead. */
+/** CSS animation speed: durations are authored for 1x, so scale the playback rate instead. */
 function startAnimationRate() {
   const apply = () => {
     if (typeof CSSAnimation === 'undefined') {
@@ -30,24 +30,21 @@ function startAnimationRate() {
     const rate = getOrbSettings().animationSpeed / DEFAULT_ORB_SETTINGS.animationSpeed
 
     for (const animation of document.getAnimations()) {
-      if (animation instanceof CSSAnimation && animation.animationName.startsWith('orb-float')) {
+      if (animation instanceof CSSAnimation && animation.animationName.startsWith('drift')) {
         animation.playbackRate = rate
       }
     }
   }
 
-  // Media queries swap the keyframes (desktop <-> mobile) which creates fresh animations at rate 1
-  const viewportQuery = window.matchMedia('(max-width: 767.98px)')
+  // Toggling reduced motion creates fresh animations at rate 1
   const reducedMotionQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
   const unsubscribe = subscribeToOrbSettings(apply)
 
   apply()
-  viewportQuery.addEventListener('change', apply)
   reducedMotionQuery.addEventListener('change', apply)
 
   return () => {
     unsubscribe()
-    viewportQuery.removeEventListener('change', apply)
     reducedMotionQuery.removeEventListener('change', apply)
   }
 }

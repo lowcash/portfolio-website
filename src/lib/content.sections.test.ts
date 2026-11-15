@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { PORTFOLIO_SECTIONS, SECTION_IDS, siteContent } from './content'
+import { PORTFOLIO_SECTIONS, SECTION_IDS, SECTION_SCENES, siteContent } from './content'
 
 describe('section config single source of truth', () => {
   it('exposes four portfolio sections with unique ids', () => {
@@ -15,8 +15,19 @@ describe('section config single source of truth', () => {
     )
   })
 
-  it('marks only contact as centered', () => {
-    const centered = PORTFOLIO_SECTIONS.filter((section) => section.centered).map((section) => section.id)
-    expect(centered).toEqual(['contact'])
+  it('pins a light scene and an accent tone to every section', () => {
+    expect(SECTION_SCENES).toEqual(['hero', 'projects', 'experience', 'contact'])
+    expect(new Set(PORTFOLIO_SECTIONS.map((section) => section.tone)).size).toBe(PORTFOLIO_SECTIONS.length)
+  })
+
+  it('gives every entry a tone', () => {
+    const tones = [
+      ...siteContent.featuredProjects.projects.map((project) => project.tone),
+      ...siteContent.backgroundExperience.experiences.map((experience) => experience.tone),
+      siteContent.backgroundExperience.education.tone,
+    ]
+
+    expect(tones).toHaveLength(7)
+    expect(tones.every(Boolean)).toBe(true)
   })
 })

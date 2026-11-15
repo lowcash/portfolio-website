@@ -23,7 +23,7 @@ async function openPageWithAchievements(page: Page, seed?: { id: string; unlocke
   await page.setViewportSize({ width: 1280, height: 800 })
   await page.goto('/')
   await page.waitForLoadState('networkidle')
-  await expect(page.getByRole('button', { name: 'Toggle debug console' })).toBeAttached()
+  await expect(page.getByRole('button', { name: 'Toggle developer console' })).toBeVisible()
 }
 
 async function scrollToSection(page: Page, id: string) {
@@ -48,6 +48,33 @@ test.describe('Easter eggs and achievements', () => {
     await page.locator('#hero h1').click({ clickCount: 3 })
 
     await expect.poll(() => isUnlocked(page, 'triple-click')).toBe(true)
+    // The triple click must not paint a selection block over the name
+    expect(await page.evaluate(() => window.getSelection()?.toString() ?? '')).not.toContain('Lukáš')
+  })
+
+  test('the copy address button unlocks Copy Cat', async ({ page }) => {
+    await page.context().grantPermissions(['clipboard-read', 'clipboard-write'])
+    await openPageWithAchievements(page)
+
+    await page.locator('#contact').scrollIntoViewIfNeeded()
+    await page.getByRole('button', { name: 'copy address' }).click()
+
+    await expect(page.getByRole('button', { name: 'copied' })).toBeVisible()
+    await expect.poll(() => isUnlocked(page, 'copy-cat')).toBe(true)
+  })
+
+  test('three navigation uses unlock Nav Master and the way back to the intro unlocks Round Trip', async ({ page }) => {
+    await openPageWithAchievements(page)
+
+    const tabs = page.getByRole('navigation', { name: 'Sections' })
+    await tabs.getByRole('link', { name: 'Contact' }).click()
+    await expect(page.locator('#contact')).toBeInViewport({ ratio: 0.15 })
+    await page.keyboard.press('2')
+    await expect(page.locator('#experience')).toBeInViewport({ ratio: 0.15 })
+    await tabs.getByRole('link', { name: 'Intro' }).click()
+
+    await expect.poll(() => isUnlocked(page, 'nav-master')).toBe(true)
+    await expect.poll(() => isUnlocked(page, 'round-trip')).toBe(true)
   })
 
   test('copying text unlocks Copy Cat', async ({ page }) => {
@@ -105,7 +132,7 @@ test.describe('Easter eggs and achievements', () => {
     await page.setViewportSize({ width: 1280, height: 800 })
     await page.goto('/')
     await page.waitForLoadState('networkidle')
-    await expect(page.getByRole('button', { name: 'Toggle debug console' })).toBeAttached()
+    await expect(page.getByRole('button', { name: 'Toggle developer console' })).toBeVisible()
 
     await page.evaluate(() => document.dispatchEvent(new Event('copy')))
     await page.waitForTimeout(300)
