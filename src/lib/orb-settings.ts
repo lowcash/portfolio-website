@@ -3,21 +3,22 @@
  *
  * - `ORB_SETTING_DEFINITIONS` drives the developer console sliders, persistence and CSS custom properties.
  * - The store writes CSS custom properties on :root (consumed by the `.orb` rules in animations.css) and persists
- *   to localStorage. Effect settings (magnetism, burst, ripples) are consumed by `orb-effects.ts`.
- * - Defaults are the Night Paper look, everything else is opt-in.
+ *   to localStorage. Physics settings (pointer, damping, parallax, nudge) are consumed by `orb-effects.ts`.
+ * - Defaults are the calm Night Paper look: 1x on every multiplier is the restrained composition, the upper half of
+ *   each slider is the louder one. Every control must have a visible effect (see the table in docs/ARCHITECTURE.md).
  */
 
 export type OrbSettingKey =
   | 'animationSpeed'
   | 'orbSize'
-  | 'orbBlur'
   | 'orbOpacity'
-  | 'orbBrightness'
+  | 'orbBlur'
   | 'hue'
   | 'saturation'
-  | 'magnetism'
-  | 'burst'
-  | 'ripples'
+  | 'pointer'
+  | 'damping'
+  | 'parallax'
+  | 'nudge'
 
 type OrbSettings = Record<OrbSettingKey, number>
 
@@ -37,6 +38,8 @@ export type OrbSettingDefinition = {
   toCssValue?: (value: number) => string
   /** One line shown under the label so every slider says what it visibly does */
   hint: string
+  /** Only does something where the pointer physics run (fine pointer, motion allowed) */
+  needsPhysics?: boolean
 }
 
 const times = (value: number) => `${value.toFixed(1)}x`
@@ -46,46 +49,45 @@ const percent = (value: number) => `${value.toFixed(0)}%`
 export const ORB_SETTING_DEFINITIONS: readonly OrbSettingDefinition[] = [
   {
     key: 'animationSpeed',
-    label: 'ANIMATION SPEED',
+    label: 'DRIFT SPEED',
     kind: 'slider',
-    min: 0.1,
-    max: 4,
+    min: 0.2,
+    max: 3,
     step: 0.1,
     defaultValue: 1,
     storageKey: 'animation_speed',
     format: times,
-    cssVar: '--animation-speed',
-    hint: 'How fast the orbs drift',
+    hint: 'How fast the lights drift on their own',
   },
   {
     key: 'orbSize',
-    label: 'ORB SIZE',
+    label: 'SIZE',
     kind: 'slider',
-    min: 0.4,
-    max: 1.8,
+    min: 0.5,
+    max: 1.6,
     step: 0.05,
     defaultValue: 1,
     storageKey: 'orb_size',
     format: times2,
     cssVar: '--orb-size',
-    hint: 'Diameter of every orb',
+    hint: 'Diameter of every light',
   },
   {
     key: 'orbOpacity',
-    label: 'ORB OPACITY',
+    label: 'INTENSITY',
     kind: 'slider',
     min: 0,
-    max: 1.6,
+    max: 2,
     step: 0.05,
     defaultValue: 1,
     storageKey: 'orb_opacity',
     format: (value) => percent(value * 100),
     cssVar: '--orb-opacity',
-    hint: 'Above the default the orbs punch through the page',
+    hint: '0% hides the lights; text contrast is only guaranteed up to 100%',
   },
   {
     key: 'orbBlur',
-    label: 'ORB BLUR',
+    label: 'SOFTNESS',
     kind: 'slider',
     min: 0.1,
     max: 1,
@@ -94,20 +96,7 @@ export const ORB_SETTING_DEFINITIONS: readonly OrbSettingDefinition[] = [
     storageKey: 'orb_blur',
     format: times2,
     cssVar: '--orb-blur',
-    hint: 'Below 1x the orbs turn into crisp discs',
-  },
-  {
-    key: 'orbBrightness',
-    label: 'GLOW',
-    kind: 'slider',
-    min: 0.2,
-    max: 2,
-    step: 0.05,
-    defaultValue: 1,
-    storageKey: 'orb_brightness',
-    format: (value) => value.toFixed(2),
-    cssVar: '--orb-glow',
-    hint: 'Brightness of the orb light',
+    hint: '1x is a pure haze, lower makes a harder-edged disc',
   },
   {
     key: 'hue',
@@ -127,51 +116,65 @@ export const ORB_SETTING_DEFINITIONS: readonly OrbSettingDefinition[] = [
     label: 'SATURATION',
     kind: 'slider',
     min: 0,
-    max: 1.3,
+    max: 2,
     step: 0.05,
     defaultValue: 1,
     storageKey: 'orb_saturation',
     format: (value) => percent(value * 100),
     cssVar: '--sat',
-    hint: '0% is monochrome, above 100% is neon',
+    hint: '0% is monochrome, 100% the muted default, above is vivid',
   },
   {
-    key: 'magnetism',
-    label: 'MAGNETISM',
+    key: 'pointer',
+    label: 'POINTER PUSH',
     kind: 'slider',
     min: 0,
     max: 100,
     step: 5,
-    defaultValue: 0,
-    storageKey: 'orb_magnetism',
+    defaultValue: 50,
+    storageKey: 'orb_pointer',
     format: percent,
-    cssVar: '--orb-magnetism',
-    toCssValue: (value) => String(value / 50),
-    hint: 'Orbs follow your cursor (device tilt on phones)',
+    needsPhysics: true,
+    hint: 'How far the lights give way to your cursor',
   },
   {
-    key: 'burst',
-    label: 'SECTION BURST',
+    key: 'damping',
+    label: 'SPRING DAMPING',
+    kind: 'slider',
+    min: 0.15,
+    max: 1.5,
+    step: 0.05,
+    defaultValue: 0.7,
+    storageKey: 'orb_damping',
+    format: times2,
+    needsPhysics: true,
+    hint: 'Low wobbles and overshoots, high glides without bounce',
+  },
+  {
+    key: 'parallax',
+    label: 'SCROLL PARALLAX',
     kind: 'slider',
     min: 0,
     max: 100,
     step: 5,
-    defaultValue: 0,
-    storageKey: 'orb_burst',
+    defaultValue: 50,
+    storageKey: 'orb_parallax',
     format: percent,
-    hint: 'Orbs pulse when you reach a new section',
+    needsPhysics: true,
+    hint: 'How much the lights trail behind while you scroll',
   },
   {
-    key: 'ripples',
-    label: 'CLICK RIPPLES',
+    key: 'nudge',
+    label: 'CLICK NUDGE',
     kind: 'toggle',
     min: 0,
     max: 1,
     step: 1,
-    defaultValue: 0,
-    storageKey: 'orb_ripples',
+    defaultValue: 1,
+    storageKey: 'orb_nudge',
     format: (value) => (value >= 1 ? 'ON' : 'OFF'),
-    hint: 'Click or tap the background for a shockwave that shoves the orbs',
+    needsPhysics: true,
+    hint: 'Clicking the background gives the lights a soft shove',
   },
 ]
 
@@ -189,54 +192,28 @@ type OrbPreset = {
 export const ORB_PRESETS: readonly OrbPreset[] = [
   { id: 'calm', label: 'Calm', description: 'The default look', values: {} },
   {
-    id: 'aurora',
-    label: 'Aurora',
-    description: 'Slow, wide, glowing curtains',
-    values: {
-      animationSpeed: 0.6,
-      orbSize: 1.4,
-      orbOpacity: 1.3,
-      orbBrightness: 1.2,
-      hue: 105,
-      magnetism: 35,
-      burst: 40,
-    },
+    id: 'still',
+    label: 'Still',
+    description: 'Barely there: no physics, slowest drift',
+    values: { animationSpeed: 0.3, orbOpacity: 0.7, pointer: 0, parallax: 0, nudge: 0 },
   },
   {
-    id: 'neon',
-    label: 'Neon',
-    description: 'Crisp, saturated, fast',
-    values: {
-      animationSpeed: 1.8,
-      orbSize: 0.8,
-      orbOpacity: 1.2,
-      orbBlur: 0.45,
-      orbBrightness: 1.4,
-      saturation: 1.3,
-      magnetism: 50,
-      burst: 80,
-      ripples: 1,
-    },
+    id: 'lively',
+    label: 'Lively',
+    description: 'Looser spring, more reaction',
+    values: { animationSpeed: 1.5, damping: 0.35, pointer: 80, parallax: 80 },
   },
   {
-    id: 'nebula',
-    label: 'Nebula',
-    description: 'Heavy, glowing magenta haze',
-    values: {
-      animationSpeed: 0.5,
-      orbSize: 1.4,
-      orbOpacity: 1.5,
-      orbBrightness: 1.3,
-      hue: 40,
-      saturation: 1.3,
-      magnetism: 20,
-    },
+    id: 'vivid',
+    label: 'Vivid',
+    description: 'Bigger, brighter, more colour',
+    values: { orbSize: 1.3, orbOpacity: 1.6, saturation: 1.6, orbBlur: 0.8 },
   },
   {
     id: 'mono',
     label: 'Mono',
     description: 'Black and white film',
-    values: { animationSpeed: 0.7, orbSize: 1.2, orbOpacity: 1.2, saturation: 0, burst: 30 },
+    values: { saturation: 0, orbOpacity: 1.2 },
   },
 ]
 
@@ -335,7 +312,6 @@ function scheduleSettingsEvent() {
     window.dispatchEvent(
       new CustomEvent(SETTINGS_EVENT, {
         detail: {
-          orbBrightness: settings.orbBrightness,
           animationSpeed: settings.animationSpeed,
           orbSize: settings.orbSize,
           orbBlur: settings.orbBlur,

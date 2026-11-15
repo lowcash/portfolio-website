@@ -41,9 +41,16 @@ export function TopBar({ currentSection, onSectionClick }: TopBarProps) {
             ))}
           </ul>
         </nav>
-        <p className='keyhint js-only'>
+        <button
+          className='keyhint'
+          type='button'
+          popoverTarget='console'
+          popoverTargetAction='toggle'
+          aria-keyshortcuts='D'
+          title='Open the developer console (shortcut: D)'
+        >
           <kbd>D</kbd> dev console
-        </p>
+        </button>
       </div>
     </header>
   )

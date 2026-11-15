@@ -58,7 +58,7 @@ test.describe('Portfolio smoke baseline', () => {
   })
 
   test('debug console toggles from keyboard and button without breaking layout', async ({ page }) => {
-    const consolePane = page.getByRole('region', { name: 'Developer console' })
+    const consolePane = page.getByRole('dialog', { name: 'Developer console' })
     await expect(page.getByRole('button', { name: 'Toggle developer console' })).toBeVisible()
     await page.mouse.click(640, 400)
 

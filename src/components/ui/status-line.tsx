@@ -48,8 +48,12 @@ export function StatusLine({ currentSection, onSectionClick }: StatusLineProps) 
         popoverTargetAction='toggle'
         aria-keyshortcuts='D'
         aria-label='Toggle developer console'
+        title='Developer console (shortcut: D)'
       >
         &gt;_<span>dev</span>
+        <kbd className='st-key' aria-hidden='true'>
+          D
+        </kbd>
       </button>
       <nav className='st-tabs' aria-label='Sections'>
         <ol>

@@ -59,7 +59,7 @@ test.describe('Lights, scenes and the hero', () => {
       .locator('#hero')
       .getByRole('button', { name: /Dev Console/ })
       .click()
-    await expect(page.getByRole('region', { name: 'Developer console' })).toBeVisible()
+    await expect(page.getByRole('dialog', { name: 'Developer console' })).toBeVisible()
   })
 
   test('type stays restrained: body 16-18px, h1 <= 96px, sections announce themselves', async ({ page }) => {
@@ -127,7 +127,7 @@ test.describe('Without JavaScript', () => {
     await expect(page.getByRole('button', { name: 'copy address' })).toBeHidden()
 
     await page.getByRole('button', { name: 'Toggle developer console' }).click()
-    const pane = page.getByRole('region', { name: 'Developer console' })
+    const pane = page.getByRole('dialog', { name: 'Developer console' })
     await expect(pane).toBeVisible()
     await expect(pane).toContainText('The controls need JavaScript')
   })

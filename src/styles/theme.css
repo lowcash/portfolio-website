@@ -57,23 +57,23 @@
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-standard: cubic-bezier(0.2, 0, 0, 1);
   --ease-glide: cubic-bezier(0.45, 0.05, 0.2, 1);
-  --animate-drift-a: drift-a 37s ease-in-out infinite alternate;
-  --animate-drift-b: drift-b 43s ease-in-out infinite alternate;
-  --animate-drift-c: drift-c 31s ease-in-out infinite alternate;
+  --animate-drift-a: drift-a 74s ease-in-out infinite alternate;
+  --animate-drift-b: drift-b 86s ease-in-out infinite alternate;
+  --animate-drift-c: drift-c 62s ease-in-out infinite alternate;
 
   @keyframes drift-a {
     to {
-      transform: translate3d(-7%, 5%, 0) scale(1.08);
+      transform: translate3d(-4%, 3%, 0) scale(1.05);
     }
   }
   @keyframes drift-b {
     to {
-      transform: translate3d(6%, -6%, 0) scale(0.93);
+      transform: translate3d(3.5%, -3.5%, 0) scale(0.96);
     }
   }
   @keyframes drift-c {
     to {
-      transform: translate3d(-5%, -7%, 0) scale(1.1);
+      transform: translate3d(-3%, -4%, 0) scale(1.06);
     }
   }
 }
@@ -91,13 +91,8 @@
     --sat: 1;
     --orb-size: 1;
     --orb-opacity: 1;
-    --orb-glow: 1;
     --orb-blur: 1;
     --orb-core: calc((1 - var(--orb-blur)) * 100%);
-    --orb-magnetism: 0;
-    --orb-pointer-x: 0;
-    --orb-pointer-y: 0;
-    --animation-speed: 1;
     --dur-1: 120ms;
     --dur-2: 240ms;
     --dur-3: 480ms;

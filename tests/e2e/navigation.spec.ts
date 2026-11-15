@@ -129,6 +129,6 @@ test.describe('Keyboard shortcuts', () => {
     await page.waitForTimeout(400)
 
     expect(await page.evaluate(() => window.scrollY)).toBeLessThan(50)
-    await expect(page.getByRole('region', { name: 'Developer console' })).toBeHidden()
+    await expect(page.getByRole('dialog', { name: 'Developer console' })).toBeHidden()
   })
 })

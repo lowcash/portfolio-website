@@ -182,7 +182,7 @@ export function AppShell({ sectionIds, children }: AppShellProps) {
 
       if (action.type === 'console') {
         event.preventDefault()
-        toggleConsolePane(true)
+        toggleConsolePane()
       } else if (action.type === 'escape') {
         closeConsolePane()
       } else {
@@ -193,7 +193,7 @@ export function AppShell({ sectionIds, children }: AppShellProps) {
 
     // Four fingers toggle the console on touch devices
     const handleTouchStart = (event: TouchEvent) => {
-      if (event.touches.length === 4) toggleConsolePane(false)
+      if (event.touches.length === 4) toggleConsolePane()
     }
 
     window.addEventListener('keydown', handleKeyDown)

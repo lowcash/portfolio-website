@@ -19,7 +19,7 @@ test.describe('Mobile console', () => {
 
   test('the pane scrolls inside itself and stays within the viewport', async ({ page }) => {
     await page.getByRole('button', { name: 'Toggle developer console' }).click()
-    const pane = page.getByRole('region', { name: 'Developer console' })
+    const pane = page.getByRole('dialog', { name: 'Developer console' })
     await expect(pane).toBeVisible()
 
     const box = await pane.boundingBox()
@@ -31,10 +31,37 @@ test.describe('Mobile console', () => {
 
   test('achievement tiles are comfortable touch targets', async ({ page }) => {
     await page.getByRole('button', { name: 'Toggle developer console' }).click()
-    const tile = page.getByRole('region', { name: 'Developer console' }).locator('.tiles button').first()
+    const tile = page.getByRole('dialog', { name: 'Developer console' }).locator('.tiles button').first()
     const box = await tile.boundingBox()
 
     expect(box!.width).toBeGreaterThanOrEqual(24)
     expect(box!.height).toBeGreaterThanOrEqual(24)
+  })
+
+  test('touch reaches the console from the status line and the hero, the physics sliders are disabled and the page does not overflow', async ({
+    page,
+  }) => {
+    await page
+      .locator('#hero')
+      .getByRole('button', { name: /Dev Console/ })
+      .click()
+    const pane = page.getByRole('dialog', { name: 'Developer console' })
+    await expect(pane).toBeVisible()
+    await expect(pane).toBeFocused()
+
+    for (const key of ['pointer', 'damping', 'parallax']) {
+      await expect(page.locator(`#orb-setting-${key}`)).toBeDisabled()
+    }
+    await expect(page.locator('#orb-setting-orbSize')).toBeEnabled()
+
+    // No physics on touch: the lights are never written to
+    await page.getByRole('button', { name: 'Close developer console' }).click()
+    await page.touchscreen.tap(200, 300)
+    expect(await page.locator('.orb-a').evaluate((element) => (element as HTMLElement).style.translate)).toBe('')
+
+    const overflow = await page.evaluate(
+      () => document.documentElement.scrollWidth - document.documentElement.clientWidth,
+    )
+    expect(overflow).toBeLessThanOrEqual(0)
   })
 })

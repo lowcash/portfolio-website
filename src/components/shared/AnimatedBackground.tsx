@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect } from 'react'
 
 import { startOrbEffects } from '@/lib/orb-effects'
 import { hydrateOrbSettings } from '@/lib/orb-settings'
@@ -6,16 +6,13 @@ import { hydrateOrbSettings } from '@/lib/orb-settings'
 /**
  * Three lights (radial gradients, transform and opacity only) and one static grain tile. The composition per section
  * is CSS (`html[data-scene]`), so nothing here re-renders while scrolling and the server HTML already is the final
- * hero layout. The opt-in effects (magnetism, burst, ripples) drive the same three elements.
+ * hero layout. The pointer physics (orb-effects.ts) drive the same three elements through `translate`.
  */
 export function AnimatedBackground() {
-  const rippleLayerRef = useRef<HTMLDivElement>(null)
-
   useEffect(() => {
     hydrateOrbSettings()
-    const rippleLayer = rippleLayerRef.current
 
-    return rippleLayer ? startOrbEffects(rippleLayer) : undefined
+    return startOrbEffects()
   }, [])
 
   return (
@@ -31,7 +28,6 @@ export function AnimatedBackground() {
           <i />
         </div>
       </div>
-      <div className='ripples chrome' ref={rippleLayerRef} aria-hidden='true' />
       <div className='grain' aria-hidden='true' />
     </>
   )

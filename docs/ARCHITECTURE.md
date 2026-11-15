@@ -24,7 +24,8 @@ src/
 │   ├── navigation/             # Section hash/URL helpers, scroll spy, useActiveSection
 │   ├── content.ts              # All copy, section ids/scenes/tones, entry tones
 │   ├── orb-settings.ts         # Settings of the lights: definitions, presets, persistence, CSS variables (tested)
-│   ├── orb-effects.ts          # Magnetism, section burst, click ripples, animation playback rate (opt-in)
+│   ├── orb-physics.ts          # Pure spring/target/nudge maths of the lights (tested)
+│   ├── orb-effects.ts          # The single rAF physics loop, drift playback rate
 │   ├── shortcuts.ts            # D / 0-3 / Esc key mapping (tested)
 │   └── scroll-metrics.ts       # One rAF-throttled scroll listener shared by subscribers
 └── styles/                     # theme (Tailwind 4 @theme tokens), base, layout, chrome, animations
@@ -42,6 +43,8 @@ Three slow lights sit behind a page typeset like a research paper (serif prose, 
 
 Keys (`lib/shortcuts.ts`, handled in `AppShell`): `D` toggles the console, `0`-`3` jump to a section, `Esc` closes the console. Modifier combinations and editable targets are ignored.
 
+The console is discoverable without being loud: a `D dev console` button in the top bar (from 768px), a small `D` key cap on the status-line `>_ dev` button (only where there is a keyboard, `hover: hover` and `pointer: fine`), the `>_ Dev Console` hero action, a line in the contact section, and `aria-keyshortcuts`. On touch the status-line `>_` button and the hero action open it (four fingers still work). It is a modal-style dialog (`role='dialog'`, `aria-modal`, a popover under the hood): focus moves into it on open, Tab and Shift+Tab cycle inside it, a Tab from focus that wandered out is pulled back, `Esc` or the close button close it and focus returns to what opened it.
+
 ### 3. Section Navigation
 
 **Implementation**: `src/components/layout/AppShell.tsx`, `src/lib/navigation/`
@@ -50,9 +53,30 @@ Keys (`lib/shortcuts.ts`, handled in `AppShell`): `D` toggles the console, `0`-`
 
 ### 4. The three lights
 
-**Implementation**: `src/components/shared/AnimatedBackground.tsx`, `src/styles/animations.css`, `src/lib/orb-*.ts`
+**Implementation**: `src/components/shared/AnimatedBackground.tsx`, `src/styles/animations.css`, `src/lib/orb-settings.ts`, `src/lib/orb-physics.ts`, `src/lib/orb-effects.ts`
 
-Three radial-gradient layers (no `filter: blur`, no `backdrop-filter`) move with `transform` and `opacity` only. The composition per section is CSS (`html[data-scene='projects'] .orb-a { --x … }`), the slow drift is a keyframe animation on the inner element, and nothing re-renders while scrolling. Hero is the default composition, so it is also the no-JS and reduced-motion state. Console sliders write CSS custom properties (`--orb-size`, `--orb-opacity`, `--orb-glow`, `--orb-blur`, `--hue-shift`, `--sat`); speed is `playbackRate`. Magnetism, section burst and click ripples are opt-in and drive the same three elements.
+Three radial-gradient layers (no `filter: blur`, no `backdrop-filter`) move with `transform`, `translate` and `opacity` only. The composition per section is CSS (`html[data-scene='projects'] .orb-a { --x ... }`), the slow drift (62-86 s per cycle, 3-6% travel) is a keyframe animation on the inner element, and nothing re-renders while scrolling. Hero is the default composition, so it is also the no-JS and reduced-motion state. The default look is deliberately calm: peak gradient alpha 0.34, OKLCH chroma 0.08-0.13, lights 70vmax wide, a smooth five-stop falloff.
+
+**Physics** (`orb-effects.ts`, maths in `orb-physics.ts`): one `requestAnimationFrame` loop drives a damped spring per light. The target of each spring is the cursor push (lights give way to the pointer, the far light less) plus the scroll parallax (the lights trail the scroll position); a click on the background adds a velocity kick away from it (not on links, buttons or inputs). Displacement is bounded to 90 px, integration uses fixed 1/120 s sub-steps (frame-rate independent) and only `translate` is written (skipped below 0.01 px). The loop sleeps when all springs are at rest, stops while the tab is hidden and is not started at all under `prefers-reduced-motion` or on coarse pointers (`(prefers-reduced-motion: no-preference) and (hover: hover) and (pointer: fine)`, followed live), where the lights just drift. The lights are `position: fixed`, so there is no "section offscreen" state; sleeping at rest is the equivalent.
+
+**Control audit** (every control in the dev console, what it changes and the default; each has a Playwright proof in `tests/e2e/orb-settings.desktop.spec.ts`):
+
+| Control (key)                  | Effect (code path)                                                                           | Default | Range    | Visible proof                                              |
+| ------------------------------ | -------------------------------------------------------------------------------------------- | ------- | -------- | ---------------------------------------------------------- |
+| Drift speed (`animationSpeed`) | `playbackRate` of the three `drift-*` CSS animations (`startAnimationRate`)                  | 1.0x    | 0.2-3    | test reads `playbackRate` 3 on all three animations        |
+| Size (`orbSize`)               | `--orb-size` -> `scale()` of `.orb`                                                          | 1.00x   | 0.5-1.6  | bounding width grows >1.4x, survives reload                |
+| Intensity (`orbOpacity`)       | `--orb-opacity` -> element `opacity` (capped at 1) and, above 100%, gradient alpha via `--k` | 100%    | 0-200%   | computed opacity 0 at 0%, gradient changes at 200%         |
+| Softness (`orbBlur`)           | `--orb-blur` -> `--orb-core`, the position of the first gradient stop (0 = pure haze)        | 1.00x   | 0.1-1    | first stop moves to 80% at 0.2x                            |
+| Hue shift (`hue`)              | `--hue-shift` -> OKLCH hue of the lights and of the accent (status line, chrome)             | 0 deg   | 0-360    | accent colour and gradient string change                   |
+| Saturation (`saturation`)      | `--sat` -> OKLCH chroma of the lights and the accent                                         | 100%    | 0-200%   | accent becomes grey at 0%, gradient chroma 0               |
+| Pointer push (`pointer`)       | spring target = -pointer x reach (70 px x strength x depth)                                  | 50%     | 0-100    | light offset < -30 px at 100%, back to 0 at 0%             |
+| Spring damping (`damping`)     | damping ratio of every spring (stiffness fixed)                                              | 0.70x   | 0.15-1.5 | 0.15 overshoots the target by > 6 px, 1.5 does not         |
+| Scroll parallax (`parallax`)   | spring target y = (0.5 - scroll progress) x 2 x reach (80 px x strength x depth)             | 50%     | 0-100    | light shifts > 40 px between top and bottom, 0 at 0%       |
+| Click nudge (`nudge`, switch)  | velocity kick of 300 px/s away from a click on the background                                | ON      | off/on   | offset peaks > 8 px after a click, not after a control hit |
+
+The pointer, damping, parallax and nudge controls are disabled (with a hint) where the physics are off (touch, reduced motion). Every physics change plays a short demo shove so the effect is visible without moving the cursor. Removed in the audit: **Glow** (multiplied the same gradient alpha as Intensity, a duplicate), **Magnetism** (replaced by Pointer push; it wrote CSS variables on `:root` every frame and used device tilt on phones), **Section burst** (a scale pulse that only fired on a section change and competed with the scene transition) and **Click ripples** (an accent-coloured ring, flashy; the nudge keeps the click interaction without it). Presets: Calm (default), Still, Lively, Vivid (the old louder look), Mono.
+
+Contrast: text over the lights is measured on real pixels in `tests/e2e/orb-contrast.desktop.spec.ts` (all four scenes, the lights at rest and pushed 90 px into each corner, 1440 and 390 wide); the worst case at 100% intensity is 5.47:1 (needs 4.5). Above 100% intensity the guarantee does not hold, which the slider hint says.
 
 ### 5. Achievement layer
 
@@ -79,7 +103,7 @@ The scale is deliberately restrained and lives in `theme.css`: body 17px, lead 1
 ## Testing
 
 - `pnpm test` - unit tests for pure logic (colors, settings, URLs, typography).
-- `pnpm run test:e2e` - Playwright (desktop, tablet, mobile), including navigation, `lights-and-hero`, `orb-settings` and `easter-eggs` specs.
+- `pnpm run test:e2e` - Playwright (desktop, tablet, mobile), including navigation, `lights-and-hero`, `orb-settings` (one proof per control plus the rAF cost), `orb-contrast` and `easter-eggs` specs.
 - `visual-baseline.spec.ts` - local-only screenshot regression (macOS snapshots, skipped in CI). Update intentionally with `pnpm exec playwright test visual-baseline --update-snapshots=all`.
 - `docs/PERF-BASELINE.md` - Lighthouse numbers before/after the optimization work.
 

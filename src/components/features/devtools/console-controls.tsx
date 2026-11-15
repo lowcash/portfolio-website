@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useSyncExternalStore } from 'react'
 
+import { subscribeToPhysicsSupport, supportsOrbPhysics } from '@/lib/orb-effects'
 import {
   ORB_PRESETS,
   ORB_SETTING_DEFINITIONS,
@@ -20,8 +21,20 @@ import { ACHIEVEMENTS, type Achievement } from '@/components/features/easter-egg
 import { ACHIEVEMENT_HINTS } from './achievement-hints'
 import { useConsoleStats } from './use-console-stats'
 
-function Knob({ definition, value }: { definition: OrbSettingDefinition; value: number }) {
+function Knob({
+  definition,
+  value,
+  hasPhysics,
+}: {
+  definition: OrbSettingDefinition
+  value: number
+  hasPhysics: boolean
+}) {
   const id = `orb-setting-${definition.key}`
+  const isDisabled = Boolean(definition.needsPhysics) && !hasPhysics
+  const hint = isDisabled
+    ? 'Needs a mouse and motion enabled; touch and reduced motion keep the plain drift'
+    : definition.hint
 
   if (definition.kind === 'toggle') {
     const isOn = value >= 1
@@ -37,11 +50,12 @@ function Knob({ definition, value }: { definition: OrbSettingDefinition; value: 
           aria-checked={isOn}
           aria-labelledby={`${id}-label`}
           aria-describedby={`${id}-hint`}
+          disabled={isDisabled}
           onClick={() => setOrbSetting(definition.key, isOn ? 0 : 1)}
         >
           {definition.format(value)}
         </button>
-        <small id={`${id}-hint`}>{definition.hint}</small>
+        <small id={`${id}-hint`}>{hint}</small>
       </div>
     )
   }
@@ -60,15 +74,17 @@ function Knob({ definition, value }: { definition: OrbSettingDefinition; value: 
         step={definition.step}
         value={value}
         aria-describedby={`${id}-hint`}
+        disabled={isDisabled}
         onChange={(event) => setOrbSetting(definition.key, parseFloat(event.target.value))}
       />
-      <small id={`${id}-hint`}>{definition.hint}</small>
+      <small id={`${id}-hint`}>{hint}</small>
     </div>
   )
 }
 
 function Lights() {
   const settings = useSyncExternalStore(subscribeToOrbSettings, getOrbSettings, getServerOrbSettings)
+  const hasPhysics = useSyncExternalStore(subscribeToPhysicsSupport, supportsOrbPhysics, () => true)
 
   return (
     <div className='pane'>
@@ -91,7 +107,7 @@ function Lights() {
       </div>
       <div className='knobs'>
         {ORB_SETTING_DEFINITIONS.map((definition) => (
-          <Knob key={definition.key} definition={definition} value={settings[definition.key]} />
+          <Knob key={definition.key} definition={definition} value={settings[definition.key]} hasPhysics={hasPhysics} />
         ))}
       </div>
     </div>

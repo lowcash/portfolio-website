@@ -84,8 +84,17 @@
     display: none;
     align-items: center;
     gap: var(--s-2);
+    padding: 0;
+    background: none;
+    border: 0;
+    cursor: pointer;
+    font: inherit;
     color: var(--color-ink-2);
     white-space: nowrap;
+    transition: color var(--dur-2) var(--ease-standard);
+  }
+  .topbar .keyhint:hover {
+    color: var(--accent);
   }
   @media (width >= 48rem) {
     .topbar {
@@ -203,9 +212,26 @@
     transform-origin: left center;
     transform: scaleX(var(--p, 0));
   }
+  .st-key {
+    display: none;
+  }
   @media (width >= 48rem) {
     .st-session span {
       display: inline;
+    }
+    /* The shortcut is only worth showing where there is a keyboard */
+    @media (hover: hover) and (pointer: fine) {
+      .st-key {
+        display: inline-block;
+        min-width: 0;
+        padding: 0 0.4em;
+        border: 1px solid currentColor;
+        border-radius: var(--radius-xs);
+        font-size: 0.85em;
+        font-weight: 400;
+        line-height: 1.4;
+        color: inherit;
+      }
     }
     .st-tabs ol {
       width: auto;

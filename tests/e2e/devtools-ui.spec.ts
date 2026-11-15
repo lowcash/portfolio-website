@@ -12,7 +12,7 @@ test.describe('Dev console pane', () => {
 
     await toggle.click()
 
-    const pane = page.getByRole('region', { name: 'Developer console' })
+    const pane = page.getByRole('dialog', { name: 'Developer console' })
     await expect(pane).toBeVisible()
     await expect(page.locator('#orb-setting-animationSpeed')).toBeVisible()
 
@@ -24,7 +24,7 @@ test.describe('Dev console pane', () => {
 
   test('the close button closes the pane and the page stays usable', async ({ page }) => {
     await page.getByRole('button', { name: 'Toggle developer console' }).click()
-    const pane = page.getByRole('region', { name: 'Developer console' })
+    const pane = page.getByRole('dialog', { name: 'Developer console' })
     await expect(pane).toBeVisible()
 
     await pane.getByRole('button', { name: 'Close developer console' }).click()
@@ -41,7 +41,7 @@ test.describe('Dev console pane', () => {
     })
     await page.getByRole('button', { name: 'Toggle developer console' }).click()
 
-    const pane = page.getByRole('region', { name: 'Developer console' })
+    const pane = page.getByRole('dialog', { name: 'Developer console' })
     const tiles = pane.locator('.tiles li')
     await expect(tiles).toHaveCount(16)
     await expect(tiles.first()).toHaveText('01')
@@ -50,7 +50,7 @@ test.describe('Dev console pane', () => {
 
   test('hovering or focusing a tile shows its hint', async ({ page }) => {
     await page.getByRole('button', { name: 'Toggle developer console' }).click()
-    const pane = page.getByRole('region', { name: 'Developer console' })
+    const pane = page.getByRole('dialog', { name: 'Developer console' })
 
     await pane.locator('.tiles button').nth(1).focus()
     await expect(pane.locator('.ach-line')).toContainText('Perfectly Balanced')
@@ -59,7 +59,7 @@ test.describe('Dev console pane', () => {
 
   test('the readout reports scene, scroll, fps and keys', async ({ page }) => {
     await page.getByRole('button', { name: 'Toggle developer console' }).click()
-    const readout = page.getByRole('region', { name: 'Developer console' }).locator('.read')
+    const readout = page.getByRole('dialog', { name: 'Developer console' }).locator('.read')
 
     await expect(readout).toContainText('scene')
     await expect(readout).toContainText('hero')
@@ -69,7 +69,7 @@ test.describe('Dev console pane', () => {
 
   test('reset buttons have cursor:pointer', async ({ page }) => {
     await page.getByRole('button', { name: 'Toggle developer console' }).click()
-    const pane = page.getByRole('region', { name: 'Developer console' })
+    const pane = page.getByRole('dialog', { name: 'Developer console' })
 
     for (const name of ['RESET TO DEFAULT', 'RESET ACHIEVEMENTS']) {
       const button = pane.getByRole('button', { name })

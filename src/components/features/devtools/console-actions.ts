@@ -7,21 +7,17 @@ export function openConsole(): void {
 
 export const CONSOLE_ID = 'console'
 
-let restoreTarget: HTMLElement | null = null
-
 export const supportsPopover = (pane: HTMLElement) => typeof pane.togglePopover === 'function'
 const isPaneOpen = (pane: HTMLElement) =>
   supportsPopover(pane) ? pane.matches(':popover-open') : pane.hasAttribute('data-open')
 
 /**
- * Toggles the pane through the popover API (data-open where unsupported). Opening from the keyboard moves focus into
- * the pane; closing hands it back to where it was. There is no focus trap: it is not a modal.
+ * Toggles the pane through the popover API (data-open where unsupported). Focus handling (into the dialog on open,
+ * back to the trigger on close, Tab trap) lives in console-pane.tsx so it also covers the declarative buttons.
  */
-export function toggleConsolePane(fromKeyboard: boolean) {
+export function toggleConsolePane() {
   const pane = document.getElementById(CONSOLE_ID)
   if (!pane) return
-
-  const wasOpen = isPaneOpen(pane)
 
   if (supportsPopover(pane)) {
     pane.togglePopover()
@@ -29,19 +25,11 @@ export function toggleConsolePane(fromKeyboard: boolean) {
     pane.toggleAttribute('data-open')
     pane.dispatchEvent(new Event('toggle'))
   }
-
-  if (wasOpen) {
-    restoreTarget?.focus({ preventScroll: true })
-    restoreTarget = null
-  } else if (fromKeyboard) {
-    restoreTarget = document.activeElement instanceof HTMLElement ? document.activeElement : null
-    pane.focus({ preventScroll: true })
-  }
 }
 
 export function closeConsolePane() {
   const pane = document.getElementById(CONSOLE_ID)
   if (pane && isPaneOpen(pane)) {
-    toggleConsolePane(true)
+    toggleConsolePane()
   }
 }
