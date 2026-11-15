@@ -80,8 +80,9 @@
     color: var(--color-ink);
     border-bottom-color: var(--accent);
   }
-  .topbar .keyhint {
-    display: none;
+  .topbar .keyhint,
+  .topbar .menu-btn {
+    display: flex;
     align-items: center;
     gap: var(--s-2);
     padding: 0;
@@ -93,8 +94,57 @@
     white-space: nowrap;
     transition: color var(--dur-2) var(--ease-standard);
   }
-  .topbar .keyhint:hover {
+  .topbar .keyhint:hover,
+  .topbar .menu-btn:hover {
     color: var(--accent);
+  }
+
+  /* Compact bar below 48rem: wordmark and a menu button; the menu is a full-width list under the bar */
+  @media (width < 48rem) {
+    .topbar .menu-btn {
+      min-width: 3rem;
+      justify-content: flex-end;
+    }
+    .top-menu {
+      display: none;
+      position: fixed;
+      inset: var(--top-h) 0 auto 0;
+      padding: var(--s-2) var(--gutter) var(--s-4);
+      background: var(--color-bg-sunk);
+      border-bottom: 1px solid var(--color-line-strong);
+      box-shadow: var(--shadow-pane);
+    }
+    .top-menu[data-open] {
+      display: block;
+    }
+    .topbar .top-menu ul {
+      flex-direction: column;
+      gap: 0;
+    }
+    .topbar .top-menu li {
+      display: block;
+    }
+    .topbar .top-menu a,
+    .topbar .top-menu .keyhint {
+      width: 100%;
+      min-height: 3rem;
+      font-size: 0.875rem;
+      border: 0;
+      border-top: 1px solid var(--color-line);
+    }
+    .topbar .top-menu nav a[aria-current] {
+      color: var(--accent);
+    }
+    .topbar .top-menu nav a[aria-current]::after {
+      content: '*';
+      margin-left: 0.4em;
+    }
+    .topbar .top-menu kbd {
+      display: none;
+    }
+    .topbar .top-menu .keyhint::before {
+      content: '>_';
+    }
   }
   @media (width >= 48rem) {
     .topbar {
@@ -106,8 +156,12 @@
     .topbar ul {
       gap: var(--s-6);
     }
-    .topbar .keyhint {
-      display: flex;
+    .topbar .menu-btn {
+      display: none;
+    }
+    /* The menu and the console button become direct flex items of the bar */
+    .top-menu {
+      display: contents;
     }
   }
 

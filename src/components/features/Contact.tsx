@@ -7,27 +7,28 @@ import { SectionHeader } from '@/components/ui/section-header'
 
 export function Contact() {
   const { title, email, hint, socials } = siteContent.contact
-  const [user, domain] = email.split('@')
 
   return (
     <section id='contact' className='section contact tone tone-fuchsia' aria-labelledby='contact-h'>
       <SectionHeader id='contact-h' index='03' eyebrow='Get in touch' title={title} />
 
       <div className='contact-body wrap grid-12'>
-        <a className='mail' href={`mailto:${email}`}>
-          {user}
-          <i>@</i>
-          {domain}
+        <a className='mail l-col' href={`mailto:${email}`}>
+          {email}
         </a>
-        <div className='contact-row mono'>
-          <CopyAddress value={email} />
+        <ul className='rows l-col'>
+          <li className='js-only'>
+            <CopyAddress value={email} />
+          </li>
           {socials.map((social) => (
-            <ExternalLink key={social.label} href={social.href} aria-label={`Connect with me on ${social.label}`}>
-              {social.label}
-            </ExternalLink>
+            <li key={social.label}>
+              <ExternalLink href={social.href} aria-label={`Connect with me on ${social.label}`}>
+                {social.label}
+              </ExternalLink>
+            </li>
           ))}
-        </div>
-        <p className='hint mono'>
+        </ul>
+        <p className='hint l-col mono'>
           <span className='d'>{formatTypography(hint.desktop)}</span>
           <span className='m'>{formatTypography(hint.mobile)}</span>
         </p>

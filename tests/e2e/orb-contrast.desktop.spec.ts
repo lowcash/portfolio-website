@@ -4,7 +4,8 @@ import { type Page, expect, test } from '@playwright/test'
  * AA text contrast over the lights, measured on real pixels: the page is screenshotted with all text made
  * transparent (so only the background, lights and grain remain), then every visible text element is compared with the
  * worst (lightest or darkest) background pixel inside its box. Worst-case frames: every scene, the lights at rest and
- * pushed to the physics limit towards each corner, at 100% intensity (the guaranteed range).
+ * pushed to the physics limit towards each corner, at 100% intensity (the guaranteed range). Sections that are not
+ * the active one are dimmed (opacity), which is taken into account: the inactive sections are measured too.
  */
 
 const SCENES = ['hero', 'featured-projects', 'experience', 'contact'] as const
@@ -31,6 +32,8 @@ async function collectTexts(page: Page): Promise<TextInfo[]> {
         .map((node) => node.textContent!.trim())
         .join(' ')
       const style = getComputedStyle(element)
+      // Section dimming (opacity) lowers the text colour's alpha towards whatever is behind it
+      const fade = parseFloat(getComputedStyle(element.closest('#hero, section.section')!).opacity)
 
       if (!own || style.visibility === 'hidden' || style.display === 'none') continue
 
@@ -52,7 +55,7 @@ async function collectTexts(page: Page): Promise<TextInfo[]> {
 
       found.push({
         label: `${element.tagName.toLowerCase()}.${element.className || '-'} "${own.slice(0, 28)}"`,
-        color: toRgba(style.color),
+        color: toRgba(style.color).map((value, index) => (index === 3 ? value * fade : value)),
         size: parseFloat(style.fontSize),
         weight: parseInt(style.fontWeight, 10),
         box: [x0, y0, x1, y1],
@@ -131,7 +134,7 @@ for (const viewport of [
         'data-scene',
         scene === 'featured-projects' ? 'projects' : scene,
       )
-      await page.waitForTimeout(2200)
+      await page.waitForTimeout(3600)
 
       for (const push of PUSHES) {
         await page.evaluate((offset) => {

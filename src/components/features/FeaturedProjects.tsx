@@ -67,18 +67,18 @@ function ProjectEntry({ project, index }: { project: Project; index: number }) {
       }
     >
       {linked.length > 0 ? (
-        <ul className='sites'>
+        <ul className='rows'>
           {linked.map((site) => (
             <li key={site.url}>
               <ExternalLink href={site.url} lang={NON_ENGLISH.has(site.name) ? 'cs' : undefined}>
                 {site.name}
               </ExternalLink>
-              <span>{formatTypography(site.description)}</span>
+              <span className='sub'>{formatTypography(site.description)}</span>
             </li>
           ))}
         </ul>
       ) : (
-        <ul className='points'>
+        <ul className='rows'>
           {plain.map((point) => (
             <li key={point}>{formatTypography(point)}</li>
           ))}
@@ -98,7 +98,7 @@ export function FeaturedProjects() {
         index='01'
         eyebrow='Selected work'
         title={title}
-        meta={`${projects.length} entries`}
+        meta={[`${projects.length} entries`]}
       />
 
       <div className='wrap'>

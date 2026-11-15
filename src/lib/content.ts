@@ -142,7 +142,7 @@ export const siteContent = {
           'Contributed to ASP.NET MVC platforms, implementing Razor views, jQuery UI components, and service-layer logic.',
           'Handled relational database queries (SQL), basic schema maintenance, and internal API endpoints.',
         ],
-        technologies: ['C# / .NET', 'ASP.NET MVC', 'SQL', 'REST APIs'],
+        technologies: ['C#', '.NET', 'ASP.NET MVC', 'SQL', 'REST APIs'],
         tone: 'sky' as Tone,
       },
     ],

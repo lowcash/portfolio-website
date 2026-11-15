@@ -15,7 +15,7 @@ export function BackgroundExperience() {
         index='02'
         eyebrow='Roles and education'
         title={title}
-        meta={`${experiences.length} roles · ${education.degrees.length} degrees`}
+        meta={[`${experiences.length} roles`, `${education.degrees.length} degrees`]}
       />
 
       <div className='wrap'>
@@ -28,7 +28,7 @@ export function BackgroundExperience() {
             title={experience.title}
             main={<TechList items={experience.technologies} />}
           >
-            <ul className='points'>
+            <ul className='rows'>
               {experience.bullets.map((bullet) => (
                 <li key={bullet}>{formatTypography(bullet)}</li>
               ))}
@@ -42,19 +42,19 @@ export function BackgroundExperience() {
           tone={education.tone}
           title={education.institution}
         >
-          <ul className='degrees'>
+          <ul className='rows'>
             {education.degrees.map((degree) => (
               <li key={degree.label}>
-                <span className='yrs mono'>{degree.years}</span>
                 <strong>{formatTypography(degree.label)}</strong>
-                <span className='field'>{formatTypography(degree.field)}</span>
+                <span className='sub'>{formatTypography(degree.field)}</span>
+                <span className='sub sub--meta mono'>{degree.years}</span>
               </li>
             ))}
           </ul>
         </Entry>
 
         <div className='aside grid-12 reveal'>
-          <p>
+          <p className='l-col'>
             {formatTypography(beyondCodeNote.before)}{' '}
             <span style={{ whiteSpace: 'nowrap' }}>
               as{' '}

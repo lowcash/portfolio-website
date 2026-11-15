@@ -72,10 +72,81 @@
     padding-inline: var(--gutter);
   }
 
+  /* ---------- one layout system ----------
+   * Every row of the page sits in .wrap.grid-12. Columns 1-2 are the rail (index, number, badge), columns 3-12 the
+   * content column; entries split the content column into main (3-7) and detail (8-12) from 64rem. Below 48rem
+   * everything is one column. Vertical rhythm: --s-5 inside a block, --s-6 and up between blocks. */
   .grid-12 {
     display: grid;
     grid-template-columns: repeat(12, minmax(0, 1fr));
     column-gap: var(--col-gap);
+  }
+  .l-rail,
+  .l-col {
+    grid-column: 1 / -1;
+  }
+  @media (width >= 48rem) {
+    .l-rail {
+      grid-column: 1 / span 2;
+    }
+    .l-col {
+      grid-column: 3 / -1;
+    }
+  }
+  @media (width >= 64rem) {
+    .l-main {
+      grid-column: 3 / span 5;
+    }
+    .l-detail {
+      grid-column: 8 / -1;
+    }
+  }
+
+  /* ---------- the two list patterns ----------
+   * .tags: short facts (stack, technologies) as hairline chips. .rows: sentences, links and contact lines, each with
+   * the same hairline marker in a fixed gutter, so every list starts and wraps on the same two edges. */
+  .tags {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s-2);
+    color: var(--color-ink-2);
+  }
+  .tags li {
+    padding: 0.05rem var(--s-2);
+    border: 1px solid var(--color-line-strong);
+    border-radius: var(--radius-xs);
+    white-space: nowrap;
+  }
+  .rows {
+    display: grid;
+    gap: var(--s-4);
+    max-width: var(--text-measure);
+    color: var(--color-ink-2);
+  }
+  .rows > li {
+    position: relative;
+    padding-left: 1.5rem;
+    line-height: 1.5;
+  }
+  .rows > li::before {
+    content: '';
+    position: absolute;
+    left: 0;
+    top: 0.75em;
+    width: 0.75rem;
+    height: 1px;
+    background: var(--accent);
+  }
+  .rows strong {
+    font-weight: 400;
+    color: var(--color-ink);
+  }
+  .rows .sub {
+    display: block;
+    margin-top: var(--s-1);
+  }
+  .rows .sub--meta {
+    color: var(--color-ink-3);
   }
 
   kbd {

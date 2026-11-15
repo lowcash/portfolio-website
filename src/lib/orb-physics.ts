@@ -7,8 +7,8 @@ export type Spring = { x: number; y: number; vx: number; vy: number }
 
 export type SpringTarget = { x: number; y: number }
 
-/** Spring stiffness (1/s^2): about 0.85 Hz natural frequency, so the lights react softly rather than snap */
-const STIFFNESS = 28
+/** Spring stiffness (1/s^2): about 0.64 Hz natural frequency, so the lights react slowly rather than snap */
+const STIFFNESS = 16
 /** Hard bound on the displacement of a light from its scene position, in px */
 export const MAX_OFFSET_PX = 90
 /** Largest frame time that is simulated; a stalled tab must not catapult the lights */
@@ -48,8 +48,8 @@ export function isAtRest(spring: Spring, target: SpringTarget) {
 
 /** How far each light travels, in px at 100% strength (depth: the far light moves less) */
 const LIGHT_DEPTH = [1, 0.7, 0.5] as const
-const POINTER_REACH_PX = 70
-const PARALLAX_REACH_PX = 80
+const POINTER_REACH_PX = 50
+const PARALLAX_REACH_PX = 56
 /** Lights retreat from the cursor, so the page content is never chased by a glow */
 const POINTER_DIRECTION = -1
 
@@ -80,7 +80,7 @@ export function resolveTarget(index: number, input: TargetInput): SpringTarget {
 /** Velocity kick (px/s) for light `index` from a click at `-1..1` viewport coordinates: away from the click. */
 export function resolveNudge(index: number, clickX: number, clickY: number): { vx: number; vy: number } {
   const depth = LIGHT_DEPTH[index % LIGHT_DEPTH.length]
-  const NUDGE_SPEED_PX_S = 300
+  const NUDGE_SPEED_PX_S = 180
   const length = Math.hypot(clickX, clickY) || 1
 
   return { vx: (-clickX / length) * NUDGE_SPEED_PX_S * depth, vy: (-clickY / length) * NUDGE_SPEED_PX_S * depth }

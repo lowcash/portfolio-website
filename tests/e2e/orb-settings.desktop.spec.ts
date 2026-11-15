@@ -265,7 +265,9 @@ test.describe('Orb controls: every one has a visible effect', () => {
 })
 
 test.describe('Calm defaults and motion preferences', () => {
-  test('the default lights are quiet: low alpha, muted colour, slow drift', async ({ page }) => {
+  test('the default lights are barely there: low alpha, muted colour, a drift cycle of two to three minutes', async ({
+    page,
+  }) => {
     await page.setViewportSize({ width: 1280, height: 800 })
     await page.goto('/')
     await page.waitForLoadState('networkidle')
@@ -274,17 +276,30 @@ test.describe('Calm defaults and motion preferences', () => {
       const gradient = getComputedStyle(document.querySelector('.orb-a i')!).backgroundImage
       const alphas = [...gradient.matchAll(/\/ ([\d.]+)\)/g)].map((match) => parseFloat(match[1]))
       const chroma = [...gradient.matchAll(/oklch\(([\d.]+) ([\d.]+)/g)].map((match) => parseFloat(match[2]))
-      const durations = document
+      const timings = document
         .getAnimations()
         .filter((animation) => animation instanceof CSSAnimation && animation.animationName.startsWith('drift'))
-        .map((animation) => (animation.effect!.getTiming().duration as number) / 1000)
+        .map((animation) => animation.effect!.getTiming())
+      // One cycle is the full way out and back: twice the duration when the animation alternates
+      const cycles = timings.map(
+        (timing) => ((timing.duration as number) / 1000) * (timing.direction === 'alternate' ? 2 : 1),
+      )
 
-      return { peakAlpha: Math.max(...alphas), peakChroma: Math.max(...chroma), shortestDrift: Math.min(...durations) }
+      return {
+        peakAlpha: Math.max(...alphas),
+        peakChroma: Math.max(...chroma),
+        shortestCycle: Math.min(...cycles),
+        longestCycle: Math.max(...cycles),
+        count: cycles.length,
+      }
     })
 
-    expect(look.peakAlpha).toBeLessThanOrEqual(0.35)
+    expect(look.peakAlpha).toBeLessThanOrEqual(0.25)
     expect(look.peakChroma).toBeLessThanOrEqual(0.14)
-    expect(look.shortestDrift).toBeGreaterThanOrEqual(60)
+    expect(look.count).toBe(3)
+    // Barely there: one full drift cycle takes two to three minutes
+    expect(look.shortestCycle).toBeGreaterThanOrEqual(120)
+    expect(look.longestCycle).toBeLessThanOrEqual(180)
   })
 
   test('with reduced motion there is no physics: the lights stay put and the physics sliders are disabled', async ({

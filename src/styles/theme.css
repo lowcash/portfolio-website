@@ -57,23 +57,24 @@
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-standard: cubic-bezier(0.2, 0, 0, 1);
   --ease-glide: cubic-bezier(0.45, 0.05, 0.2, 1);
-  --animate-drift-a: drift-a 74s ease-in-out infinite alternate;
-  --animate-drift-b: drift-b 86s ease-in-out infinite alternate;
-  --animate-drift-c: drift-c 62s ease-in-out infinite alternate;
+  /* One full cycle (out and back) takes 2.2 to 2.8 minutes; the travel is about 2% of a light's own width */
+  --animate-drift-a: drift-a 130s ease-in-out infinite;
+  --animate-drift-b: drift-b 150s ease-in-out infinite;
+  --animate-drift-c: drift-c 170s ease-in-out infinite;
 
   @keyframes drift-a {
-    to {
-      transform: translate3d(-4%, 3%, 0) scale(1.05);
+    50% {
+      transform: translate3d(-2%, 1.5%, 0) scale(1.025);
     }
   }
   @keyframes drift-b {
-    to {
-      transform: translate3d(3.5%, -3.5%, 0) scale(0.96);
+    50% {
+      transform: translate3d(1.75%, -1.75%, 0) scale(0.98);
     }
   }
   @keyframes drift-c {
-    to {
-      transform: translate3d(-3%, -4%, 0) scale(1.06);
+    50% {
+      transform: translate3d(-1.5%, -2%, 0) scale(1.03);
     }
   }
 }
@@ -97,7 +98,8 @@
     --dur-2: 240ms;
     --dur-3: 480ms;
     --dur-4: 900ms;
-    --dur-scene: 1600ms;
+    --dur-scene: 3200ms;
+    --dim-inactive: 0.82;
     --gutter: 1rem;
     --col-gap: 1rem;
     --bar-h: 3rem;

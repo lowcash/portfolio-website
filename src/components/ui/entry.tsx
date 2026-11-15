@@ -31,22 +31,22 @@ interface EntryProps {
 export function Entry({ num, badge, tone, title, lead = false, main, children }: EntryProps) {
   return (
     <article className={`entry grid-12 reveal ${lead ? 'entry--lead' : ''} ${TONE_CLASS[tone]}`}>
-      <p className='e-idx mono'>
+      <p className='e-idx l-rail mono'>
         <span className='num'>{num}</span>
         <span className='badge caps'>{formatTypography(badge)}</span>
       </p>
-      <div className='e-main'>
+      <div className='e-main l-col l-main'>
         <h3>{formatTypography(title)}</h3>
         {main}
       </div>
-      <div className='e-detail'>{children}</div>
+      <div className='e-detail l-col l-detail'>{children}</div>
     </article>
   )
 }
 
-export function TechList({ items }: { items: readonly string[] }) {
+export function TechList({ items, className = '' }: { items: readonly string[]; className?: string }) {
   return (
-    <ul className='tech mono'>
+    <ul className={`tags mono ${className}`.trim()}>
       {items.map((item) => (
         <li key={item}>{formatTypography(item)}</li>
       ))}

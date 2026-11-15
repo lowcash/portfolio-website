@@ -34,15 +34,45 @@ test.describe('Mobile navigation regressions', () => {
     expect(hint!.y + hint!.height).toBeLessThanOrEqual(bar!.y)
   })
 
-  test('the conventional menu fits one row inside the gutters at 390px', async ({ page }) => {
-    const menu = page.getByRole('navigation', { name: 'Main menu' })
-    const box = await menu.boundingBox()
-    const last = await menu.getByRole('link', { name: 'Contact' }).boundingBox()
+  test('the top bar is compact: wordmark and a menu button on one slim row, the menu opens full width', async ({
+    page,
+  }) => {
+    const bar = await page.locator('.topbar').boundingBox()
+    const wordmark = await page.getByRole('link', { name: 'lowcash.dev' }).boundingBox()
+    const button = page.locator('.menu-btn')
+    const buttonBox = await button.boundingBox()
 
-    expect(box).not.toBeNull()
-    expect(last).not.toBeNull()
-    expect(last!.x + last!.width).toBeLessThanOrEqual(390)
-    expect(box!.height).toBeLessThan(60)
+    expect(bar!.height).toBeLessThanOrEqual(48)
+    expect(wordmark!.x).toBeGreaterThanOrEqual(15)
+    expect(buttonBox!.x + buttonBox!.width).toBeLessThanOrEqual(390 - 15)
+    expect(buttonBox!.height).toBeGreaterThanOrEqual(40)
+    await expect(page.locator("nav[aria-label='Main menu']")).toBeHidden()
+    await expect(button).toHaveAttribute('aria-expanded', 'false')
+
+    await button.click()
+    await expect(button).toHaveAttribute('aria-expanded', 'true')
+    const menu = page.locator('#top-menu')
+    const menuBox = await menu.boundingBox()
+    expect(menuBox!.x).toBe(0)
+    expect(menuBox!.width).toBe(390)
+    for (const name of ['Intro', 'Projects', 'Experience', 'Contact']) {
+      const link = await menu.getByRole('link', { name }).boundingBox()
+      expect(link!.height).toBeGreaterThanOrEqual(44)
+    }
+
+    await page.keyboard.press('Escape')
+    await expect(page.locator("nav[aria-label='Main menu']")).toBeHidden()
+  })
+
+  test('the dev console stays reachable on touch: from the menu and from the status line', async ({ page }) => {
+    await page.getByRole('button', { name: 'Menu', exact: true }).click()
+    await page.locator('.topbar .keyhint').click()
+    await expect(page.getByRole('dialog', { name: 'Developer console' })).toBeVisible()
+    await expect(page.locator('#top-menu')).toBeHidden()
+
+    await page.keyboard.press('Escape')
+    await page.getByRole('button', { name: 'Toggle developer console' }).click()
+    await expect(page.getByRole('dialog', { name: 'Developer console' })).toBeVisible()
   })
 
   test('the page does not scroll sideways', async ({ page }) => {

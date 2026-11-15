@@ -23,7 +23,7 @@ export function CopyAddress({ value }: { value: string }) {
   }
 
   return (
-    <button type='button' className='copy js-only' onClick={handleClick}>
+    <button type='button' className='link copy js-only' onClick={handleClick}>
       {label}
     </button>
   )
