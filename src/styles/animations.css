@@ -241,13 +241,13 @@
       scroll-behavior: smooth;
     }
     .orb-a i {
-      animation: var(--animate-drift-a);
+      animation: var(--animate-drift-a-x), var(--animate-drift-a-y);
     }
     .orb-b i {
-      animation: var(--animate-drift-b);
+      animation: var(--animate-drift-b-x), var(--animate-drift-b-y);
     }
     .orb-c i {
-      animation: var(--animate-drift-c);
+      animation: var(--animate-drift-c-x), var(--animate-drift-c-y);
     }
     /* 174 BPM: hovering the drum & bass link makes the room keep time */
     html:has(.dnb:hover) .orbs,

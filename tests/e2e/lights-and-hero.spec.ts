@@ -131,7 +131,6 @@ test.describe('Without JavaScript', () => {
 
     await expect(page.getByRole('heading', { name: "Hey, I'm Lukáš Machala" })).toBeVisible()
     await expect(page.getByRole('navigation', { name: 'Sections' }).getByRole('link')).toHaveCount(4)
-    await expect(page.getByRole('button', { name: 'copy address' })).toBeHidden()
 
     await page.getByRole('button', { name: 'Toggle developer console' }).click()
     const pane = page.getByRole('dialog', { name: 'Developer console' })

@@ -8,6 +8,7 @@ import {
   ORB_SETTING_DEFINITIONS,
   type OrbSettingDefinition,
   applyOrbPreset,
+  describePresetChanges,
   getOrbSettings,
   getServerOrbSettings,
   matchesPreset,
@@ -85,6 +86,9 @@ function Knob({
 function Lights() {
   const settings = useSyncExternalStore(subscribeToOrbSettings, getOrbSettings, getServerOrbSettings)
   const hasPhysics = useSyncExternalStore(subscribeToPhysicsSupport, supportsOrbPhysics, () => true)
+  const [peeked, setPeeked] = useState<string | null>(null)
+  const shown =
+    ORB_PRESETS.find((preset) => preset.id === peeked) ?? ORB_PRESETS.find((preset) => matchesPreset(settings, preset))
 
   return (
     <div className='pane'>
@@ -94,8 +98,11 @@ function Lights() {
           <button
             key={preset.id}
             type='button'
-            title={preset.description}
             aria-pressed={matchesPreset(settings, preset)}
+            onPointerEnter={() => setPeeked(preset.id)}
+            onPointerLeave={() => setPeeked(null)}
+            onFocus={(event) => setPeeked(event.currentTarget.matches(':focus-visible') ? preset.id : null)}
+            onBlur={() => setPeeked(null)}
             onClick={() => applyOrbPreset(preset)}
           >
             {preset.label}
@@ -105,6 +112,15 @@ function Lights() {
           RESET TO DEFAULT
         </button>
       </div>
+      <p className='preset-note' aria-live='polite'>
+        {shown ? (
+          <>
+            <b>{shown.label}</b> — {shown.description}. <span>{describePresetChanges(shown)}</span>
+          </>
+        ) : (
+          'Custom: sliders moved away from every preset.'
+        )}
+      </p>
       <div className='knobs'>
         {ORB_SETTING_DEFINITIONS.map((definition) => (
           <Knob key={definition.key} definition={definition} value={settings[definition.key]} hasPhysics={hasPhysics} />
@@ -196,7 +212,7 @@ function Achievements() {
             <b>{focused.name}</b> — {focused.unlocked ? focused.description : hintFor(focused)}
           </>
         ) : (
-          'Sixteen things to find. Hover a tile for a hint.'
+          `${achievements.length} things to find. Hover, focus or tap a tile for a hint.`
         )}
       </p>
       <button type='button' className='reset' onClick={handleReset}>

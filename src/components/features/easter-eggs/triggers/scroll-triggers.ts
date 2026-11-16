@@ -159,14 +159,13 @@ export function useSpeedReader(enabled: boolean, unlockAchievementRef: UnlockRef
     }
 
     const startTime = Date.now()
-    const docHeight = document.documentElement.scrollHeight
-    const winHeight = window.innerHeight
-    const maxScroll = docHeight - winHeight
 
     const handleScroll = () => {
+      // Measured at scroll time: fonts, images and the mobile address bar change the page height after mount
+      const maxScroll = document.documentElement.scrollHeight - window.innerHeight
       const scrollTop = window.scrollY
 
-      if (scrollTop >= maxScroll) {
+      if (maxScroll > 0 && scrollTop >= maxScroll - 2) {
         const endTime = Date.now()
         const duration = (endTime - startTime) / 1000 // Convert to seconds
 

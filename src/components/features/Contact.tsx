@@ -1,7 +1,6 @@
 import { siteContent } from '@/lib/content'
 import { formatTypography } from '@/lib/prevent-widows'
 
-import { CopyAddress } from '@/components/ui/copy-address'
 import { ExternalLink } from '@/components/ui/external-link'
 import { SectionHeader } from '@/components/ui/section-header'
 
@@ -17,9 +16,6 @@ export function Contact() {
           {email}
         </a>
         <ul className='rows l-col'>
-          <li className='js-only'>
-            <CopyAddress value={email} />
-          </li>
           {socials.map((social) => (
             <li key={social.label}>
               <ExternalLink href={social.href} aria-label={`Connect with me on ${social.label}`}>

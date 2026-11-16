@@ -27,8 +27,15 @@ export function StatusAchievements() {
   const counter = useSyncExternalStore(subscribe, readCounter, () => '')
 
   return (
-    <span className='st-ach' hidden={counter === ''} aria-label='Achievements unlocked'>
+    <button
+      type='button'
+      className='st-ach'
+      hidden={counter === ''}
+      popoverTarget='console'
+      popoverTargetAction='show'
+      aria-label={`Achievements unlocked ${counter.replace('★︎ ', '')}. Open the console to see them`}
+    >
       {counter}
-    </span>
+    </button>
   )
 }

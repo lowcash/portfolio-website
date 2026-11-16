@@ -52,17 +52,6 @@ test.describe('Easter eggs and achievements', () => {
     expect(await page.evaluate(() => window.getSelection()?.toString() ?? '')).not.toContain('Lukáš')
   })
 
-  test('the copy address button unlocks Copy Cat', async ({ page }) => {
-    await page.context().grantPermissions(['clipboard-read', 'clipboard-write'])
-    await openPageWithAchievements(page)
-
-    await page.locator('#contact').scrollIntoViewIfNeeded()
-    await page.getByRole('button', { name: 'copy address' }).click()
-
-    await expect(page.getByRole('button', { name: 'copied' })).toBeVisible()
-    await expect.poll(() => isUnlocked(page, 'copy-cat')).toBe(true)
-  })
-
   test('three navigation uses unlock Nav Master and the way back to the intro unlocks Round Trip', async ({ page }) => {
     await openPageWithAchievements(page)
 

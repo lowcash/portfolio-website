@@ -122,7 +122,7 @@ export const ORB_SETTING_DEFINITIONS: readonly OrbSettingDefinition[] = [
     storageKey: 'orb_saturation',
     format: (value) => percent(value * 100),
     cssVar: '--sat',
-    hint: '0% is monochrome, 100% the muted default, above is vivid',
+    hint: '0% is monochrome (lights and accents), 100% the muted default, above is vivid',
   },
   {
     key: 'pointer',
@@ -194,14 +194,14 @@ export const ORB_PRESETS: readonly OrbPreset[] = [
   {
     id: 'still',
     label: 'Still',
-    description: 'Barely there: no physics, slowest drift, fainter',
-    values: { animationSpeed: 0.3, orbOpacity: 0.7, pointer: 0, parallax: 0, nudge: 0 },
+    description: 'Barely there: much fainter, slowest drift, no reaction to cursor, scroll or clicks',
+    values: { animationSpeed: 0.2, orbOpacity: 0.35, pointer: 0, parallax: 0, nudge: 0 },
   },
   {
     id: 'lively',
     label: 'Lively',
-    description: 'Looser spring, more reaction',
-    values: { animationSpeed: 3, damping: 0.4, pointer: 80, parallax: 80 },
+    description: 'Brighter lights that drift 3x faster and swing loosely with the cursor and scroll',
+    values: { animationSpeed: 3, orbOpacity: 1.4, saturation: 1.3, damping: 0.4, pointer: 80, parallax: 80 },
   },
   {
     id: 'vivid',
@@ -212,10 +212,20 @@ export const ORB_PRESETS: readonly OrbPreset[] = [
   {
     id: 'mono',
     label: 'Mono',
-    description: 'Black and white film',
-    values: { saturation: 0, orbOpacity: 1.2 },
+    description: 'Black and white film: no colour anywhere, slightly brighter lights',
+    values: { saturation: 0, orbOpacity: 1.5 },
   },
 ]
+
+/** "DRIFT SPEED 0.3x · INTENSITY 35%": the settings a preset moves away from the default, for the console note. */
+export function describePresetChanges(preset: OrbPreset) {
+  const changes = ORB_SETTING_DEFINITIONS.filter(
+    (definition) =>
+      preset.values[definition.key] !== undefined && preset.values[definition.key] !== definition.defaultValue,
+  ).map((definition) => `${definition.label.toLowerCase()} ${definition.format(preset.values[definition.key]!)}`)
+
+  return changes.length > 0 ? changes.join(' · ') : 'every control at its default'
+}
 
 const SETTINGS_EVENT = 'orb-settings-change'
 const SETTINGS_EVENT_DEBOUNCE_MS = 400

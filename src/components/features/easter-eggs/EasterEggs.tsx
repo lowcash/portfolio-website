@@ -84,7 +84,11 @@ export function EasterEggs() {
         style={{ zIndex: 200, width: '100%', height: '100%' }}
       />
 
-      <AchievementToast achievement={showAchievement} isHiding={isHidingAchievement} />
+      <AchievementToast
+        achievement={showAchievement}
+        isHiding={isHidingAchievement}
+        progress={`${achievements.filter((achievement) => achievement.unlocked).length}/${achievements.length}`}
+      />
 
       <ClickParticles particles={particles} />
 

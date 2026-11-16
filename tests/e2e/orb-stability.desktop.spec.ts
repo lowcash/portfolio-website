@@ -37,6 +37,93 @@ test.describe('Orb stability', () => {
     expect(maxY).toBeLessThan(900 * 0.03)
   })
 
+  test('the lights drift subconsciously: 2-6% of the viewport, 50-90 s cycles, smooth, never still', async ({
+    page,
+  }) => {
+    const centres = () =>
+      page.locator('.orb i').evaluateAll((els) =>
+        els.map((element) => {
+          const r = element.getBoundingClientRect()
+          return [r.x + r.width / 2, r.y + r.height / 2]
+        }),
+      )
+
+    // Real time: non-zero but tiny, and no frame ever jumps
+    const first = await centres()
+    let previous = first
+    let maxStep = 0
+    let maxFromStart = 0
+
+    for (let sample = 0; sample < 16; sample += 1) {
+      await page.waitForTimeout(250)
+      const current = await centres()
+      current.forEach(([x, y], index) => {
+        maxStep = Math.max(maxStep, Math.hypot(x - previous[index][0], y - previous[index][1]))
+        maxFromStart = Math.max(maxFromStart, Math.hypot(x - first[index][0], y - first[index][1]))
+      })
+      previous = current
+    }
+
+    console.log(
+      `real time, 4 s: max step per 250 ms ${maxStep.toFixed(2)}px, max from start ${maxFromStart.toFixed(2)}px`,
+    )
+    expect(maxFromStart).toBeGreaterThan(0.2)
+    expect(maxStep).toBeLessThan(4)
+
+    // A whole cycle (animations scrubbed): excursion per light in % of the viewport
+    const sweep = await page.evaluate(() => {
+      const drift = document
+        .getAnimations()
+        .filter((animation) => animation instanceof CSSAnimation && animation.animationName.startsWith('drift'))
+      const cycles = drift.map((animation) => (animation.effect!.getTiming().duration as number) / 1000)
+      const orbs = [...document.querySelectorAll('.orb i')]
+      const lo = orbs.map(() => [Infinity, Infinity])
+      const hi = orbs.map(() => [-Infinity, -Infinity])
+      let maxScrubStep = 0
+      let last: number[][] | null = null
+
+      for (let second = 0; second <= 180; second += 1) {
+        drift.forEach((animation) => {
+          animation.pause()
+          animation.currentTime = second * 1000
+        })
+        const now = orbs.map((element) => {
+          const r = element.getBoundingClientRect()
+          return [r.x + r.width / 2, r.y + r.height / 2]
+        })
+        now.forEach(([x, y], index) => {
+          lo[index] = [Math.min(lo[index][0], x), Math.min(lo[index][1], y)]
+          hi[index] = [Math.max(hi[index][0], x), Math.max(hi[index][1], y)]
+          if (last) {
+            maxScrubStep = Math.max(maxScrubStep, Math.hypot(x - last[index][0], y - last[index][1]))
+          }
+        })
+        last = now
+      }
+
+      return {
+        shortest: Math.min(...cycles) * 1,
+        longest: Math.max(...cycles) * 1,
+        halfX: orbs.map((_, index) => (hi[index][0] - lo[index][0]) / 2 / innerWidth),
+        halfY: orbs.map((_, index) => (hi[index][1] - lo[index][1]) / 2 / innerHeight),
+        maxScrubStep,
+      }
+    })
+
+    console.log(
+      `excursion x ${sweep.halfX.map((v) => (v * 100).toFixed(1))}% y ${sweep.halfY.map((v) => (v * 100).toFixed(1))}%, max 1 s step ${sweep.maxScrubStep.toFixed(1)}px`,
+    )
+    expect(sweep.shortest).toBeGreaterThanOrEqual(50)
+    expect(sweep.longest).toBeLessThanOrEqual(90)
+
+    for (const fraction of [...sweep.halfX, ...sweep.halfY]) {
+      expect(fraction).toBeGreaterThanOrEqual(0.02)
+      expect(fraction).toBeLessThanOrEqual(0.06)
+    }
+    // Gentle: never more than ~20 px of travel in one second
+    expect(sweep.maxScrubStep).toBeLessThan(20)
+  })
+
   test('hovering links and entries does not animate a line', async ({ page }) => {
     const targets = page.locator('.entry, a.mail')
     const count = await targets.count()

@@ -4,6 +4,7 @@ import {
   DEFAULT_ORB_SETTINGS,
   ORB_PRESETS,
   ORB_SETTING_DEFINITIONS,
+  describePresetChanges,
   matchesPreset,
   resolveStoredSettings,
   settingsToCssVars,
@@ -128,6 +129,18 @@ describe('presets', () => {
 
     for (const preset of others) {
       expect(matchesPreset(DEFAULT_ORB_SETTINGS, preset)).toBe(false)
+    }
+  })
+
+  it('describes what each preset changes, in words and values', () => {
+    const [calm, still, lively] = ORB_PRESETS
+
+    expect(describePresetChanges(calm)).toBe('every control at its default')
+    expect(describePresetChanges(still)).toContain('intensity 35%')
+    expect(describePresetChanges(lively)).toContain('drift speed 3.0x')
+
+    for (const preset of ORB_PRESETS.slice(1)) {
+      expect(preset.description.length, preset.id).toBeGreaterThan(20)
     }
   })
 })

@@ -100,7 +100,7 @@ test.describe('Orb controls: every one has a visible effect', () => {
       )
 
     await setSlider(page, 'animationSpeed', 3)
-    await expect.poll(async () => (await readRates()).length).toBe(3)
+    await expect.poll(async () => (await readRates()).length).toBe(6)
     await expect.poll(async () => (await readRates()).every((rate) => rate === 3)).toBe(true)
   })
 
@@ -254,6 +254,10 @@ test.describe('Orb controls: every one has a visible effect', () => {
     await expect.poll(() => rootVar(page, '--sat')).toBe('1.6')
     await expect.poll(() => rootVar(page, '--orb-size')).toBe('1.3')
 
+    await expect(consoleDialog.locator('.preset-note')).toContainText('saturation 160%')
+    await consoleDialog.getByRole('button', { name: 'Still' }).hover()
+    await expect(consoleDialog.locator('.preset-note')).toContainText('intensity 35%')
+
     await consoleDialog.getByRole('button', { name: 'Still' }).click()
     await expect(consoleDialog.getByRole('switch', { name: /CLICK NUDGE/ })).toHaveAttribute('aria-checked', 'false')
 
@@ -265,7 +269,7 @@ test.describe('Orb controls: every one has a visible effect', () => {
 })
 
 test.describe('Calm defaults and motion preferences', () => {
-  test('the default lights are barely there: low alpha, muted colour, a drift cycle of four to six minutes', async ({
+  test('the default lights are barely there: low alpha, muted colour, a slow drift cycle of one to one and a half minutes', async ({
     page,
   }) => {
     await page.setViewportSize({ width: 1280, height: 800 })
@@ -296,10 +300,10 @@ test.describe('Calm defaults and motion preferences', () => {
 
     expect(look.peakAlpha).toBeLessThanOrEqual(0.25)
     expect(look.peakChroma).toBeLessThanOrEqual(0.14)
-    expect(look.count).toBe(3)
-    // Barely there: one full drift cycle takes four to six minutes
-    expect(look.shortestCycle).toBeGreaterThanOrEqual(200)
-    expect(look.longestCycle).toBeLessThanOrEqual(400)
+    expect(look.count).toBe(6)
+    // Subconscious: one full drift cycle takes 50 to 90 seconds
+    expect(look.shortestCycle).toBeGreaterThanOrEqual(50)
+    expect(look.longestCycle).toBeLessThanOrEqual(90)
   })
 
   test('with reduced motion there is no physics: the lights stay put and the physics sliders are disabled', async ({

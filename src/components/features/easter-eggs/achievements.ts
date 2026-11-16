@@ -1,11 +1,11 @@
 /**
  * Achievements (detection lives in ./triggers, unlock state in EasterEggs):
- * 1. Triple-click the hero heading → "Speed Clicker"
+ * 1. Triple-click the hero name → "Speed Clicker"
  * 2. Scroll to exactly 50% → "Perfectly Balanced"
  * 3. Idle 60 seconds → "Patience is a Virtue"
  * 4. Rapid 10 clicks → "Click Master"
  * 5. Copy text → "Copy Cat"
- * 6. Shake device / mouse → "Shake It Off"
+ * 6. Shake the mouse side to side (desktop) / flick-scroll fast (touch) → "Shake It Off"
  * 7. Scroll 10,000px → "Marathon Runner"
  * 8. Reach bottom <2min → "Speed Reader"
  * 9. Visit 3+ times → "Repeat Visitor"
@@ -17,7 +17,7 @@
  * 15. Reach contact and return hero → "Back to Origin"
  * 16. Unlocked all 15 → "Enlightenment" (auto-unlock)
  *
- * Open the Dev Console (tap the terminal icon bottom-left or press D on desktop) to see all achievements.
+ * Open the Dev Console (the >_ dev button, the hero action, or D on desktop) to see all achievements.
  */
 
 export interface Achievement {
@@ -33,7 +33,7 @@ export const ACHIEVEMENTS: Achievement[] = [
   {
     id: 'triple-click',
     name: 'Speed Clicker',
-    description: 'Triple-clicked the logo',
+    description: 'Triple-clicked the name in the hero',
     icon: '⚡',
     unlocked: false,
   },
@@ -68,7 +68,7 @@ export const ACHIEVEMENTS: Achievement[] = [
   {
     id: 'shake',
     name: 'Shake It Off',
-    description: 'Shook your device or moved mouse rapidly',
+    description: 'Shook the mouse side to side, or flicked the page up and down',
     icon: '📱',
     unlocked: false,
   },

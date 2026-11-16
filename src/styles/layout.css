@@ -98,7 +98,7 @@
     position: relative;
     align-items: start;
     padding-top: var(--s-4);
-    margin-bottom: clamp(var(--s-6), 5vw, var(--s-8));
+    margin-bottom: var(--block-gap);
   }
   .rule::before {
     content: '';
@@ -159,7 +159,7 @@
   .entry {
     position: relative;
     row-gap: var(--s-5);
-    padding-block: var(--s-6) clamp(var(--s-6), 5vw, var(--s-7));
+    padding-block: var(--rule-gap);
   }
   .entry::before {
     content: '';
@@ -261,7 +261,7 @@
 
   .aside {
     position: relative;
-    padding-block: clamp(var(--s-6), 5vw, var(--s-8)) 0;
+    padding-block: var(--rule-gap) 0;
   }
   .aside::before {
     content: '';
@@ -283,9 +283,6 @@
   /* ---------- contact ---------- */
   .contact {
     padding-bottom: calc(var(--bar-h) + var(--s-8));
-  }
-  .contact .sec-head {
-    margin-bottom: clamp(var(--s-6), 5vw, var(--s-8));
   }
   .contact-body {
     row-gap: var(--s-5);
@@ -315,13 +312,6 @@
   .contact .rows button {
     padding-block: var(--s-2);
     margin-block: calc(var(--s-2) * -1);
-  }
-  .copy {
-    display: inline;
-    font: inherit;
-    cursor: pointer;
-    background: none;
-    border: 0;
   }
   .hint {
     color: var(--color-ink-2);
