@@ -92,13 +92,13 @@
   /* ---------- sections ---------- */
   .section {
     position: relative;
-    padding-block: var(--section-pad) var(--s-7);
+    padding-top: var(--sec-gap);
   }
   .sec-head {
     position: relative;
     align-items: start;
-    padding-top: var(--s-4);
-    margin-bottom: var(--block-gap);
+    padding-top: var(--sec-gap);
+    margin-bottom: var(--sec-gap);
   }
   .rule::before {
     content: '';
@@ -113,11 +113,10 @@
   }
   .idx {
     color: var(--accent);
-    padding-top: var(--s-3);
+    padding-top: var(--s-1);
   }
   .sec-title {
     grid-column: 1 / -1;
-    padding-top: var(--s-2);
   }
   .eyebrow {
     color: var(--color-ink-2);
@@ -160,6 +159,10 @@
     position: relative;
     row-gap: var(--s-5);
     padding-block: var(--rule-gap);
+  }
+  /* The last entry's lower gap is not extra space: the next section rule brings its own --sec-gap */
+  .entry:last-child {
+    margin-bottom: calc(var(--rule-gap) * -1);
   }
   .entry::before {
     content: '';

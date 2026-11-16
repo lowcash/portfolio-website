@@ -7,18 +7,6 @@ const SECTIONS = [
 ] as const
 
 const statusTabs = (page: Page) => page.getByRole('navigation', { name: 'Sections' })
-const mainMenu = (page: Page) => page.locator("nav[aria-label='Main menu']")
-
-/** Below 48rem the main menu hides behind a Menu button; this opens it (a no-op where the menu is inline). */
-async function openMainMenu(page: Page) {
-  const button = page.getByRole('button', { name: 'Menu', exact: true })
-
-  if (await button.isVisible()) {
-    await button.click()
-  }
-
-  return mainMenu(page)
-}
 
 for (const [name, viewport] of [
   ['Desktop', { width: 1280, height: 800 }],
@@ -42,27 +30,12 @@ for (const [name, viewport] of [
         await expect(tab).toHaveAttribute('aria-current', 'location')
         await expect(page.locator('html')).toHaveAttribute('data-scene', scene)
       })
-
-      test(`conventional menu item ${label} scrolls to #${id}`, async ({ page }) => {
-        const item = (await openMainMenu(page)).getByRole('link', { name: label })
-        await expect(item).toBeVisible()
-
-        await item.click()
-
-        await expect(page.locator(`#${id}`)).toBeInViewport({ ratio: 0.15 })
-        // The menu closes after a jump on mobile, so read the state from the link itself
-        await expect(mainMenu(page).locator(`a[href='#${id}']`)).toHaveAttribute('aria-current', 'location')
-      })
     }
 
-    test('the conventional menu lists Intro, Projects, Experience, Contact in page order', async ({ page }) => {
-      await expect((await openMainMenu(page)).getByRole('link')).toHaveText([
-        'Intro',
-        'Projects',
-        'Experience',
-        'Contact',
-      ])
+    test('the status line is the only section navigation, in page order', async ({ page }) => {
       await expect(statusTabs(page).getByRole('link')).toHaveText([/intro/i, /projects/i, /experience/i, /contact/i])
+      await expect(page.getByRole('navigation')).toHaveCount(1)
+      await expect(page.locator('.topbar nav')).toHaveCount(0)
     })
 
     test('active tab follows manual scrolling', async ({ page }) => {
@@ -73,7 +46,6 @@ for (const [name, viewport] of [
         'aria-current',
         'location',
       )
-      await expect(mainMenu(page).locator("a[href='#experience']")).toHaveAttribute('aria-current', 'location')
     })
 
     test('contact tab is active at the bottom of the page', async ({ page }) => {

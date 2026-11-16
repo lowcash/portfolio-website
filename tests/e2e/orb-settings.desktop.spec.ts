@@ -269,7 +269,7 @@ test.describe('Orb controls: every one has a visible effect', () => {
 })
 
 test.describe('Calm defaults and motion preferences', () => {
-  test('the default lights are barely there: low alpha, muted colour, a slow drift cycle of one to one and a half minutes', async ({
+  test('the default lights are barely there: low alpha, muted colour, a slow drift cycle of 44 to 60 seconds', async ({
     page,
   }) => {
     await page.setViewportSize({ width: 1280, height: 800 })
@@ -301,9 +301,9 @@ test.describe('Calm defaults and motion preferences', () => {
     expect(look.peakAlpha).toBeLessThanOrEqual(0.25)
     expect(look.peakChroma).toBeLessThanOrEqual(0.14)
     expect(look.count).toBe(6)
-    // Subconscious: one full drift cycle takes 50 to 90 seconds
-    expect(look.shortestCycle).toBeGreaterThanOrEqual(50)
-    expect(look.longestCycle).toBeLessThanOrEqual(90)
+    // Subconscious: one full drift cycle takes 44 to 60 seconds
+    expect(look.shortestCycle).toBeGreaterThanOrEqual(40)
+    expect(look.longestCycle).toBeLessThanOrEqual(60)
   })
 
   test('with reduced motion there is no physics: the lights stay put and the physics sliders are disabled', async ({

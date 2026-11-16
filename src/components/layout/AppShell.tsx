@@ -215,7 +215,7 @@ export function AppShell({ sectionIds, children }: AppShellProps) {
 
   return (
     <>
-      <TopBar currentSection={currentSection} onSectionClick={navigateToSection} />
+      <TopBar onSectionClick={navigateToSection} />
       {children}
 
       {areExtrasReady ? <EasterEggs /> : null}

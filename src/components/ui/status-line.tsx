@@ -2,9 +2,10 @@
 
 import { useEffect, useRef } from 'react'
 
-import { PORTFOLIO_SECTIONS } from '@/lib/content'
+import { SECTION_LINKS } from '@/lib/navigation/section-links'
 import { subscribeToScrollMetrics } from '@/lib/scroll-metrics'
 
+import { SectionLink } from './section-link'
 import { StatusAchievements } from './status-achievements'
 
 interface StatusLineProps {
@@ -49,25 +50,14 @@ export function StatusLine({ currentSection, onSectionClick }: StatusLineProps) 
       </button>
       <nav className='st-tabs' aria-label='Sections'>
         <ol>
-          {PORTFOLIO_SECTIONS.map((section, index) => (
-            <li key={section.id}>
-              <a
-                href={`#${section.id}`}
-                aria-current={index === currentSection ? 'location' : undefined}
-                aria-keyshortcuts={String(index)}
-                onClick={(event) => {
-                  if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) {
-                    return
-                  }
-                  event.preventDefault()
-                  onSectionClick(index)
-                }}
-              >
+          {SECTION_LINKS.map((item) => (
+            <li key={item.id}>
+              <SectionLink item={item} currentSection={currentSection} onSectionClick={onSectionClick}>
                 <span className='n' aria-hidden='true'>
-                  {index}:
+                  {item.index}:
                 </span>
-                {section.name}
-              </a>
+                {item.label}
+              </SectionLink>
             </li>
           ))}
         </ol>

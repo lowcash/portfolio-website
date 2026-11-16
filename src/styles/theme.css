@@ -60,48 +60,48 @@
   --ease-standard: cubic-bezier(0.2, 0, 0, 1);
   --ease-glide: cubic-bezier(0.45, 0.05, 0.2, 1);
   /* Subconscious drift: each light floats on two independent sine-like axes (x and y have different periods, so the
-   * path never visibly repeats). Full cycles take 52 to 90 s, the travel is +-3 to 3.5% of the viewport (the smaller lights travel further in their own units). */
-  --animate-drift-a-x: drift-a-x 64s ease-in-out infinite;
-  --animate-drift-a-y: drift-a-y 88s ease-in-out infinite;
-  --animate-drift-b-x: drift-b-x 76s ease-in-out infinite;
-  --animate-drift-b-y: drift-b-y 52s ease-in-out infinite;
-  --animate-drift-c-x: drift-c-x 90s ease-in-out infinite;
-  --animate-drift-c-y: drift-c-y 70s ease-in-out infinite;
+   * path never visibly repeats). Full cycles take 44 to 60 s, the travel is +-4.5 to 5.5% of the viewport; independent of scroll. */
+  --animate-drift-a-x: drift-a-x 48s ease-in-out infinite;
+  --animate-drift-a-y: drift-a-y 60s ease-in-out infinite;
+  --animate-drift-b-x: drift-b-x 56s ease-in-out infinite;
+  --animate-drift-b-y: drift-b-y 44s ease-in-out infinite;
+  --animate-drift-c-x: drift-c-x 60s ease-in-out infinite;
+  --animate-drift-c-y: drift-c-y 52s ease-in-out infinite;
 
   @keyframes drift-a-x {
     0%,
     100% {
-      translate: -3.5vw 0;
+      translate: -4.5vw 0;
     }
     50% {
-      translate: 3.5vw 0;
+      translate: 4.5vw 0;
     }
   }
   @keyframes drift-a-y {
     0%,
     100% {
-      transform: translate3d(0, -3vh, 0) scale(0.98);
+      transform: translate3d(0, -4.5vh, 0) scale(0.98);
     }
     50% {
-      transform: translate3d(0, 3vh, 0) scale(1.03);
+      transform: translate3d(0, 4.5vh, 0) scale(1.03);
     }
   }
   @keyframes drift-b-x {
     0%,
     100% {
-      translate: 4vw 0;
+      translate: 5vw 0;
     }
     50% {
-      translate: -4vw 0;
+      translate: -5vw 0;
     }
   }
   @keyframes drift-b-y {
     0%,
     100% {
-      transform: translate3d(0, -3.4vh, 0) scale(0.97);
+      transform: translate3d(0, -5vh, 0) scale(0.97);
     }
     50% {
-      transform: translate3d(0, 3.4vh, 0) scale(1.02);
+      transform: translate3d(0, 5vh, 0) scale(1.02);
     }
   }
   @keyframes drift-c-x {
@@ -116,10 +116,10 @@
   @keyframes drift-c-y {
     0%,
     100% {
-      transform: translate3d(0, -5vh, 0) scale(0.98);
+      transform: translate3d(0, -5.5vh, 0) scale(0.98);
     }
     50% {
-      transform: translate3d(0, 5vh, 0) scale(1.03);
+      transform: translate3d(0, 5.5vh, 0) scale(1.03);
     }
   }
 }
@@ -161,10 +161,10 @@
     --s-8: calc(var(--spacing) * 18);
     --s-9: calc(var(--spacing) * 28);
     --s-10: calc(var(--spacing) * 42);
-    --section-pad: clamp(var(--s-8), 9vw, var(--s-9));
-    /* Space on each side of every ledger hairline (entries, aside) and between a section head and its body */
+    /* Vertical rhythm, two steps only. --rule-gap: space on each side of a ledger hairline (entries, aside).
+     * --sec-gap: space above and below every section rule, and between a section head and its body. */
     --rule-gap: var(--s-6);
-    --block-gap: clamp(var(--s-6), 5vw, var(--s-8));
+    --sec-gap: clamp(var(--s-7), 6vw, var(--s-8));
 
     --text-display: clamp(2.75rem, 1.5rem + 5.4vw, 6rem);
     --text-measure: 68ch;

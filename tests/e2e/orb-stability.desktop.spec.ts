@@ -37,7 +37,7 @@ test.describe('Orb stability', () => {
     expect(maxY).toBeLessThan(900 * 0.03)
   })
 
-  test('the lights drift subconsciously: 2-6% of the viewport, 50-90 s cycles, smooth, never still', async ({
+  test('the lights drift subconsciously: 3-6.5% of the viewport, 44-60 s cycles, smooth, never still', async ({
     page,
   }) => {
     const centres = () =>
@@ -113,14 +113,14 @@ test.describe('Orb stability', () => {
     console.log(
       `excursion x ${sweep.halfX.map((v) => (v * 100).toFixed(1))}% y ${sweep.halfY.map((v) => (v * 100).toFixed(1))}%, max 1 s step ${sweep.maxScrubStep.toFixed(1)}px`,
     )
-    expect(sweep.shortest).toBeGreaterThanOrEqual(50)
-    expect(sweep.longest).toBeLessThanOrEqual(90)
+    expect(sweep.shortest).toBeGreaterThanOrEqual(40)
+    expect(sweep.longest).toBeLessThanOrEqual(60)
 
     for (const fraction of [...sweep.halfX, ...sweep.halfY]) {
-      expect(fraction).toBeGreaterThanOrEqual(0.02)
-      expect(fraction).toBeLessThanOrEqual(0.06)
+      expect(fraction).toBeGreaterThanOrEqual(0.03)
+      expect(fraction).toBeLessThanOrEqual(0.065)
     }
-    // Gentle: never more than ~20 px of travel in one second
+    // Gentle: never more than ~20 px of travel in one second (measured: about 10)
     expect(sweep.maxScrubStep).toBeLessThan(20)
   })
 

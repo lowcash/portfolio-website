@@ -34,43 +34,17 @@ test.describe('Mobile navigation regressions', () => {
     expect(hint!.y + hint!.height).toBeLessThanOrEqual(bar!.y)
   })
 
-  test('the top bar is compact: wordmark and a menu button on one slim row, the menu opens full width', async ({
+  test('the top bar is a slim wordmark row with no menu; the console stays reachable from the status line', async ({
     page,
   }) => {
     const bar = await page.locator('.topbar').boundingBox()
     const wordmark = await page.getByRole('link', { name: 'lowcash.dev' }).boundingBox()
-    const button = page.locator('.menu-btn')
-    const buttonBox = await button.boundingBox()
 
     expect(bar!.height).toBeLessThanOrEqual(48)
     expect(wordmark!.x).toBeGreaterThanOrEqual(15)
-    expect(buttonBox!.x + buttonBox!.width).toBeLessThanOrEqual(390 - 15)
-    expect(buttonBox!.height).toBeGreaterThanOrEqual(40)
-    await expect(page.locator("nav[aria-label='Main menu']")).toBeHidden()
-    await expect(button).toHaveAttribute('aria-expanded', 'false')
+    await expect(page.locator('.menu-btn')).toHaveCount(0)
+    await expect(page.locator('.topbar .keyhint')).toBeHidden()
 
-    await button.click()
-    await expect(button).toHaveAttribute('aria-expanded', 'true')
-    const menu = page.locator('#top-menu')
-    const menuBox = await menu.boundingBox()
-    expect(menuBox!.x).toBe(0)
-    expect(menuBox!.width).toBe(390)
-    for (const name of ['Intro', 'Projects', 'Experience', 'Contact']) {
-      const link = await menu.getByRole('link', { name }).boundingBox()
-      expect(link!.height).toBeGreaterThanOrEqual(44)
-    }
-
-    await page.keyboard.press('Escape')
-    await expect(page.locator("nav[aria-label='Main menu']")).toBeHidden()
-  })
-
-  test('the dev console stays reachable on touch: from the menu and from the status line', async ({ page }) => {
-    await page.getByRole('button', { name: 'Menu', exact: true }).click()
-    await page.locator('.topbar .keyhint').click()
-    await expect(page.getByRole('dialog', { name: 'Developer console' })).toBeVisible()
-    await expect(page.locator('#top-menu')).toBeHidden()
-
-    await page.keyboard.press('Escape')
     await page.getByRole('button', { name: 'Toggle developer console' }).click()
     await expect(page.getByRole('dialog', { name: 'Developer console' })).toBeVisible()
   })
