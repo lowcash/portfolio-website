@@ -13,7 +13,7 @@ src/
 │   ├── fonts/                  # fraunces-roman / fraunces-italic / martian-mono .woff2 (subset, see Fonts)
 │   └── page.tsx                # Server-side section assembly inside AppShell
 ├── components/
-│   ├── features/               # Sections (Hero, FeaturedProjects, BackgroundExperience, Contact), server components
+│   ├── features/               # Sections (Hero, FeaturedProjects, Experience, Contact), server components
 │   │   ├── devtools/           # console-pane (popover shell), console-controls (lazy), console-actions, use-console-stats
 │   │   └── easter-eggs/        # EasterEggs state, achievement toast, achievements data, confetti, triggers/ (one hook per egg)
 │   ├── shared/                 # AnimatedBackground (three lights + grain)
@@ -23,9 +23,7 @@ src/
 ├── lib/
 │   ├── navigation/             # Section hash/URL helpers, scroll spy, useActiveSection
 │   ├── content.ts              # All copy, section ids/scenes/tones, entry tones
-│   ├── orb-settings.ts         # Settings of the lights: definitions, presets, persistence, CSS variables (tested)
-│   ├── orb-physics.ts          # Pure spring/target/nudge maths of the lights (tested)
-│   ├── orb-effects.ts          # The single rAF physics loop, drift playback rate
+│   ├── orbs/                   # The lights: settings.ts (definitions, presets, persistence, CSS variables), physics.ts (pure spring maths), effects.ts (the single rAF loop) - all tested but effects
 │   ├── shortcuts.ts            # D / 0-3 / Esc key mapping (tested)
 │   └── scroll-metrics.ts       # One rAF-throttled scroll listener shared by subscribers
 └── styles/                     # theme (Tailwind 4 @theme tokens), base, layout, chrome, animations
@@ -53,11 +51,11 @@ The console is discoverable without being loud: a `D dev console` button in the 
 
 ### 4. The three lights
 
-**Implementation**: `src/components/shared/AnimatedBackground.tsx`, `src/styles/animations.css`, `src/lib/orb-settings.ts`, `src/lib/orb-physics.ts`, `src/lib/orb-effects.ts`
+**Implementation**: `src/components/shared/AnimatedBackground.tsx`, `src/styles/animations.css`, `src/lib/orbs/settings.ts`, `src/lib/orbs/physics.ts`, `src/lib/orbs/effects.ts`
 
-Three radial-gradient layers (no `filter: blur`, no `backdrop-filter`) move with `transform`, `translate` and `opacity` only. The composition per section is CSS (`html[data-scene='projects'] .orb-a { --x ... }`), the very slow drift (one full out-and-back cycle takes 130, 150 and 170 s, i.e. 2.2-2.8 minutes, with about 2% travel) is a keyframe animation on the inner element; scene changes glide over 3.2 s, and nothing re-renders while scrolling. Hero is the default composition, so it is also the no-JS and reduced-motion state. The default look is deliberately calm: peak gradient alpha 0.24, OKLCH chroma 0.08-0.13, lights 70vmax wide, a smooth five-stop falloff.
+Three radial-gradient layers (no `filter: blur`, no `backdrop-filter`) move with `transform`, `translate` and `opacity` only. The composition per section is CSS (`html[data-scene='projects'] .orb-a { --x ... }`), the very slow drift (one full out-and-back cycle takes 240, 290 and 340 s, i.e. 4-5.7 minutes, with about 2% travel) is a keyframe animation on the inner element; scene changes glide over 6 s, and nothing re-renders while scrolling. Hero is the default composition, so it is also the no-JS and reduced-motion state. The default look is deliberately calm: peak gradient alpha 0.15, OKLCH chroma 0.08-0.13, lights 42vmax wide, plus a faint `.orb-ambient` wash that breathes over 120 s, a smooth five-stop falloff.
 
-**Physics** (`orb-effects.ts`, maths in `orb-physics.ts`): one `requestAnimationFrame` loop drives a damped spring per light (stiffness 16, about 0.64 Hz). The target of each spring is the cursor push (lights give way to the pointer, the far light less) plus the scroll parallax (the lights trail the scroll position); a click on the background adds a velocity kick away from it (not on links, buttons or inputs). Displacement is bounded to 90 px, integration uses fixed 1/120 s sub-steps (frame-rate independent) and only `translate` is written (skipped below 0.01 px). The loop sleeps when all springs are at rest, stops while the tab is hidden and is not started at all under `prefers-reduced-motion` or on coarse pointers (`(prefers-reduced-motion: no-preference) and (hover: hover) and (pointer: fine)`, followed live), where the lights just drift. The lights are `position: fixed`, so there is no "section offscreen" state; sleeping at rest is the equivalent.
+**Physics** (`orbs/effects.ts`, maths in `orbs/physics.ts`): one `requestAnimationFrame` loop drives a damped spring per light (stiffness 16, about 0.64 Hz). The target of each spring is the cursor push (lights give way to the pointer, the far light less) plus the scroll parallax (the lights trail the scroll position); a click on the background adds a velocity kick away from it (not on links, buttons or inputs). Displacement is bounded to 90 px, integration uses fixed 1/120 s sub-steps (frame-rate independent) and only `translate` is written (skipped below 0.01 px). The loop sleeps when all springs are at rest, stops while the tab is hidden and is not started at all under `prefers-reduced-motion` or on coarse pointers (`(prefers-reduced-motion: no-preference) and (hover: hover) and (pointer: fine)`, followed live), where the lights just drift. The lights are `position: fixed`, so there is no "section offscreen" state; sleeping at rest is the equivalent.
 
 **Control audit** (every control in the dev console, what it changes and the default; each has a Playwright proof in `tests/e2e/orb-settings.desktop.spec.ts`):
 
@@ -98,7 +96,7 @@ pyftsubset r.ttf --unicodes="$U" --layout-features='kern,liga,ccmp,locl,mark,mkm
 
 ## Type and orientation
 
-The scale is deliberately restrained and lives in `theme.css`: body 17px, lead 18-21px, h3 20-26px, h2 32-52px, hero name 44-96px (fluid, one line from about 390px up), contact email up to 52px (one colour, the link colour), mono 13px. Running text is capped at `--text-measure` (68ch). The hero is name, one-line role, stack and two actions (See projects, Dev Console); there is no chart there, because a seeded random walk carried no information. Each section opens with a rule, an index (01-03), an eyebrow ("Selected work", "Roles and education", "Get in touch") and the h2; the top bar and the status line both mark the active section with `aria-current`.
+The scale is deliberately restrained and lives in `theme.css`: body 17px, lead 18-21px, h3 20-26px, h2 32-52px, hero name 44-96px (fluid, one line from about 390px up), aside 18-24px and 22-32px (`--text-aside`, `--text-aside-lead`), contact email up to 52px (one colour, the link colour), mono 13px. Running text is capped at `--text-measure` (68ch). The hero is name, one-line role, stack and two actions (See projects, Dev Console); there is no chart there, because a seeded random walk carried no information. Each section opens with a rule, an index (01-03), an eyebrow ("Selected work", "Roles and education", "Get in touch") and the h2; the top bar and the status line both mark the active section with `aria-current`.
 
 **Section orientation on scroll** (`layout.css`, end of file): the active section (`html[data-scene]`, set by `AppShell`) rests at full strength, the other sections sit at `--dim-inactive` (0.82) opacity, the active section's index number turns accent (the others are `ink-3`) and a 3rem accent hairline fades in on the section rule at the rail. Only opacity and colour change (0.9 s fade, none under `prefers-reduced-motion`), so there is no layout shift; without JavaScript there is no `data-scene` and nothing is dimmed. Text in dimmed sections is still AA (see Contrast above).
 

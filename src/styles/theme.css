@@ -31,6 +31,8 @@
   --text-h3--line-height: 1.2;
   --text-h3-lead: clamp(1.625rem, 1.2rem + 1.6vw, 2.5rem);
   --text-h3-lead--line-height: 1.1;
+  --text-aside: clamp(1.125rem, 1rem + 0.8vw, 1.5rem);
+  --text-aside-lead: clamp(1.375rem, 1.1rem + 1.2vw, 2rem);
   --text-h2: clamp(2rem, 1.5rem + 2vw, 3.25rem);
   --text-h2--line-height: 1.05;
   --tracking-display: -0.03em;
@@ -57,10 +59,10 @@
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
   --ease-standard: cubic-bezier(0.2, 0, 0, 1);
   --ease-glide: cubic-bezier(0.45, 0.05, 0.2, 1);
-  /* One full cycle (out and back) takes 2.2 to 2.8 minutes; the travel is about 2% of a light's own width */
-  --animate-drift-a: drift-a 130s ease-in-out infinite;
-  --animate-drift-b: drift-b 150s ease-in-out infinite;
-  --animate-drift-c: drift-c 170s ease-in-out infinite;
+  /* One full cycle (out and back) takes about 4 to 5 minutes; the travel is about 2% of a light's own width */
+  --animate-drift-a: drift-a 240s ease-in-out infinite;
+  --animate-drift-b: drift-b 290s ease-in-out infinite;
+  --animate-drift-c: drift-c 340s ease-in-out infinite;
 
   @keyframes drift-a {
     50% {
@@ -98,7 +100,7 @@
     --dur-2: 240ms;
     --dur-3: 480ms;
     --dur-4: 900ms;
-    --dur-scene: 3200ms;
+    --dur-scene: 6000ms;
     --dim-inactive: 0.82;
     --gutter: 1rem;
     --col-gap: 1rem;

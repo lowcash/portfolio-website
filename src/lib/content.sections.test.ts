@@ -23,8 +23,8 @@ describe('section config single source of truth', () => {
   it('gives every entry a tone', () => {
     const tones = [
       ...siteContent.featuredProjects.projects.map((project) => project.tone),
-      ...siteContent.backgroundExperience.experiences.map((experience) => experience.tone),
-      siteContent.backgroundExperience.education.tone,
+      ...siteContent.experience.experiences.map((experience) => experience.tone),
+      siteContent.experience.education.tone,
     ]
 
     expect(tones).toHaveLength(7)

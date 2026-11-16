@@ -3,7 +3,7 @@
  *
  * - `ORB_SETTING_DEFINITIONS` drives the developer console sliders, persistence and CSS custom properties.
  * - The store writes CSS custom properties on :root (consumed by the `.orb` rules in animations.css) and persists
- *   to localStorage. Physics settings (pointer, damping, parallax, nudge) are consumed by `orb-effects.ts`.
+ *   to localStorage. Physics settings (pointer, damping, parallax, nudge) are consumed by `orbs/effects.ts`.
  * - Defaults are the calm Night Paper look: 1x on every multiplier is the restrained composition, the upper half of
  *   each slider is the louder one. Every control must have a visible effect (see the table in docs/ARCHITECTURE.md).
  */
@@ -57,7 +57,7 @@ export const ORB_SETTING_DEFINITIONS: readonly OrbSettingDefinition[] = [
     defaultValue: 1,
     storageKey: 'animation_speed',
     format: times,
-    hint: 'How fast the lights drift on their own (1x is one cycle in about 2.5 minutes)',
+    hint: 'How fast the lights drift on their own (1x is one cycle in about 5 minutes)',
   },
   {
     key: 'orbSize',

@@ -15,8 +15,8 @@ import {
   resolveNudge,
   resolveTarget,
   stepSpring,
-} from '@/lib/orb-physics'
-import { getOrbSettings, subscribeToOrbSettings } from '@/lib/orb-settings'
+} from '@/lib/orbs/physics'
+import { getOrbSettings, subscribeToOrbSettings } from '@/lib/orbs/settings'
 import { subscribeToScrollMetrics } from '@/lib/scroll-metrics'
 
 const NUDGE_IGNORED_TARGETS = 'a, button, input, select, textarea, label, summary, [role="button"], [role="slider"]'

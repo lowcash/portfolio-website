@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 
-import { MAX_OFFSET_PX, createSpring, isAtRest, resolveNudge, resolveTarget, stepSpring } from './orb-physics'
+import { MAX_OFFSET_PX, createSpring, isAtRest, resolveNudge, resolveTarget, stepSpring } from './physics'
 
 const settle = (damping: number, seconds: number, target = { x: 40, y: 0 }) => {
   const spring = createSpring()

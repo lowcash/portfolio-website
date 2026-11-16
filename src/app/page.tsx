@@ -1,7 +1,7 @@
 import { type PortfolioSectionId, SECTION_IDS } from '@/lib/content'
 
-import { BackgroundExperience } from '@/components/features/BackgroundExperience'
 import { Contact } from '@/components/features/Contact'
+import { Experience } from '@/components/features/Experience'
 import { FeaturedProjects } from '@/components/features/FeaturedProjects'
 import { Hero } from '@/components/features/Hero'
 import { AppShell } from '@/components/layout/AppShell'
@@ -10,7 +10,7 @@ import { MainContent } from '@/components/ui/main-content'
 const SECTION_COMPONENTS: Record<PortfolioSectionId, React.ComponentType> = {
   hero: Hero,
   'featured-projects': FeaturedProjects,
-  experience: BackgroundExperience,
+  experience: Experience,
   contact: Contact,
 }
 

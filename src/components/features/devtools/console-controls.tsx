@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useSyncExternalStore } from 'react'
 
-import { subscribeToPhysicsSupport, supportsOrbPhysics } from '@/lib/orb-effects'
+import { subscribeToPhysicsSupport, supportsOrbPhysics } from '@/lib/orbs/effects'
 import {
   ORB_PRESETS,
   ORB_SETTING_DEFINITIONS,
@@ -14,7 +14,7 @@ import {
   resetOrbSettings,
   setOrbSetting,
   subscribeToOrbSettings,
-} from '@/lib/orb-settings'
+} from '@/lib/orbs/settings'
 
 import { ACHIEVEMENTS, type Achievement } from '@/components/features/easter-eggs/achievements'
 

@@ -122,24 +122,24 @@ export const siteContent = {
       },
     ],
   },
-  backgroundExperience: {
+  experience: {
     title: 'Experience',
     experiences: [
       {
-        title: 'Interactive Web Systems & Admin Tooling',
+        title: 'Web Games & Admin Dashboards',
         period: '4 years',
         bullets: [
           'Developed 2D web game mechanics, custom canvas interactions, and asset integration pipelines.',
-          'Engineered Next.js admin dashboards and interactive game galleries with role-based access control (RBAC).',
+          'Engineered Next.js admin dashboards and interactive game galleries with role-based access control.',
         ],
-        technologies: ['TypeScript', 'Next.js', 'React', 'Phaser', 'RBAC'],
+        technologies: ['TypeScript', 'Next.js', 'React', 'Phaser', 'Canvas'],
         tone: 'teal' as Tone,
       },
       {
-        title: 'Fullstack Business Systems',
+        title: 'CRM & Client Management Systems',
         period: 'Part-time, 3 years',
         bullets: [
-          'Contributed to ASP.NET MVC platforms, implementing Razor views, jQuery UI components, and service-layer logic.',
+          'Contributed to ASP.NET MVC CRM platforms for customers (client management, records, workflows), implementing Razor views, jQuery UI components, and service-layer logic.',
           'Handled relational database queries (SQL), basic schema maintenance, and internal API endpoints.',
         ],
         technologies: ['C#', '.NET', 'ASP.NET MVC', 'SQL', 'REST APIs'],

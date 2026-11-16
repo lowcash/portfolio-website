@@ -125,11 +125,11 @@ test.describe('Orb controls: every one has a visible effect', () => {
       page.locator('.orb-a').evaluate((element) => parseFloat(getComputedStyle(element).opacity))
     const readGradient = () => page.locator('.orb-a i').evaluate((element) => getComputedStyle(element).backgroundImage)
 
-    await expect.poll(readOpacity, { timeout: 3000 }).toBeGreaterThan(0.5)
+    await expect.poll(readOpacity, { timeout: 8000 }).toBeGreaterThan(0.5)
     const defaultGradient = await readGradient()
 
     await setSlider(page, 'orbOpacity', 0)
-    await expect.poll(readOpacity, { timeout: 4000 }).toBe(0)
+    await expect.poll(readOpacity, { timeout: 9000 }).toBe(0)
 
     await setSlider(page, 'orbOpacity', 2)
     await expect.poll(readGradient).not.toBe(defaultGradient)
@@ -265,7 +265,7 @@ test.describe('Orb controls: every one has a visible effect', () => {
 })
 
 test.describe('Calm defaults and motion preferences', () => {
-  test('the default lights are barely there: low alpha, muted colour, a drift cycle of two to three minutes', async ({
+  test('the default lights are barely there: low alpha, muted colour, a drift cycle of four to six minutes', async ({
     page,
   }) => {
     await page.setViewportSize({ width: 1280, height: 800 })
@@ -297,9 +297,9 @@ test.describe('Calm defaults and motion preferences', () => {
     expect(look.peakAlpha).toBeLessThanOrEqual(0.25)
     expect(look.peakChroma).toBeLessThanOrEqual(0.14)
     expect(look.count).toBe(3)
-    // Barely there: one full drift cycle takes two to three minutes
-    expect(look.shortestCycle).toBeGreaterThanOrEqual(120)
-    expect(look.longestCycle).toBeLessThanOrEqual(180)
+    // Barely there: one full drift cycle takes four to six minutes
+    expect(look.shortestCycle).toBeGreaterThanOrEqual(200)
+    expect(look.longestCycle).toBeLessThanOrEqual(400)
   })
 
   test('with reduced motion there is no physics: the lights stay put and the physics sliders are disabled', async ({

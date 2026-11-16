@@ -5,8 +5,8 @@ import { Entry, TechList } from '@/components/ui/entry'
 import { ExternalLink } from '@/components/ui/external-link'
 import { SectionHeader } from '@/components/ui/section-header'
 
-export function BackgroundExperience() {
-  const { title, experiences, education, beyondCodeNote } = siteContent.backgroundExperience
+export function Experience() {
+  const { title, experiences, education, beyondCodeNote } = siteContent.experience
 
   return (
     <section id='experience' className='section tone tone-teal' aria-labelledby='experience-h'>

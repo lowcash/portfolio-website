@@ -1,6 +1,6 @@
 /**
  * Pure physics of the lights: a damped spring per axis, bounded, integrated in fixed sub-steps so the result does not
- * depend on the frame rate. No DOM in here (see orb-effects.ts for the loop that applies it).
+ * depend on the frame rate. No DOM in here (see orbs/effects.ts for the loop that applies it).
  */
 
 export type Spring = { x: number; y: number; vx: number; vy: number }

@@ -7,7 +7,7 @@ import {
   matchesPreset,
   resolveStoredSettings,
   settingsToCssVars,
-} from './orb-settings'
+} from './settings'
 
 describe('orb setting definitions', () => {
   it('has unique keys and storage keys', () => {

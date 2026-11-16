@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 
-import { setOrbSetting } from '@/lib/orb-settings'
+import { setOrbSetting } from '@/lib/orbs/settings'
 
 import type { UnlockRef } from './types'
 
