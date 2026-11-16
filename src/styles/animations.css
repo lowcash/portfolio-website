@@ -15,7 +15,7 @@
     contain: strict;
   }
   .orb {
-    --d: clamp(20rem, 42vmax, 50rem);
+    --d: clamp(28rem, 64vmax, 78rem);
     position: absolute;
     left: 0;
     top: 0;
@@ -26,25 +26,28 @@
     /* Above 100% the gradient alpha (see below) carries the extra density, since opacity cannot exceed 1 */
     opacity: min(1, calc(var(--o) * var(--orb-opacity)));
     /* `translate` is written by the physics loop (orbs/effects.ts) and composes with the scene transform */
-    transition:
-      transform var(--dur-scene) var(--ease-glide),
-      opacity calc(var(--dur-scene) * 0.75) linear;
+    transition: opacity calc(var(--dur-scene) / 3) linear;
   }
   .orb i {
     --k: max(1, var(--orb-opacity));
-    --c2: calc(var(--orb-core) + (100% - var(--orb-core)) * 0.28);
-    --c3: calc(var(--orb-core) + (100% - var(--orb-core)) * 0.54);
-    --c4: calc(var(--orb-core) + (100% - var(--orb-core)) * 0.78);
+    --f1: calc(var(--orb-core) + (100% - var(--orb-core)) * 0.16);
+    --f2: calc(var(--orb-core) + (100% - var(--orb-core)) * 0.32);
+    --f3: calc(var(--orb-core) + (100% - var(--orb-core)) * 0.48);
+    --f4: calc(var(--orb-core) + (100% - var(--orb-core)) * 0.64);
+    --f5: calc(var(--orb-core) + (100% - var(--orb-core)) * 0.8);
     display: block;
     width: 100%;
     height: 100%;
     border-radius: 50%;
+    /* Gaussian-like falloff over the whole diameter: no visible edge, peak alpha 0.055 */
     background: radial-gradient(
       closest-side,
-      rgb(var(--rgb) / calc(0.15 * var(--k))) var(--orb-core),
-      rgb(var(--rgb) / calc(0.085 * var(--k))) var(--c2),
-      rgb(var(--rgb) / calc(0.035 * var(--k))) var(--c3),
-      rgb(var(--rgb) / calc(0.01 * var(--k))) var(--c4),
+      rgb(var(--rgb) / calc(0.055 * var(--k))) var(--orb-core),
+      rgb(var(--rgb) / calc(0.048 * var(--k))) var(--f1),
+      rgb(var(--rgb) / calc(0.034 * var(--k))) var(--f2),
+      rgb(var(--rgb) / calc(0.019 * var(--k))) var(--f3),
+      rgb(var(--rgb) / calc(0.008 * var(--k))) var(--f4),
+      rgb(var(--rgb) / calc(0.002 * var(--k))) var(--f5),
       transparent 100%
     );
   }
@@ -53,10 +56,12 @@
       --oc: var(--ol) calc(var(--och) * var(--sat)) calc(var(--oh) + var(--hue-shift));
       background: radial-gradient(
         closest-side,
-        oklch(var(--oc) / calc(0.15 * var(--k))) var(--orb-core),
-        oklch(var(--oc) / calc(0.085 * var(--k))) var(--c2),
-        oklch(var(--oc) / calc(0.035 * var(--k))) var(--c3),
-        oklch(var(--oc) / calc(0.01 * var(--k))) var(--c4),
+        oklch(var(--oc) / calc(0.055 * var(--k))) var(--orb-core),
+        oklch(var(--oc) / calc(0.048 * var(--k))) var(--f1),
+        oklch(var(--oc) / calc(0.034 * var(--k))) var(--f2),
+        oklch(var(--oc) / calc(0.019 * var(--k))) var(--f3),
+        oklch(var(--oc) / calc(0.008 * var(--k))) var(--f4),
+        oklch(var(--oc) / calc(0.002 * var(--k))) var(--f5),
         transparent 100%
       );
     }
@@ -83,7 +88,7 @@
   /* Scenes: the hero composition is the default, so it is also the no-JS and reduced-motion state */
   .orb-a {
     --x: 74vw;
-    --y: 30vh;
+    --y: 32vh;
     --s: 1;
     --o: 0.9;
   }
@@ -99,60 +104,8 @@
     --s: 0.6;
     --o: 0.22;
   }
-  html[data-scene='projects'] .orb-a {
-    --x: 102vw;
-    --y: 2vh;
-    --s: 0.75;
-    --o: 0.5;
-  }
-  html[data-scene='projects'] .orb-b {
-    --x: 0vw;
-    --y: 46vh;
-    --s: 1.05;
-    --o: 0.9;
-  }
-  html[data-scene='projects'] .orb-c {
-    --x: 96vw;
-    --y: 100vh;
-    --s: 0.75;
-    --o: 0.45;
-  }
-  html[data-scene='experience'] .orb-a {
-    --x: 36vw;
-    --y: -14vh;
-    --s: 0.7;
-    --o: 0.4;
-  }
-  html[data-scene='experience'] .orb-b {
-    --x: -4vw;
-    --y: 100vh;
-    --s: 0.85;
-    --o: 0.6;
-  }
-  html[data-scene='experience'] .orb-c {
-    --x: 100vw;
-    --y: 38vh;
-    --s: 1.05;
-    --o: 0.7;
-  }
-  html[data-scene='contact'] .orb-a {
-    --x: 30vw;
-    --y: 100vh;
-    --s: 1.05;
-    --o: 0.9;
-  }
-  html[data-scene='contact'] .orb-b {
-    --x: 72vw;
-    --y: 98vh;
-    --s: 1;
-    --o: 0.85;
-  }
-  html[data-scene='contact'] .orb-c {
-    --x: 52vw;
-    --y: 118vh;
-    --s: 0.9;
-    --o: 0.6;
-  }
+  /* No per-section composition: the lights stay where they are (the section focus lives in the chrome and the
+   * dimming of inactive sections), so scrolling never moves a light across the screen. */
 
   /* Subconscious ambient layer: a faint, wide wash in the scene hue; static (and still faint) without motion */
   .orb-ambient {
@@ -244,11 +197,9 @@
   }
   @keyframes goldenBeam {
     0% {
-      background-position: -100% 0;
       opacity: 0.6;
     }
     100% {
-      background-position: 100% 0;
       opacity: 1;
     }
   }
@@ -272,16 +223,6 @@
       transform: none;
     }
   }
-  /* Section rule: a soft glow that slowly breathes; the line itself never moves */
-  @keyframes rule-glow {
-    0%,
-    100% {
-      opacity: 0.6;
-    }
-    50% {
-      opacity: 1;
-    }
-  }
   /* The ambient layer: one very faint wash that swells and recedes, below conscious notice */
   @keyframes ambient-breathe {
     0%,
@@ -292,14 +233,6 @@
     50% {
       opacity: 1;
       transform: scale(1.06);
-    }
-  }
-  @keyframes progress {
-    from {
-      transform: scaleX(0);
-    }
-    to {
-      transform: scaleX(1);
     }
   }
 
@@ -329,18 +262,8 @@
         animation-range: entry 0% cover 24%;
       }
     }
-    .rule::before {
-      animation: rule-glow 9s ease-in-out infinite;
-    }
     .orb-ambient {
       animation: ambient-breathe 120s ease-in-out infinite;
-    }
-  }
-
-  @supports (animation-timeline: scroll()) {
-    .st-progress {
-      animation: progress linear both;
-      animation-timeline: scroll(root block);
     }
   }
 }

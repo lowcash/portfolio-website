@@ -47,8 +47,8 @@ describe('defaults', () => {
 
   it('has the physics on at a very gentle strength and the palette unshifted', () => {
     expect(DEFAULT_ORB_SETTINGS).toMatchObject({
-      pointer: 30,
-      parallax: 30,
+      pointer: 20,
+      parallax: 10,
       nudge: 1,
       damping: 0.9,
       hue: 0,

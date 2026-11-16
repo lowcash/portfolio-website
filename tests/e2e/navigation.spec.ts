@@ -97,8 +97,7 @@ for (const [name, viewport] of [
       await expect.poll(() => page.evaluate(() => window.scrollY), { timeout: 5000 }).toBeLessThan(120)
     })
 
-    test('status line shows the scroll percentage and a progress hairline', async ({ page }) => {
-      await expect(page.locator('.st-progress')).toBeAttached()
+    test('status line shows the scroll percentage', async ({ page }) => {
       await page.evaluate(() => window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'instant' }))
 
       if (viewport.width >= 768) {

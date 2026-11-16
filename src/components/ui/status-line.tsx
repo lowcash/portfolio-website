@@ -13,24 +13,16 @@ interface StatusLineProps {
 }
 
 /**
- * tmux-style status line: console button, section tabs, achievement counter, scroll percentage and a 1px progress
- * hairline. It replaces nav dots, burger, progress bar, scroll-to-top and the console trigger. Without JavaScript it is
- * a row of anchors and a working popover button.
+ * tmux-style status line: console button, section tabs, achievement counter and scroll percentage. It replaces nav
+ * dots, burger, progress bar, scroll-to-top and the console trigger. Without JavaScript it is a row of anchors and a working popover button.
  */
 export function StatusLine({ currentSection, onSectionClick }: StatusLineProps) {
   const percentRef = useRef<HTMLSpanElement>(null)
-  const barRef = useRef<HTMLSpanElement>(null)
 
   useEffect(() => {
-    // Under @supports the hairline is driven by a CSS scroll timeline; elsewhere by --p
-    const hasScrollTimeline = CSS.supports('animation-timeline: scroll()')
     let lastPercent = -1
 
     return subscribeToScrollMetrics((metrics) => {
-      if (!hasScrollTimeline) {
-        barRef.current?.style.setProperty('--p', metrics.progress.toFixed(4))
-      }
-
       const percent = Math.round(metrics.progress * 100)
       if (percent !== lastPercent && percentRef.current) {
         lastPercent = percent
@@ -84,7 +76,6 @@ export function StatusLine({ currentSection, onSectionClick }: StatusLineProps) 
         <StatusAchievements />
         <span ref={percentRef}>0%</span>
       </p>
-      <span ref={barRef} className='st-progress' aria-hidden='true' />
     </div>
   )
 }

@@ -108,7 +108,7 @@
     top: 0;
     height: 1px;
     background: var(--color-line-strong);
-    /* Soft glow instead of a wipe; it breathes slowly under motion (rule-glow in animations.css) */
+    /* A static soft glow; nothing sweeps or animates */
     box-shadow: 0 0 14px 1px color-mix(in srgb, var(--accent) 26%, transparent);
   }
   .idx {
@@ -167,20 +167,6 @@
     inset: 0 0 auto 0;
     height: 1px;
     background: var(--color-line);
-  }
-  .entry::after {
-    content: '';
-    position: absolute;
-    inset: 0 0 auto 0;
-    height: 1px;
-    background: var(--accent);
-    transform: scaleX(0);
-    transform-origin: left center;
-    transition: transform var(--dur-4) var(--ease-out-expo);
-  }
-  .entry:hover::after,
-  .entry:focus-within::after {
-    transform: scaleX(1);
   }
   .e-idx {
     display: flex;
@@ -315,10 +301,9 @@
     white-space: nowrap;
     padding-bottom: 0.14em;
     background: linear-gradient(var(--accent), var(--accent)) left bottom / 100% 1px no-repeat;
-    transition: background-size var(--dur-3) var(--ease-out-expo);
   }
   .mail:hover {
-    background-size: 100% 3px;
+    background-size: 100% 2px;
   }
   @media (width >= 48rem) {
     /* The content column is five sixths of the page */
@@ -363,17 +348,6 @@
   .section {
     transition: opacity var(--dur-4) var(--ease-standard);
   }
-  .sec-head::after {
-    content: '';
-    position: absolute;
-    left: var(--gutter);
-    top: 0;
-    width: 3rem;
-    height: 1px;
-    background: var(--accent);
-    opacity: 0;
-    transition: opacity var(--dur-4) var(--ease-standard);
-  }
   html[data-scene] :is(#hero, #featured-projects, #experience, #contact) {
     opacity: var(--dim-inactive);
   }
@@ -389,9 +363,6 @@
 
     & .idx {
       color: var(--accent);
-    }
-    & .sec-head::after {
-      opacity: 1;
     }
   }
 }

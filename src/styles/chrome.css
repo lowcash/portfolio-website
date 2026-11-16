@@ -256,16 +256,6 @@
   .st-ach {
     color: var(--accent);
   }
-  .st-progress {
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: -1px;
-    height: 1px;
-    background: var(--accent);
-    transform-origin: left center;
-    transform: scaleX(var(--p, 0));
-  }
   .st-key {
     display: none;
   }

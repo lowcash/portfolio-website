@@ -1,7 +1,7 @@
 import { type Page, expect, test } from '@playwright/test'
 
 /**
- * Orientation while scrolling: the active section rests at full strength and carries an accent hairline on its rail,
+ * Orientation while scrolling: the active section rests at full strength,
  * the others sit a touch dimmer. Opacity and colour only: nothing moves, so there is no layout shift.
  */
 const SECTIONS = [
@@ -17,11 +17,9 @@ const sectionState = (page: Page) =>
       ids.map((id) => {
         const section = document.getElementById(id)!
         const head = section.querySelector('.sec-head, .hero-body > .idx') as HTMLElement
-        const hairline = getComputedStyle(section.querySelector('.sec-head') ?? section, '::after')
         return {
           id,
           opacity: parseFloat(getComputedStyle(section).opacity),
-          hairline: section.querySelector('.sec-head') ? parseFloat(hairline.opacity) : null,
           idxColor: getComputedStyle(head.querySelector('.idx') ?? head).color,
         }
       }),
@@ -46,11 +44,9 @@ test.describe('Section orientation', () => {
       for (const state of states) {
         if (state.id === id) {
           expect(state.opacity, `${state.id} active`).toBe(1)
-          if (state.hairline !== null) expect(state.hairline).toBe(1)
         } else {
           expect(state.opacity, `${state.id} inactive`).toBeLessThan(1)
           expect(state.opacity, `${state.id} inactive`).toBeGreaterThanOrEqual(0.75)
-          if (state.hairline !== null) expect(state.hairline).toBe(0)
         }
       }
 

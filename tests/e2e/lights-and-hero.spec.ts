@@ -31,13 +31,25 @@ test.describe('Lights, scenes and the hero', () => {
     }
   })
 
-  test('the lights move with transform only: positions change with the scene', async ({ page }) => {
-    const first = await page.locator('.orb-a').evaluate((element) => getComputedStyle(element).transform)
+  test('the lights stay put when the scene changes (no travel across the screen)', async ({ page }) => {
+    const centre = () =>
+      page.locator('.orb').evaluateAll((els) =>
+        els.map((element) => {
+          const r = element.getBoundingClientRect()
+          return [r.x + r.width / 2, r.y + r.height / 2]
+        }),
+      )
+    const before = await centre()
     await page.evaluate(() => document.getElementById('contact')?.scrollIntoView({ behavior: 'instant' }))
     await expect(page.locator('html')).toHaveAttribute('data-scene', 'contact')
-    await expect
-      .poll(() => page.locator('.orb-a').evaluate((element) => getComputedStyle(element).transform), { timeout: 4000 })
-      .not.toBe(first)
+    await page.waitForTimeout(1500)
+    const after = await centre()
+    const limit = (await page.viewportSize())!.width * 0.05
+
+    after.forEach(([x, y], index) => {
+      expect(Math.abs(x - before[index][0])).toBeLessThan(limit)
+      expect(Math.abs(y - before[index][1])).toBeLessThan(limit)
+    })
   })
 
   test('the hero has no chart: name, role, stack and two actions only', async ({ page }) => {
@@ -97,22 +109,17 @@ test.describe('Lights, scenes and the hero', () => {
       .toBe('beat')
   })
 
-  test('the scroll hairline is driven by a scroll timeline where supported, by --p elsewhere', async ({ page }) => {
-    await page.evaluate(() => window.scrollTo({ top: document.documentElement.scrollHeight / 2, behavior: 'instant' }))
-    await page.waitForTimeout(400)
+  test('nothing sweeps: no progress line and no scaleX or background-size transitions', async ({ page }) => {
+    await expect(page.locator('.st-progress')).toHaveCount(0)
 
-    const { timeline, scaleX } = await page.evaluate(() => {
-      const bar = document.querySelector('.st-progress') as HTMLElement
-      const style = getComputedStyle(bar)
-      return {
-        timeline: CSS.supports('animation-timeline: scroll()'),
-        scaleX: new DOMMatrixReadOnly(style.transform).a,
-      }
-    })
-
-    expect(scaleX).toBeGreaterThan(0.3)
-    expect(scaleX).toBeLessThan(0.7)
-    expect(typeof timeline).toBe('boolean')
+    const sweeping = await page.evaluate(
+      () =>
+        Array.from(document.querySelectorAll('*, *::after')).filter((element) => {
+          const { transitionProperty } = getComputedStyle(element)
+          return transitionProperty.includes('background-size') || transitionProperty.includes('background-position')
+        }).length,
+    )
+    expect(sweeping).toBe(0)
   })
 })
 

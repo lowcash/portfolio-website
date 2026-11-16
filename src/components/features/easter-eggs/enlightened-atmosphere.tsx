@@ -69,7 +69,7 @@ function EnlightenedLayers() {
 
       {/* Premium golden vignette frame – visible once all achievements are unlocked */}
       <>
-        {/* Golden sweeping hairline – animated gleam at very top of viewport */}
+        {/* Golden hairline – a static line that only pulses in opacity at very top of viewport */}
         <div
           className='pointer-events-none fixed inset-x-0 top-0'
           aria-hidden='true'
@@ -78,7 +78,6 @@ function EnlightenedLayers() {
             height: '2px',
             background:
               'linear-gradient(90deg, transparent 0%, #fbbf24 30%, #fde68a 50%, #fbbf24 70%, transparent 100%)',
-            backgroundSize: '200% 100%',
             animation: 'goldenBeam 3s ease-in-out infinite alternate',
           }}
         />
