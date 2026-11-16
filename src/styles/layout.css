@@ -395,3 +395,20 @@
     }
   }
 }
+
+/* Touch: inline links and the contact lines get a 44px hit area without moving the layout */
+@media (pointer: coarse) {
+  .link,
+  .mail {
+    padding-block: 0.8rem;
+    margin-block: -0.8rem;
+  }
+  .contact .rows a,
+  .contact .rows button {
+    padding-block: 0.75rem;
+    margin-block: -0.75rem;
+  }
+  .skip {
+    min-height: 2.75rem;
+  }
+}

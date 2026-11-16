@@ -105,7 +105,7 @@
     --gutter: 1rem;
     --col-gap: 1rem;
     --bar-h: 3rem;
-    --top-h: 2.75rem;
+    --top-h: 2.8125rem;
 
     /* space steps: 1, 2, 3, 4, 6, 8, 12, 18, 28, 42 times the 4px base */
     --s-1: calc(var(--spacing) * 1);

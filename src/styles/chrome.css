@@ -533,4 +533,29 @@
       column-gap: var(--s-7);
     }
   }
+
+  /* Touch: every control in the console is at least 44px in the direction that matters */
+  @media (pointer: coarse) {
+    .x {
+      flex: none;
+      width: 2.75rem;
+      height: 2.75rem;
+      margin-right: -0.9rem;
+    }
+    .presets button,
+    .reset,
+    .knob button[role='switch'] {
+      min-height: 2.75rem;
+      min-width: 2.75rem;
+    }
+    .knob input[type='range'] {
+      height: 2.75rem;
+    }
+    .tiles {
+      gap: var(--s-1);
+    }
+    .tiles button {
+      min-height: 2.75rem;
+    }
+  }
 }
