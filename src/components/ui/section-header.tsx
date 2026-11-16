@@ -1,42 +1,31 @@
 import { formatTypography } from '@/lib/prevent-widows'
 
 interface SectionHeaderProps {
+  /** id of the h2, referenced by the section's aria-labelledby */
+  id: string
+  /** Two-digit position of the section: 01, 02, ... */
+  index: string
+  /** Short descriptor above the title, e.g. "Selected work" */
+  eyebrow: string
   title: string
-  subtitle: string
-  gradient: string
-  glowColors: {
-    primary: string
-    secondary: string
-  }
-  variant?: 'default' | 'compact'
+  /** Derived count facts, e.g. ["4 entries"], laid out as one gapped row */
+  meta?: readonly string[]
 }
 
-const SECTION_TITLE_CLASS =
-  'relative mb-3 pb-[2px] text-[1.625rem] font-bold tracking-tight text-balance text-zinc-100 md:text-[2.5rem]'
-
-export function SectionHeader({ title, subtitle, gradient, glowColors, variant = 'compact' }: SectionHeaderProps) {
-  const formattedTitle = formatTypography(title)
-  const formattedSubtitle = subtitle ? formatTypography(subtitle) : ''
-
-  const glowFilter =
-    variant === 'compact'
-      ? `drop-shadow(0 0 6px ${glowColors.primary}) drop-shadow(0 0 14px ${glowColors.secondary})`
-      : `drop-shadow(0 0 12px ${glowColors.primary}) drop-shadow(0 0 24px ${glowColors.secondary})`
-
+/** Section head: hairline rule, index, eyebrow, title and an optional count. */
+export function SectionHeader({ id, index, eyebrow, title, meta }: SectionHeaderProps) {
   return (
-    <header className='mb-7 text-center md:mb-10'>
-      <h2 className={SECTION_TITLE_CLASS} style={{ filter: glowFilter }}>
-        <span className='relative'>{formattedTitle}</span>
-        <span
-          aria-hidden='true'
-          className={`pointer-events-none absolute inset-0 ${gradient} bg-clip-text text-transparent`}
-        >
-          {formattedTitle}
-        </span>
-      </h2>
-      {formattedSubtitle ? (
-        <p className='mx-auto max-w-lg text-sm leading-relaxed font-normal text-zinc-300 sm:text-base'>
-          {formattedSubtitle}
+    <header className='sec-head rule wrap grid-12'>
+      <p className='idx l-rail mono'>{index}</p>
+      <div className='sec-title'>
+        <p className='eyebrow mono caps'>{eyebrow}</p>
+        <h2 id={id}>{formatTypography(title)}</h2>
+      </div>
+      {meta ? (
+        <p className='meta mono'>
+          {meta.map((fact) => (
+            <span key={fact}>{fact}</span>
+          ))}
         </p>
       ) : null}
     </header>

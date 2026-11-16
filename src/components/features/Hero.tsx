@@ -1,22 +1,38 @@
 import { siteContent } from '@/lib/content'
-import { SECTION_STYLES } from '@/lib/section-config'
+import { formatTypography } from '@/lib/prevent-widows'
 
-import { HeroContent } from '@/components/ui/hero-content'
-import { SectionWrapper } from '@/components/ui/section-wrapper'
+import { TechList } from '@/components/ui/entry'
 
 export function Hero() {
-  const { gradient, glowColors } = SECTION_STYLES.hero
-  const content = siteContent.hero
+  const { greeting, name, role, summary } = siteContent.hero
+  const stack = summary.split(' · ')
 
   return (
-    <SectionWrapper id='hero' fullHeight maxWidth='5xl'>
-      <HeroContent
-        heading={content.heading}
-        role={content.role}
-        summary={content.summary}
-        gradient={gradient}
-        glowColors={glowColors}
-      />
-    </SectionWrapper>
+    <section id='hero' className='hero tone tone-pink' aria-labelledby='hero-h'>
+      <div className='hero-body wrap grid-12'>
+        <p className='idx l-rail mono' aria-hidden='true'>
+          00
+        </p>
+        <h1 id='hero-h' className='l-col'>
+          <span className='hey'>{greeting}</span> <span className='name'>{name}</span>
+        </h1>
+        <p className='role l-col'>{formatTypography(role)}</p>
+        <TechList items={stack} className='l-col' />
+        <p className='actions l-col mono'>
+          <a className='btn btn--primary' href='#featured-projects'>
+            See projects
+          </a>
+          <button
+            className='btn'
+            type='button'
+            popoverTarget='console'
+            popoverTargetAction='toggle'
+            aria-keyshortcuts='D'
+          >
+            &gt;_ Dev Console
+          </button>
+        </p>
+      </div>
+    </section>
   )
 }

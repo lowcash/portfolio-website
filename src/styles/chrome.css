@@ -1,0 +1,493 @@
+/**
+ * Chrome: the page is run like a terminal window. A title bar on top (wordmark and the console hint),
+ * a tmux status line at the bottom (tabs, console button, progress) and the dev console docked on it.
+ * The chrome follows the active scene's hue; content never repaints while scrolling.
+ */
+
+@layer components {
+  .chrome {
+    --hue: 350;
+    --accent-fb: #ffafd4;
+    --accent: var(--accent-fb);
+  }
+  @supports (color: oklch(0% 0 0)) {
+    .chrome {
+      --accent: oklch(0.84 calc(0.11 * var(--sat)) calc(var(--hue) + var(--hue-shift)));
+    }
+  }
+  html[data-scene='projects'] .chrome {
+    --hue: 285;
+    --accent-fb: #c4c4ff;
+  }
+  html[data-scene='experience'] .chrome {
+    --hue: 190;
+    --accent-fb: #67e2da;
+  }
+  html[data-scene='contact'] .chrome {
+    --hue: 325;
+    --accent-fb: #efb2f2;
+  }
+  html[data-enlightened] .chrome {
+    --hue: 85;
+    --accent-fb: #f8ca65;
+  }
+
+  /* ---------- title bar: wordmark and console hint ---------- */
+  .topbar {
+    position: fixed;
+    inset: 0 0 auto 0;
+    z-index: var(--z-index-status);
+    height: var(--top-h);
+    background: var(--color-bg-sunk);
+    border-bottom: 1px solid var(--color-line-strong);
+    color: var(--color-ink-2);
+    font-size: 0.75rem;
+  }
+  .topbar > div {
+    display: flex;
+    align-items: stretch;
+    justify-content: space-between;
+    gap: var(--s-2);
+    height: 100%;
+  }
+  .topbar a {
+    display: flex;
+    align-items: center;
+    color: var(--color-ink);
+    text-decoration: none;
+    transition: color var(--dur-2) var(--ease-standard);
+  }
+  .topbar a:hover {
+    color: var(--accent);
+  }
+  .topbar .keyhint {
+    display: none;
+    align-items: center;
+    gap: var(--s-2);
+    padding: 0;
+    background: none;
+    border: 0;
+    cursor: pointer;
+    font: inherit;
+    color: var(--color-ink-2);
+    white-space: nowrap;
+    transition: color var(--dur-2) var(--ease-standard);
+  }
+  .topbar .keyhint:hover {
+    color: var(--accent);
+  }
+  /* Below 48rem the bar is just the wordmark; the console lives on the status line (>_) there */
+  @media (width >= 48rem) {
+    .topbar {
+      font-size: var(--text-mono);
+    }
+    .topbar .keyhint {
+      display: flex;
+    }
+  }
+
+  /* ---------- status line ---------- */
+  .status {
+    position: fixed;
+    inset: auto 0 0 0;
+    z-index: var(--z-index-status);
+    display: flex;
+    align-items: stretch;
+    height: calc(var(--bar-h) + env(safe-area-inset-bottom, 0px));
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+    background: var(--color-bg-sunk);
+    border-top: 1px solid var(--color-line-strong);
+    color: var(--color-ink-2);
+  }
+  .status > * {
+    display: flex;
+    align-items: center;
+  }
+  .st-session {
+    flex: none;
+    gap: 0.5em;
+    padding-inline: var(--s-4);
+    min-width: 3rem;
+    justify-content: center;
+    border: 0;
+    border-radius: 0;
+    cursor: pointer;
+    background: var(--accent);
+    color: var(--color-bg-sunk);
+    font-weight: 600;
+    transition: background-color var(--dur-3) linear;
+  }
+  .st-session span {
+    display: none;
+  }
+  .st-session:focus-visible {
+    outline-offset: -4px;
+    outline-color: var(--color-bg-sunk);
+  }
+  .st-tabs {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+  .st-tabs ol {
+    display: flex;
+    width: 100%;
+    height: 100%;
+  }
+  .st-tabs li {
+    flex: 1 1 auto;
+    display: flex;
+  }
+  .st-tabs a {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    color: var(--color-ink-2);
+    white-space: nowrap;
+    text-transform: lowercase;
+    transition: color var(--dur-2) var(--ease-standard);
+  }
+  .st-tabs a:hover {
+    color: var(--color-ink);
+  }
+  .st-tabs a:focus-visible {
+    outline-offset: -4px;
+  }
+  .st-tabs .n {
+    display: none;
+    color: var(--color-ink-3);
+  }
+  .st-tabs a[aria-current] {
+    color: var(--accent);
+  }
+  .st-tabs a[aria-current]::after {
+    content: '*';
+  }
+  .st-right {
+    display: none;
+    gap: var(--s-5);
+    padding-inline: var(--s-4) var(--gutter);
+    margin: 0;
+    white-space: nowrap;
+  }
+  .st-right [hidden] {
+    display: none;
+  }
+  .st-ach {
+    padding: 0;
+    background: none;
+    border: 0;
+    font: inherit;
+    cursor: pointer;
+    color: var(--accent);
+  }
+  .st-ach:hover {
+    text-decoration: underline;
+    text-underline-offset: 0.25em;
+  }
+  .st-key {
+    display: none;
+  }
+  @media (width >= 48rem) {
+    .st-session span {
+      display: inline;
+    }
+    /* The shortcut is only worth showing where there is a keyboard */
+    @media (hover: hover) and (pointer: fine) {
+      .st-key {
+        display: inline-block;
+        min-width: 0;
+        padding: 0 0.4em;
+        border: 1px solid currentColor;
+        border-radius: var(--radius-xs);
+        font-size: 0.85em;
+        font-weight: 400;
+        line-height: 1.4;
+        color: inherit;
+      }
+    }
+    .st-tabs ol {
+      width: auto;
+    }
+    .st-tabs li {
+      flex: none;
+    }
+    .st-tabs a {
+      padding-inline: var(--s-4);
+    }
+    .st-tabs .n {
+      display: inline;
+    }
+    .st-right {
+      display: flex;
+    }
+  }
+
+  .toast {
+    position: fixed;
+    right: 0;
+    bottom: calc(var(--bar-h) + env(safe-area-inset-bottom, 0px));
+    z-index: var(--z-index-toast);
+    max-width: 100%;
+    padding: var(--s-2) var(--gutter) var(--s-2) var(--s-4);
+    background: var(--accent);
+    color: var(--color-bg-sunk);
+    transform: translateY(110%);
+    visibility: hidden;
+    transition:
+      transform var(--dur-3) var(--ease-out-expo),
+      visibility 0s linear var(--dur-3);
+  }
+  .toast.on {
+    transform: none;
+    visibility: visible;
+    transition-delay: 0s;
+  }
+
+  /* ---------- dev console: a split pane docked on the status line ---------- */
+  .console {
+    position: fixed;
+    inset: auto 0 calc(var(--bar-h) + env(safe-area-inset-bottom, 0px)) 0;
+    z-index: var(--z-index-console);
+    width: 100%;
+    max-width: none;
+    max-height: min(62vh, 32rem);
+    margin: 0;
+    padding: 0;
+    overflow: auto;
+    overscroll-behavior: contain;
+    background: var(--color-surface);
+    color: var(--color-ink);
+    border: 0;
+    border-top: 1px solid var(--accent);
+    box-shadow: var(--shadow-pane);
+  }
+  @supports selector(:popover-open) {
+    .console:not(:popover-open) {
+      display: none;
+    }
+  }
+  @supports not selector(:popover-open) {
+    .console:not([data-open]) {
+      display: none;
+    }
+  }
+  .console:focus {
+    outline: none;
+  }
+  .console > header {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: var(--s-4);
+    padding: var(--s-2) var(--gutter);
+    background: var(--color-surface);
+    border-bottom: 1px solid var(--color-line);
+  }
+  .console h2 {
+    font: inherit;
+    color: var(--accent);
+  }
+  .console > header p {
+    color: var(--color-ink-3);
+    margin-right: auto;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .x {
+    display: grid;
+    place-items: center;
+    width: 2.5rem;
+    height: 2.5rem;
+    margin-right: -0.75rem;
+    background: none;
+    border: 0;
+    cursor: pointer;
+    color: var(--color-ink-2);
+    font-size: 1rem;
+  }
+  .x:hover {
+    color: var(--accent);
+  }
+  .panes {
+    display: grid;
+    gap: var(--s-6);
+    padding: var(--s-5) var(--gutter) var(--s-6);
+  }
+  .pane h3 {
+    font: inherit;
+    color: var(--color-ink-3);
+    margin-bottom: var(--s-4);
+  }
+  .presets {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--s-2);
+    margin-bottom: var(--s-5);
+  }
+  .presets button,
+  .reset {
+    padding: var(--s-2) var(--s-3);
+    min-height: 2rem;
+    background: none;
+    cursor: pointer;
+    border: 1px solid var(--color-line-strong);
+    border-radius: var(--radius-xs);
+    color: var(--color-ink-2);
+  }
+  .presets button:hover,
+  .reset:hover {
+    border-color: var(--accent);
+    color: var(--color-ink);
+  }
+  .presets button[aria-pressed='true'] {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--color-bg-sunk);
+  }
+  .preset-note {
+    margin: calc(var(--s-3) * -1) 0 var(--s-5);
+    min-height: 3em;
+    color: var(--color-ink-2);
+  }
+  .preset-note b {
+    color: var(--accent);
+    font-weight: inherit;
+  }
+  .preset-note span {
+    color: var(--color-ink-3);
+  }
+  .presets .reset {
+    margin-left: auto;
+    border-style: dashed;
+  }
+  .knobs {
+    display: grid;
+    gap: var(--s-4) var(--s-6);
+  }
+  .knob {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 0 var(--s-4);
+    align-items: baseline;
+    align-content: start;
+  }
+  .knob output {
+    color: var(--accent);
+  }
+  .knob input[type='range'] {
+    grid-column: 1 / -1;
+    width: 100%;
+    height: 1.5rem;
+    margin: 0;
+    accent-color: var(--accent);
+  }
+  .knob small {
+    grid-column: 1 / -1;
+    font-size: inherit;
+    color: var(--color-ink-3);
+  }
+  .knob button[role='switch'] {
+    justify-self: end;
+    padding: 0 var(--s-2);
+    background: none;
+    cursor: pointer;
+    border: 1px solid var(--color-line-strong);
+    border-radius: var(--radius-xs);
+    color: var(--color-ink-2);
+  }
+  .knob button[role='switch'][aria-checked='true'] {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+  .tiles {
+    display: grid;
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+    gap: var(--s-2);
+  }
+  .tiles button {
+    width: 100%;
+    aspect-ratio: 1;
+    min-height: 2rem;
+    padding: 0;
+    cursor: help;
+    background: none;
+    border: 1px solid var(--color-line-strong);
+    border-radius: var(--radius-xs);
+    color: var(--color-ink-3);
+  }
+  .tiles button:hover,
+  .tiles button:focus-visible {
+    border-color: var(--accent);
+    color: var(--color-ink);
+  }
+  .tiles button[data-on] {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--color-bg-sunk);
+    font-weight: 600;
+  }
+  .ach-line {
+    min-height: 3em;
+    margin-top: var(--s-3);
+    color: var(--color-ink-2);
+  }
+  .ach-line b {
+    font-weight: 400;
+    color: var(--accent);
+  }
+  .read {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: var(--s-1) var(--s-5);
+  }
+  .read dt {
+    color: var(--color-ink-3);
+  }
+  .read dd {
+    color: var(--color-ink);
+  }
+  @media (width >= 48rem) {
+    .knobs {
+      grid-template-columns: 1fr 1fr;
+    }
+  }
+  @media (width >= 64rem) {
+    .knobs {
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+    }
+    .panes {
+      grid-template-columns: minmax(0, 7fr) minmax(0, 4fr) minmax(0, 2fr);
+      column-gap: var(--s-7);
+    }
+  }
+
+  /* Touch: every control in the console is at least 44px in the direction that matters */
+  @media (pointer: coarse) {
+    .x {
+      flex: none;
+      width: 2.75rem;
+      height: 2.75rem;
+      margin-right: -0.9rem;
+    }
+    .presets button,
+    .reset,
+    .knob button[role='switch'] {
+      min-height: 2.75rem;
+      min-width: 2.75rem;
+    }
+    .knob input[type='range'] {
+      height: 2.75rem;
+    }
+    .tiles {
+      gap: var(--s-1);
+    }
+    .tiles button {
+      min-height: 2.75rem;
+    }
+  }
+}

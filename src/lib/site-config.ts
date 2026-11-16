@@ -51,7 +51,7 @@ const SITE_CONFIG = {
     category: 'technology',
     language: 'en',
     locale: 'en_US',
-    themeColor: '#0f172a',
+    themeColor: '#0a0c12',
   },
   person: {
     name: 'Lukáš Machala',

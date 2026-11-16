@@ -3,9 +3,5 @@ interface MainContentProps {
 }
 
 export function MainContent({ children }: MainContentProps) {
-  return (
-    <main id='main-content' className='relative z-10'>
-      {children}
-    </main>
-  )
+  return <main id='main-content'>{children}</main>
 }

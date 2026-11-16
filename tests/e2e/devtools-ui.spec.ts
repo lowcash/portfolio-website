@@ -1,141 +1,93 @@
 import { expect, test } from '@playwright/test'
 
-function getAlphaFromColor(color: string): number {
-  const rgbaMatch = color.match(/rgba?\(([^)]+)\)/i)
-  if (!rgbaMatch) return 1
-  const parts = rgbaMatch[1].split(',').map((part) => part.trim())
-  if (parts.length < 4) return 1
-  const alpha = Number(parts[3])
-  return Number.isFinite(alpha) ? alpha : 1
-}
-
-test.describe('Devtools and layered UI interactions', () => {
+test.describe('Dev console pane', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/')
     await page.waitForLoadState('networkidle')
   })
 
-  test('devtools egg is clickable and opening console does not block page UI', async ({ page }) => {
-    const toggleButton = page.getByRole('button', { name: 'Toggle debug console' })
-    await expect(toggleButton).toBeVisible()
+  test('the status line button opens a pane docked above the status line', async ({ page }) => {
+    const toggle = page.getByRole('button', { name: 'Toggle developer console' })
+    await expect(toggle).toBeVisible()
 
-    // Use evaluate-based click to bypass Next.js dev overlay pointer interception.
-    await toggleButton.evaluate((btn: HTMLElement) => btn.click())
-    const consoleRegion = page.getByRole('region', { name: 'Developer debug console' })
-    await expect(consoleRegion).toBeVisible()
+    await toggle.click()
 
-    const mobileMenuTrigger = page.locator('button[aria-controls="mobile-navigation-menu"]')
-    if (await mobileMenuTrigger.isVisible()) {
-      await consoleRegion.getByRole('button', { name: 'Close console' }).click()
-      await expect(consoleRegion).not.toBeVisible()
-      await mobileMenuTrigger.click()
-      await expect(page.getByRole('navigation', { name: 'Mobile navigation' })).toBeVisible()
-      await page.getByLabel('Close menu backdrop').click()
-      await page.waitForTimeout(300)
-    } else {
-      const navButton = page.getByRole('button', { name: 'Navigate to Projects' })
-      await navButton.click()
-      await page.waitForTimeout(800)
-      await expect(page.locator('#featured-projects')).toBeInViewport({ ratio: 0.15 })
-    }
+    const pane = page.getByRole('dialog', { name: 'Developer console' })
+    await expect(pane).toBeVisible()
+    await expect(page.locator('#orb-setting-animationSpeed')).toBeVisible()
+
+    const paneBox = await pane.boundingBox()
+    const barBox = await page.locator('#status').boundingBox()
+    expect(Math.abs(paneBox!.y + paneBox!.height - barBox!.y)).toBeLessThanOrEqual(2)
+    expect(paneBox!.width).toBeGreaterThanOrEqual(page.viewportSize()!.width - 2)
   })
 
-  test('devtools egg has no visible background and no border', async ({ page }) => {
-    const toggleButton = page.getByRole('button', { name: 'Toggle debug console' })
-    await expect(toggleButton).toBeVisible()
+  test('the close button closes the pane and the page stays usable', async ({ page }) => {
+    await page.getByRole('button', { name: 'Toggle developer console' }).click()
+    const pane = page.getByRole('dialog', { name: 'Developer console' })
+    await expect(pane).toBeVisible()
 
-    const visualStyle = await toggleButton.evaluate((el) => {
-      const style = window.getComputedStyle(el)
-      return {
-        backgroundColor: style.backgroundColor,
-        borderTopWidth: style.borderTopWidth,
-        borderTopStyle: style.borderTopStyle,
-      }
-    })
+    await pane.getByRole('button', { name: 'Close developer console' }).click()
+    await expect(pane).toBeHidden()
 
-    const alpha = getAlphaFromColor(visualStyle.backgroundColor)
-    expect(alpha).toBeLessThanOrEqual(0.1)
-    expect(Number.parseFloat(visualStyle.borderTopWidth)).toBe(0)
-    expect(visualStyle.borderTopStyle).toBe('none')
+    await page.getByRole('navigation', { name: 'Sections' }).getByRole('link', { name: 'Projects' }).click()
+    await expect(page.locator('#featured-projects')).toBeInViewport({ ratio: 0.15 })
   })
 
-  test('devtools egg stays anchored to bottom-left corner', async ({ page }) => {
-    const toggleButton = page.getByRole('button', { name: 'Toggle debug console' })
-    await expect(toggleButton).toBeVisible()
-
-    const viewport = page.viewportSize()
-    const box = await toggleButton.boundingBox()
-
-    expect(viewport).not.toBeNull()
-    expect(box).not.toBeNull()
-
-    if (viewport && box) {
-      const distanceFromLeft = box.x
-      const distanceFromBottom = viewport.height - (box.y + box.height)
-
-      expect(distanceFromLeft).toBeLessThanOrEqual(20)
-      expect(distanceFromBottom).toBeLessThanOrEqual(20)
-    }
-  })
-
-  test('devtools achievement grid renders 16 slots', async ({ page }) => {
+  test('the achievement grid renders 16 numbered tiles', async ({ page }) => {
     await page.evaluate(() => {
       localStorage.removeItem('achievements')
       window.dispatchEvent(new CustomEvent('achievements-reset'))
     })
+    await page.getByRole('button', { name: 'Toggle developer console' }).click()
 
-    const toggleButton = page.getByRole('button', { name: 'Toggle debug console' })
-    await toggleButton.evaluate((btn: HTMLElement) => btn.click())
-
-    const consoleRegion = page.getByRole('region', { name: 'Developer debug console' })
-    await expect(consoleRegion).toBeVisible()
-    await expect(consoleRegion.locator('div.grid.grid-cols-4 > div')).toHaveCount(16)
+    const pane = page.getByRole('dialog', { name: 'Developer console' })
+    const tiles = pane.locator('.tiles li')
+    await expect(tiles).toHaveCount(16)
+    await expect(tiles.first()).toHaveText('01')
+    await expect(tiles.last()).toHaveText('16')
   })
 
-  test('orbs keep content readable and clickable', async ({ page }) => {
-    const heading = page.getByRole('heading', { name: "Hey, I'm Lukáš Machala" })
-    await expect(heading).toBeVisible()
-    await expect(page.locator('.orb-1')).toBeVisible()
+  test('hovering or focusing a tile shows its hint', async ({ page }) => {
+    await page.getByRole('button', { name: 'Toggle developer console' }).click()
+    const pane = page.getByRole('dialog', { name: 'Developer console' })
 
-    const mobileMenuTrigger = page.locator('button[aria-controls="mobile-navigation-menu"]')
-    if (await mobileMenuTrigger.isVisible()) {
-      const headingIsReadableOnMobile = await heading.evaluate((el) => {
-        const rect = el.getBoundingClientRect()
-        return rect.width > 0 && rect.height > 0
-      })
-
-      expect(headingIsReadableOnMobile).toBe(true)
-      await mobileMenuTrigger.click()
-      await expect(page.getByRole('navigation', { name: 'Mobile navigation' })).toBeVisible()
-    } else {
-      const headingIsTopClickableTarget = await heading.evaluate((el) => {
-        const rect = el.getBoundingClientRect()
-        const x = rect.left + rect.width / 2
-        const y = rect.top + rect.height / 2
-        const topElement = document.elementFromPoint(x, y)
-        return topElement === el || !!topElement?.closest('h1')
-      })
-
-      expect(headingIsTopClickableTarget).toBe(true)
-      const navButton = page.getByRole('button', { name: 'Navigate to Projects' })
-      await navButton.click()
-      await page.waitForTimeout(800)
-      await expect(page.locator('#featured-projects')).toBeInViewport({ ratio: 0.15 })
-    }
+    await pane.locator('.tiles button').nth(1).focus()
+    await expect(pane.locator('.ach-line')).toContainText('Perfectly Balanced')
+    await expect(pane.locator('.ach-line')).toContainText('Scroll to exactly 50% of the page')
   })
 
-  test('DevTools reset buttons have cursor:pointer', async ({ page }) => {
-    const toggleButton = page.getByRole('button', { name: 'Toggle debug console' })
-    await toggleButton.evaluate((btn: HTMLElement) => btn.click())
+  test('the readout reports scene, scroll, fps and keys', async ({ page }) => {
+    await page.getByRole('button', { name: 'Toggle developer console' }).click()
+    const readout = page.getByRole('dialog', { name: 'Developer console' }).locator('.read')
 
-    const consoleRegion = page.getByRole('region', { name: 'Developer debug console' })
-    await expect(consoleRegion).toBeVisible()
+    await expect(readout).toContainText('scene')
+    await expect(readout).toContainText('hero')
+    await expect(readout).toContainText('D · 0–3 · Esc')
+    await expect(readout.locator('dd').nth(2)).toHaveText(/^\d+$/)
+  })
+
+  test('reset buttons have cursor:pointer', async ({ page }) => {
+    await page.getByRole('button', { name: 'Toggle developer console' }).click()
+    const pane = page.getByRole('dialog', { name: 'Developer console' })
 
     for (const name of ['RESET TO DEFAULT', 'RESET ACHIEVEMENTS']) {
-      const btn = consoleRegion.getByRole('button', { name })
-      await expect(btn).toBeVisible()
-      const cursor = await btn.evaluate((el) => getComputedStyle(el).cursor)
-      expect(cursor).toBe('pointer')
+      const button = pane.getByRole('button', { name })
+      await expect(button).toBeVisible()
+      expect(await button.evaluate((element) => getComputedStyle(element).cursor)).toBe('pointer')
     }
+  })
+
+  test('the hero heading stays readable and clickable with the lights behind it', async ({ page }) => {
+    const heading = page.getByRole('heading', { name: "Hey, I'm Lukáš Machala" })
+    await expect(heading).toBeVisible()
+    await expect(page.locator('.orb-a')).toBeAttached()
+
+    const topIsHeading = await heading.evaluate((element) => {
+      const rect = element.getBoundingClientRect()
+      const top = document.elementFromPoint(rect.left + rect.width / 2, rect.top + rect.height / 2)
+      return top === element || Boolean(top?.closest('h1'))
+    })
+    expect(topIsHeading).toBe(true)
   })
 })

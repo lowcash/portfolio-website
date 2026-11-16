@@ -1,5 +1,7 @@
 import { useEffect, useRef } from 'react'
 
+import { SECTION_IDS } from '@/lib/content'
+
 import type { UnlockRef } from './types'
 
 export type ClickParticle = { id: number; x: number; y: number }
@@ -15,10 +17,10 @@ export function useTripleClickLogo(enabled: boolean, unlockAchievementRef: Unloc
     let clickTimer: NodeJS.Timeout
 
     const handleLogoClick = (e: MouseEvent) => {
-      const target = e.target as HTMLElement
+      const heading = (e.target as HTMLElement).closest('h1')
 
       // Check if clicked on hero heading (contains "Lukáš Machala")
-      if (target.closest('h1') && target.textContent?.includes('Lukáš Machala')) {
+      if (heading?.textContent?.includes('Lukáš Machala')) {
         clickCount++
 
         if (clickCount === 3) {
@@ -33,9 +35,18 @@ export function useTripleClickLogo(enabled: boolean, unlockAchievementRef: Unloc
       }
     }
 
+    // A triple click would paint a selection block over the name; drag selection still works
+    const preventTripleSelection = (e: MouseEvent) => {
+      if (e.detail > 2 && (e.target as HTMLElement).closest('h1')) {
+        e.preventDefault()
+      }
+    }
+
     document.addEventListener('click', handleLogoClick)
+    document.addEventListener('mousedown', preventTripleSelection)
     return () => {
       document.removeEventListener('click', handleLogoClick)
+      document.removeEventListener('mousedown', preventTripleSelection)
       clearTimeout(clickTimer)
     }
   }, [enabled, unlockAchievementRef])
@@ -100,42 +111,33 @@ export function useCopyCat(enabled: boolean, unlockAchievementRef: UnlockRef) {
   }, [enabled, unlockAchievementRef])
 }
 
-/** 12-13. Scroll-to-top shortcut and navigation controls */
+/** 13-14. Navigation controls (3 uses) and the way back to the intro from further down the page */
 export function useNavigationInteractions(enabled: boolean, unlockAchievementRef: UnlockRef) {
-  const navClicksRef = useRef(0)
+  const navUsesRef = useRef(0)
 
   useEffect(() => {
     if (!enabled) {
       return
     }
 
-    const handleClick = (e: MouseEvent) => {
-      const target = e.target as HTMLElement
-      const triggerButton = target.closest('button')
+    // AppShell announces every user-initiated section jump (tabs, menu, wordmark, keys 0-3)
+    const handleNavigate = (event: Event) => {
+      const { sectionId, fromY } = (event as CustomEvent<{ sectionId: string; fromY: number }>).detail
 
-      if (!triggerButton) {
-        return
+      navUsesRef.current += 1
+      if (navUsesRef.current >= 3) {
+        unlockAchievementRef.current('nav-master')
       }
 
-      if (triggerButton.matches('button[aria-label="Scroll to top of page"]')) {
+      if (sectionId === SECTION_IDS[0] && fromY > window.innerHeight) {
         unlockAchievementRef.current('round-trip')
-      }
-
-      const isDesktopNav = triggerButton.matches('button[aria-label^="Navigate to "]')
-      const isMobileNav = Boolean(triggerButton.closest('#mobile-navigation-menu'))
-
-      if (isDesktopNav || isMobileNav) {
-        navClicksRef.current += 1
-        if (navClicksRef.current >= 3) {
-          unlockAchievementRef.current('nav-master')
-        }
       }
     }
 
-    document.addEventListener('click', handleClick)
+    window.addEventListener('section-navigate', handleNavigate)
 
     return () => {
-      document.removeEventListener('click', handleClick)
+      window.removeEventListener('section-navigate', handleNavigate)
     }
   }, [enabled, unlockAchievementRef])
 }

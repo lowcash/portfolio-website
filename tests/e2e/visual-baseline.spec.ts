@@ -6,10 +6,18 @@ import { expect, test } from '@playwright/test'
  */
 const SECTION_IDS = ['hero', 'featured-projects', 'experience', 'contact'] as const
 
+const SCENES = {
+  hero: 'hero',
+  'featured-projects': 'projects',
+  experience: 'experience',
+  contact: 'contact',
+} as const
+
 const FREEZE_CSS = `
   *, *::before, *::after {
     animation: none !important;
     transition: none !important;
+    scroll-behavior: auto !important;
     caret-color: transparent !important;
   }
 `
@@ -30,14 +38,8 @@ test.describe('Visual baseline', () => {
         }
       }, sectionId)
 
-      // The background eases toward the scroll position frame by frame; wait until it has fully arrived.
-      await page.waitForFunction(() => {
-        const { scrollHeight } = document.documentElement
-        const maxScroll = scrollHeight - window.innerHeight
-        const expected = maxScroll > 0 ? (window.scrollY / maxScroll) * 100 : 0
-        const actual = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--scroll-percent'))
-        return Math.abs(actual - expected) < 0.06
-      })
+      // The lights glide to the section's scene; wait for the scene attribute, then freeze
+      await page.waitForFunction((scene) => document.documentElement.dataset.scene === scene, SCENES[sectionId])
       await page.waitForTimeout(300)
 
       await expect(page).toHaveScreenshot(`${sectionId}.png`, {

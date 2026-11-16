@@ -1,527 +1,269 @@
 /**
- * Animations & Keyframe Definitions
- * 
- * Animation library covering:
- * - Glow shimmer
- * - Background orbs (floating keyframes, CSS-variable driven layout)
- * - Scroll-based interactions and achievement effects
- * 
- * All animations respect prefers-reduced-motion preference.
+ * Lights, grain and motion. Nothing here animates anything but transform, opacity.
+ * The default state is the final, visible state; every animation sits behind prefers-reduced-motion and,
+ * where the effect is new, behind @supports with a static fallback.
  */
 
-/* ============================================
-   GLOW SHIMMER
-   ============================================ */
-
-@keyframes glow-shimmer {
-  0% {
-    background-position: -200% center;
+@layer components {
+  /* ---------- the three lights: radial gradients, no filter: blur ---------- */
+  .orbs {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-index-orbs);
+    overflow: hidden;
+    pointer-events: none;
+    contain: strict;
   }
-  100% {
-    background-position: 200% center;
-  }
-}
-
-/* Animation utility classes */
-.animate-glow-shimmer {
-  position: relative;
-  overflow: hidden;
-}
-
-.animate-glow-shimmer::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.1) 50%, transparent 100%);
-  background-size: 200% 100%;
-  animation: glow-shimmer 6s linear infinite;
-  pointer-events: none;
-}
-
-/* ============================================
-   ORB ANIMATIONS - Large dramatic movements
-   ============================================ */
-
-/**
- * Orb float keyframes (1-6)
- * Each orb has unique movement pattern to create organic, non-repetitive motion
- * Large scale translations create visible impact; vary timing ensures no sync
- */
-
-@keyframes orb-float-1 {
-  0%,
-  100% {
-    transform: translate(-50%, -50%) translateX(0px) translateY(0px) scale(1);
-  }
-  25% {
-    transform: translate(-50%, -50%) translateX(-180px) translateY(120px) scale(1.2);
-  }
-  50% {
-    transform: translate(-50%, -50%) translateX(150px) translateY(-100px) scale(0.85);
-  }
-  75% {
-    transform: translate(-50%, -50%) translateX(80px) translateY(140px) scale(1.1);
-  }
-}
-
-@keyframes orb-float-2 {
-  0%,
-  100% {
-    transform: translate(-50%, -50%) translateX(0px) translateY(0px) scale(1);
-  }
-  30% {
-    transform: translate(-50%, -50%) translateX(140px) translateY(-150px) scale(1.15);
-  }
-  60% {
-    transform: translate(-50%, -50%) translateX(-160px) translateY(110px) scale(0.9);
-  }
-  90% {
-    transform: translate(-50%, -50%) translateX(90px) translateY(80px) scale(1.05);
-  }
-}
-
-@keyframes orb-float-3 {
-  0%,
-  100% {
-    transform: translate(-50%, -50%) translateX(0px) translateY(0px) scale(1);
-  }
-  20% {
-    transform: translate(-50%, -50%) translateX(-150px) translateY(-130px) scale(1.18);
-  }
-  55% {
-    transform: translate(-50%, -50%) translateX(120px) translateY(150px) scale(0.88);
-  }
-  85% {
-    transform: translate(-50%, -50%) translateX(-70px) translateY(-90px) scale(1.08);
-  }
-}
-
-@keyframes orb-float-4 {
-  0%,
-  100% {
-    transform: translate(-50%, -50%) translateX(0px) translateY(0px) scale(1);
-  }
-  35% {
-    transform: translate(-50%, -50%) translateX(170px) translateY(130px) scale(1.12);
-  }
-  65% {
-    transform: translate(-50%, -50%) translateX(-140px) translateY(-110px) scale(0.92);
-  }
-  88% {
-    transform: translate(-50%, -50%) translateX(100px) translateY(-70px) scale(1.06);
-  }
-}
-
-@keyframes orb-float-5 {
-  0%,
-  100% {
-    transform: translate(-50%, -50%) translateX(0px) translateY(0px) scale(1);
-  }
-  40% {
-    transform: translate(-50%, -50%) translateX(-190px) translateY(160px) scale(1.25);
-  }
-  70% {
-    transform: translate(-50%, -50%) translateX(110px) translateY(-120px) scale(0.82);
-  }
-}
-
-@keyframes orb-float-6 {
-  0%,
-  100% {
-    transform: translate(-50%, -50%) translateX(0px) translateY(0px) scale(1);
-  }
-  28% {
-    transform: translate(-50%, -50%) translateX(155px) translateY(-140px) scale(1.2);
-  }
-  58% {
-    transform: translate(-50%, -50%) translateX(-125px) translateY(155px) scale(0.86);
-  }
-  82% {
-    transform: translate(-50%, -50%) translateX(90px) translateY(70px) scale(1.1);
-  }
-}
-
-/**
- * Orb animation assignments
- * 8 orbs total; unique durations prevent sync patterns
- * Last 2 orbs run in reverse for additional variety
- */
-.orb-1 {
-  animation: orb-float-1 45s ease-in-out infinite;
-}
-.orb-2 {
-  animation: orb-float-2 38s ease-in-out infinite;
-}
-.orb-3 {
-  animation: orb-float-3 42s ease-in-out infinite;
-}
-.orb-4 {
-  animation: orb-float-4 40s ease-in-out infinite;
-}
-.orb-5 {
-  animation: orb-float-5 36s ease-in-out infinite;
-}
-.orb-6 {
-  animation: orb-float-6 44s ease-in-out infinite;
-}
-.orb-7 {
-  animation: orb-float-1 50s ease-in-out infinite reverse;
-}
-.orb-8 {
-  animation: orb-float-2 46s ease-in-out infinite reverse;
-}
-
-/**
- * Mobile orb animation – reduced amplitude (40-50px vs 150-190px desktop)
- * so motion is perceptible on small viewports without orbs moving off-screen.
- * Faster durations (11-16s vs 36-50s) make the motion visible to the eye.
- */
-@keyframes orb-float-mobile-1 {
-  0%,
-  100% {
-    transform: translate(-50%, -50%) translateX(0px) translateY(0px) scale(1);
-  }
-  25% {
-    transform: translate(-50%, -50%) translateX(-40px) translateY(30px) scale(1.08);
-  }
-  50% {
-    transform: translate(-50%, -50%) translateX(35px) translateY(-25px) scale(0.94);
-  }
-  75% {
-    transform: translate(-50%, -50%) translateX(20px) translateY(35px) scale(1.04);
-  }
-}
-
-@keyframes orb-float-mobile-2 {
-  0%,
-  100% {
-    transform: translate(-50%, -50%) translateX(0px) translateY(0px) scale(1);
-  }
-  30% {
-    transform: translate(-50%, -50%) translateX(38px) translateY(-42px) scale(1.1);
-  }
-  65% {
-    transform: translate(-50%, -50%) translateX(-35px) translateY(30px) scale(0.92);
-  }
-}
-
-@media (max-width: 767.98px) {
-  .orb-1 {
-    animation: orb-float-mobile-1 15s ease-in-out infinite;
-  }
-  .orb-2 {
-    animation: orb-float-mobile-2 12s ease-in-out infinite reverse;
-  }
-  .orb-3 {
-    animation: orb-float-mobile-1 14s ease-in-out infinite 2s;
-  }
-  .orb-4 {
-    animation: orb-float-mobile-2 13s ease-in-out infinite reverse 1s;
-  }
-  .orb-5 {
-    animation: orb-float-mobile-1 11s ease-in-out infinite 3s;
-  }
-  .orb-6 {
-    animation: orb-float-mobile-2 16s ease-in-out infinite reverse 4s;
-  }
-  .orb-7,
-  .orb-8 {
-    display: none; /* Desktop-only accents keep mobile rendering cheap */
-  }
-}
-
-/**
- * Orb layout, color and motion driven entirely by CSS custom properties.
- *
- * Per-orb values (--orb-top/left[-m], --orb-diameter, --orb-alpha, --orb-blur-px, --orb-duration,
- * --orb-depth, --orb-color) are set inline by AnimatedBackground; user tunables (--orb-size, --orb-blur,
- * --orb-opacity, --orb-brightness, --orb-magnetism) are written to :root by
- * the orb settings store. Animation speed is applied as playbackRate (see orb-effects.ts) so changing it never
- * restarts or jumps the animation; durations here are authored for the default speed of 3.
- * Keeping mobile/desktop/reduced-motion differences in media queries means the server HTML already matches the
- * final layout, so hydration never moves the orbs (no layout shift).
- * .orb-N / mobile media queries own animation-duration; .orb must not override them.
- */
-:root {
-  --orb-brightness: 0.5;
-  --animation-speed: 3;
-  --orb-size: 1.2;
-  --orb-blur: 1;
-  --orb-opacity: 1.05;
-  --orb-magnetism: 0;
-  --orb-pointer-x: 0;
-  --orb-pointer-y: 0;
-
-  /* Stacking scale (low → high) */
-  --z-base: 0;
-  --z-rail: 40;
-  --z-nav: 50;
-  --z-drawer: 60;
-  --z-progress: 70;
-  --z-console: 120;
-  --z-console-mobile: 130;
-  --z-particles: 90;
-  --z-popup: 9999;
-  --z-confetti: 200;
-  --z-skip: 100;
-}
-
-.orb {
-  position: absolute;
-  top: calc(var(--orb-top) * 1%);
-  left: calc(var(--orb-left) * 1%);
-  width: calc(var(--orb-diameter) * var(--orb-size) * 1px);
-  height: calc(var(--orb-diameter) * var(--orb-size) * 1px);
-  transform: translate(-50%, -50%);
-  /* Below 1x blur the gradient grows a solid core, so low blur reads as crisp discs instead of a barely changed haze */
-  --orb-core: calc(max(0, 1 - var(--orb-blur)) * 66%);
-  /* Above the default opacity the ramp steepens, and crisp (low blur) orbs get extra density, so both ends of those
-     sliders are clearly visible instead of dissolving into the dark background */
-  --orb-opacity-boost: calc(1 + max(0, var(--orb-opacity) - 0.85) * 3 + max(0, 1 - var(--orb-blur)) * 3);
-  background: radial-gradient(circle, var(--orb-color) 0%, var(--orb-color) var(--orb-core), transparent 70%);
-  opacity: calc(var(--orb-alpha) * var(--orb-opacity) * var(--orb-opacity-boost));
-  filter: blur(calc(var(--orb-blur-px) * var(--orb-blur) * 1px)) brightness(var(--orb-brightness));
-  /* Duration comes from .orb-N / mobile shorthand rules; do not override here or authored cycles are lost */
-  /* Individual `translate` composes with the keyframed `transform`, so magnetism never fights the float animation */
-  translate: calc(var(--orb-pointer-x) * var(--orb-depth) * var(--orb-magnetism) * 1px)
-    calc(var(--orb-pointer-y) * var(--orb-depth) * var(--orb-magnetism) * 1px);
-}
-
-@media (max-width: 767.98px) {
   .orb {
-    top: calc(var(--orb-top-m) * 1%);
-    left: calc(var(--orb-left-m) * 1%);
-    width: calc(var(--orb-diameter) * var(--orb-size) * 0.4px);
-    height: calc(var(--orb-diameter) * var(--orb-size) * 0.4px);
-    opacity: calc(var(--orb-alpha) * var(--orb-opacity) * var(--orb-opacity-boost) * 0.8);
-    filter: blur(calc(var(--orb-blur-px) * var(--orb-blur) * 0.62px))
-      brightness(clamp(0.72, calc(var(--orb-brightness) * 1.2), 0.95));
+    --d: clamp(28rem, 64vmax, 78rem);
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: var(--d);
+    height: var(--d);
+    margin: calc(var(--d) / -2) 0 0 calc(var(--d) / -2);
+    transform: translate3d(var(--x), var(--y), 0) scale(calc(var(--s) * var(--orb-size)));
+    /* Above 100% the gradient alpha (see below) carries the extra density, since opacity cannot exceed 1 */
+    opacity: min(1, calc(var(--o) * var(--orb-opacity)));
+    /* `translate` is written by the physics loop (orbs/effects.ts) and composes with the scene transform */
+    transition: opacity calc(var(--dur-scene) / 3) linear;
   }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .orb {
-    animation: none;
-    filter: none;
-    will-change: auto;
-  }
-}
-
-.orb-vignette {
-  background: radial-gradient(
-    circle at center,
-    transparent 0%,
-    transparent 40%,
-    rgba(3, 7, 18, 0.2) 70%,
-    rgba(3, 7, 18, 0.5) 100%
-  );
-}
-
-@media (max-width: 767.98px) {
-  .orb-vignette {
+  .orb i {
+    --k: max(1, var(--orb-opacity));
+    --f1: calc(var(--orb-core) + (100% - var(--orb-core)) * 0.16);
+    --f2: calc(var(--orb-core) + (100% - var(--orb-core)) * 0.32);
+    --f3: calc(var(--orb-core) + (100% - var(--orb-core)) * 0.48);
+    --f4: calc(var(--orb-core) + (100% - var(--orb-core)) * 0.64);
+    --f5: calc(var(--orb-core) + (100% - var(--orb-core)) * 0.8);
+    display: block;
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    /* Gaussian-like falloff over the whole diameter: no visible edge, peak alpha 0.055 */
     background: radial-gradient(
-      circle at center,
-      transparent 0%,
-      transparent 44%,
-      rgba(3, 7, 18, 0.1) 70%,
-      rgba(3, 7, 18, 0.2) 100%
+      closest-side,
+      rgb(var(--rgb) / calc(0.055 * var(--k))) var(--orb-core),
+      rgb(var(--rgb) / calc(0.048 * var(--k))) var(--f1),
+      rgb(var(--rgb) / calc(0.034 * var(--k))) var(--f2),
+      rgb(var(--rgb) / calc(0.019 * var(--k))) var(--f3),
+      rgb(var(--rgb) / calc(0.008 * var(--k))) var(--f4),
+      rgb(var(--rgb) / calc(0.002 * var(--k))) var(--f5),
+      transparent 100%
     );
   }
-}
-
-/* ============================================
-   SCROLL-BASED COMPONENT ANIMATIONS
-   ============================================ */
-
-/**
- * Scroll-to-Top Button Glow
- * Uses dynamic CSS variables set by JavaScript (--orb-r, --orb-g, --orb-b)
- * Prevents re-renders by updating CSS vars instead of React state
- */
-.scroll-to-top-glow {
-  box-shadow: 0 0 40px rgba(var(--orb-r), var(--orb-g), var(--orb-b), 0.5);
-  transition: box-shadow 0.3s ease-out;
-}
-
-.scroll-to-top-inner {
-  box-shadow:
-    inset 0 2px 20px rgba(0, 0, 0, 0.5),
-    inset 0 0 30px rgba(var(--orb-r), var(--orb-g), var(--orb-b), 0.08);
-  transition: box-shadow 0.3s ease-out;
-}
-
-.scroll-to-top-icon {
-  color: rgb(var(--orb-r), var(--orb-g), var(--orb-b));
-  transition: color 0.3s ease-out;
-}
-
-/**
- * Navigation Dot Active/Inactive States
- * Color derives from current section (--orb-r/g/b)
- */
-.scroll-nav-dot-active {
-  background-color: rgb(var(--orb-r), var(--orb-g), var(--orb-b));
-  box-shadow: 0 0 12px rgba(var(--orb-r), var(--orb-g), var(--orb-b), 0.8);
-  transition: all 0.3s ease-out;
-}
-
-.scroll-nav-dot-inactive {
-  background-color: rgba(156, 163, 175, 0.4);
-  transition: all 0.3s ease-out;
-}
-
-/* Mobile: subtle glow for smaller dots */
-@media (max-width: 768px) {
-  .scroll-nav-dot-active {
-    box-shadow: 0 0 8px rgba(var(--orb-r), var(--orb-g), var(--orb-b), 0.8);
+  @supports (color: oklch(0% 0 0)) {
+    .orb i {
+      --oc: var(--ol) calc(var(--och) * var(--sat)) calc(var(--oh) + var(--hue-shift));
+      background: radial-gradient(
+        closest-side,
+        oklch(var(--oc) / calc(0.055 * var(--k))) var(--orb-core),
+        oklch(var(--oc) / calc(0.048 * var(--k))) var(--f1),
+        oklch(var(--oc) / calc(0.034 * var(--k))) var(--f2),
+        oklch(var(--oc) / calc(0.019 * var(--k))) var(--f3),
+        oklch(var(--oc) / calc(0.008 * var(--k))) var(--f4),
+        oklch(var(--oc) / calc(0.002 * var(--k))) var(--f5),
+        transparent 100%
+      );
+    }
   }
-}
+  .orb-a i {
+    --rgb: 176 92 144;
+    --ol: 0.6;
+    --och: 0.13;
+    --oh: 350;
+  }
+  .orb-b i {
+    --rgb: 104 96 190;
+    --ol: 0.54;
+    --och: 0.12;
+    --oh: 282;
+  }
+  .orb-c i {
+    --rgb: 52 140 136;
+    --ol: 0.62;
+    --och: 0.08;
+    --oh: 190;
+  }
 
-/* Desktop devtools panel should expose scroll affordance when content overflows. */
-.devtools-scroll-area {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(var(--orb-r), var(--orb-g), var(--orb-b), 0.7) rgba(17, 24, 39, 0.65);
-}
+  /* Scenes: the hero composition is the default, so it is also the no-JS and reduced-motion state */
+  .orb-a {
+    --x: 74vw;
+    --y: 32vh;
+    --s: 1;
+    --o: 0.9;
+  }
+  .orb-b {
+    --x: 4vw;
+    --y: 96vh;
+    --s: 0.8;
+    --o: 0.5;
+  }
+  .orb-c {
+    --x: 104vw;
+    --y: 108vh;
+    --s: 0.6;
+    --o: 0.22;
+  }
+  /* No per-section composition: the lights stay where they are (the section focus lives in the chrome and the
+   * dimming of inactive sections), so scrolling never moves a light across the screen. */
 
-.devtools-scroll-area::-webkit-scrollbar {
-  width: 0.625rem;
-}
-
-.devtools-scroll-area::-webkit-scrollbar-track {
-  border-radius: 9999px;
-  background: rgba(17, 24, 39, 0.65);
-}
-
-.devtools-scroll-area::-webkit-scrollbar-thumb {
-  border-radius: 9999px;
-  background: rgba(var(--orb-r), var(--orb-g), var(--orb-b), 0.7);
-}
-
-.devtools-scroll-area::-webkit-scrollbar-thumb:hover {
-  background: rgba(var(--orb-r), var(--orb-g), var(--orb-b), 0.9);
-}
-
-/* ============================================
-   EASTER EGGS & ACHIEVEMENT ANIMATIONS
-   ============================================ */
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes slideInRight {
-  from {
-    transform: translateX(24px);
-    opacity: 0;
-  }
-  to {
-    transform: translateX(0);
-    opacity: 1;
-  }
-}
-
-@keyframes slideOutRight {
-  from {
-    transform: translateX(0);
-    opacity: 1;
-  }
-  to {
-    transform: translateX(24px);
-    opacity: 0;
-  }
-}
-
-@keyframes confettiFall {
-  0% {
-    opacity: 1;
-    transform: translateY(-20px) rotate(0deg);
-  }
-  100% {
-    opacity: 0;
-    transform: translateY(calc(100vh + 80px)) rotate(720deg);
-  }
-}
-
-@keyframes confettiBounce {
-  0% {
-    opacity: 1;
-    transform: translateY(-30px) scale(1);
-  }
-  50% {
-    opacity: 1;
-  }
-  100% {
-    opacity: 0;
-    transform: translateY(calc(100vh + 80px)) scale(0);
-  }
-}
-
-@keyframes enlightenedPulse {
-  0%,
-  100% {
-    opacity: 0.6;
-  }
-  50% {
-    opacity: 1;
-  }
-}
-
-@keyframes enlightenedSidePulse {
-  0%,
-  100% {
-    opacity: 0.4;
-  }
-  50% {
+  /* Subconscious ambient layer: a faint, wide wash in the scene hue; static (and still faint) without motion */
+  .orb-ambient {
+    position: absolute;
+    inset: -10%;
     opacity: 0.8;
+    background:
+      radial-gradient(
+        60% 50% at 25% 30%,
+        oklch(0.55 calc(0.05 * var(--sat)) calc(300 + var(--hue-shift)) / 0.05),
+        transparent 70%
+      ),
+      radial-gradient(
+        55% 50% at 78% 72%,
+        oklch(0.55 calc(0.05 * var(--sat)) calc(200 + var(--hue-shift)) / 0.04),
+        transparent 70%
+      );
   }
-}
 
-@keyframes sparkleRise {
-  0% {
-    opacity: 0;
-    transform: translateY(0) rotate(0deg) scale(0.5);
+  /* One static tile, never repainted */
+  .grain {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-index-orbs);
+    pointer-events: none;
+    opacity: 0.085;
+    background-image: url('/grain.png');
+    background-size: 128px 128px;
   }
-  12% {
-    opacity: 0.8;
-    transform: translateY(-4vh) rotate(15deg) scale(1);
-  }
-  80% {
-    opacity: 0.4;
-  }
-  100% {
-    opacity: 0;
-    transform: translateY(-80vh) rotate(-35deg) scale(0.6);
-  }
-}
 
-@keyframes goldenBeam {
-  0% {
-    background-position: -100% 0;
-    opacity: 0.6;
+  /* ---------- easter eggs ---------- */
+  @keyframes confettiFall {
+    0% {
+      opacity: 1;
+      transform: translateY(-20px) rotate(0deg);
+    }
+    100% {
+      opacity: 0;
+      transform: translateY(calc(100vh + 80px)) rotate(720deg);
+    }
   }
-  100% {
-    background-position: 100% 0;
-    opacity: 1;
+  @keyframes confettiBounce {
+    0% {
+      opacity: 1;
+      transform: translateY(-30px) scale(1);
+    }
+    50% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+      transform: translateY(calc(100vh + 80px)) scale(0);
+    }
   }
-}
+  @keyframes enlightenedPulse {
+    0%,
+    100% {
+      opacity: 0.6;
+    }
+    50% {
+      opacity: 1;
+    }
+  }
+  @keyframes enlightenedSidePulse {
+    0%,
+    100% {
+      opacity: 0.4;
+    }
+    50% {
+      opacity: 0.8;
+    }
+  }
+  @keyframes sparkleRise {
+    0% {
+      opacity: 0;
+      transform: translateY(0) rotate(0deg) scale(0.5);
+    }
+    12% {
+      opacity: 0.8;
+      transform: translateY(-4vh) rotate(15deg) scale(1);
+    }
+    80% {
+      opacity: 0.4;
+    }
+    100% {
+      opacity: 0;
+      transform: translateY(-80vh) rotate(-35deg) scale(0.6);
+    }
+  }
+  @keyframes goldenBeam {
+    0% {
+      opacity: 0.6;
+    }
+    100% {
+      opacity: 1;
+    }
+  }
 
-/* Click ripple ring, animated by orb-effects via the Web Animations API */
-.orb-ripple {
-  position: absolute;
-  width: 640px;
-  height: 640px;
-  border-radius: 9999px;
-  border: 2px solid var(--orb-c0, rgb(236, 72, 153));
-  box-shadow:
-    0 0 48px var(--orb-c0, rgb(236, 72, 153)),
-    inset 0 0 48px var(--orb-c0, rgb(236, 72, 153));
-  opacity: 0;
+  /* ---------- motion ---------- */
+  @keyframes beat {
+    0% {
+      transform: scale(1.035);
+    }
+    100% {
+      transform: scale(1);
+    }
+  }
+  @keyframes rise {
+    from {
+      opacity: 0;
+      transform: translate3d(0, 20px, 0);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  /* The ambient layer: one very faint wash that swells and recedes, below conscious notice */
+  @keyframes ambient-breathe {
+    0%,
+    100% {
+      opacity: 0.55;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 1;
+      transform: scale(1.06);
+    }
+  }
+
+  @media (prefers-reduced-motion: no-preference) {
+    html {
+      scroll-behavior: smooth;
+    }
+    .orb-a i {
+      animation: var(--animate-drift-a-x), var(--animate-drift-a-y);
+    }
+    .orb-b i {
+      animation: var(--animate-drift-b-x), var(--animate-drift-b-y);
+    }
+    .orb-c i {
+      animation: var(--animate-drift-c-x), var(--animate-drift-c-y);
+    }
+    /* 174 BPM: hovering the drum & bass link makes the room keep time */
+    html:has(.dnb:hover) .orbs,
+    html:has(.dnb:focus-visible) .orbs {
+      animation: beat 345ms var(--ease-out-expo) infinite;
+    }
+
+    @supports (animation-timeline: view()) {
+      .reveal {
+        animation: rise linear both;
+        animation-timeline: view();
+        animation-range: entry 0% cover 24%;
+      }
+    }
+    .orb-ambient {
+      animation: ambient-breathe 120s ease-in-out infinite;
+    }
+  }
 }

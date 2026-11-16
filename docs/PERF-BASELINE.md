@@ -39,3 +39,18 @@ It is local only (macOS snapshots, skipped when `CI` is set). Update intentional
 - Hero heading needs the Inter latin-ext subset ("š"); it is now preloaded.
 - Lighthouse runs with `--disable-gpu`, so the large blurred orbs rasterize on the CPU. The reported LCP is mostly that
   artifact (unthrottled LCP is ~0.2 s); hiding the orbs entirely only moves it to 2.9 s.
+
+## After the Night Paper redesign (2026-11)
+
+Same machine and `scripts/run-lighthouse.mjs` as above; wave-1 baseline measured side by side on the same load.
+
+| Metric      | Wave 1 desktop | Night Paper desktop | Wave 1 mobile | Night Paper mobile |
+| ----------- | -------------- | ------------------- | ------------- | ------------------ |
+| Performance | 77             | 80                  | 92            | 95-99              |
+| LCP         | 3.6 s          | 3.0 s               | 3.3 s         | 2.1-3.0 s          |
+| FCP         | 1.2 s          | 1.2 s               | 1.2 s         | 0.8-1.2 s          |
+| CLS         | 0              | 0                   | 0             | 0                  |
+
+- Fonts were the cost: stock Google Fraunces (roman latin + latin-ext, italic) was about 415 KB before first paint and
+  gave FCP 2.0 s, LCP 4.4 s and mobile CLS 0.25. Subsetting and instancing brought it to about 74 KB preloaded.
+- No `filter: blur`, no `backdrop-filter`; three gradient layers animate transform and opacity only.

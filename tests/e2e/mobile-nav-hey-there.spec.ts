@@ -7,40 +7,53 @@ test.describe('Mobile navigation regressions', () => {
     await page.waitForLoadState('networkidle')
   })
 
-  test('Intro from drawer returns user to hero', async ({ page }) => {
+  test('Intro tab returns the user to the hero from the bottom', async ({ page }) => {
     await page.evaluate(() => {
       document.getElementById('contact')?.scrollIntoView({ block: 'start' })
     })
     await page.waitForTimeout(900)
 
-    const trigger = page.locator('button[aria-controls="mobile-navigation-menu"]')
-    await expect(trigger).toBeVisible()
+    await page.getByRole('navigation', { name: 'Sections' }).getByRole('link', { name: 'Intro' }).click()
 
-    await trigger.click()
-    const drawer = page.getByRole('navigation', { name: 'Mobile navigation' })
-    await expect(drawer).toBeVisible()
-
-    const heroButton = drawer.getByRole('button', { name: 'Intro' })
-    await expect(heroButton).toBeVisible()
-
-    await heroButton.click()
-
-    await expect(drawer).not.toBeVisible()
     await expect.poll(() => page.evaluate(() => window.scrollY), { timeout: 3500 }).toBeLessThan(320)
     await expect(page.locator('#hero')).toBeInViewport({ ratio: 0.25 })
   })
 
-  test('scroll-to-top does not overlap contact text on mobile', async ({ page }) => {
+  test('status line does not overlap contact text on mobile', async ({ page }) => {
     await page.evaluate(() => {
       document.getElementById('contact')?.scrollIntoView({ block: 'start' })
     })
     await page.waitForTimeout(900)
+    await page.evaluate(() => window.scrollTo({ top: document.documentElement.scrollHeight, behavior: 'instant' }))
 
-    const scrollToTopButton = page.getByRole('button', { name: 'Scroll to top of page' })
-    await expect(scrollToTopButton).toBeVisible()
+    const bar = await page.locator('#status').boundingBox()
+    const hint = await page.locator('#contact .hint').boundingBox()
 
-    await scrollToTopButton.click()
-    await expect.poll(() => page.evaluate(() => window.scrollY), { timeout: 3500 }).toBeLessThan(220)
-    await expect(page.locator('#hero')).toBeInViewport({ ratio: 0.2 })
+    expect(bar).not.toBeNull()
+    expect(hint).not.toBeNull()
+    expect(hint!.y + hint!.height).toBeLessThanOrEqual(bar!.y)
+  })
+
+  test('the top bar is a slim wordmark row with no menu; the console stays reachable from the status line', async ({
+    page,
+  }) => {
+    const bar = await page.locator('.topbar').boundingBox()
+    const wordmark = await page.getByRole('link', { name: 'lowcash.dev' }).boundingBox()
+
+    expect(bar!.height).toBeLessThanOrEqual(48)
+    expect(wordmark!.x).toBeGreaterThanOrEqual(15)
+    await expect(page.locator('.menu-btn')).toHaveCount(0)
+    await expect(page.locator('.topbar .keyhint')).toBeHidden()
+
+    await page.getByRole('button', { name: 'Toggle developer console' }).click()
+    await expect(page.getByRole('dialog', { name: 'Developer console' })).toBeVisible()
+  })
+
+  test('the page does not scroll sideways', async ({ page }) => {
+    const { sw, cw } = await page.evaluate(() => ({
+      sw: document.documentElement.scrollWidth,
+      cw: document.documentElement.clientWidth,
+    }))
+    expect(sw).toBeLessThanOrEqual(cw)
   })
 })

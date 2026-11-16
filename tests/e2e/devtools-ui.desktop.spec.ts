@@ -1,13 +1,12 @@
-import { expect, test } from '@playwright/test'
+import { type Page, expect, test } from '@playwright/test'
 
-async function triggerMidpointAchievement(page: import('@playwright/test').Page) {
+async function armAndScrollToMidpoint(page: Page) {
   await page.evaluate(async () => {
     localStorage.setItem('dev_console_opened', 'true')
     window.dispatchEvent(new CustomEvent('dev-console-opened'))
     localStorage.removeItem('achievements')
     window.dispatchEvent(new CustomEvent('achievements-reset'))
 
-    document.documentElement.style.scrollSnapType = 'none'
     const maxScroll = document.documentElement.scrollHeight - window.innerHeight
 
     for (let pass = 0; pass < 3; pass++) {
@@ -20,153 +19,139 @@ async function triggerMidpointAchievement(page: import('@playwright/test').Page)
   })
 }
 
-async function waitForAchievementPopup(page: import('@playwright/test').Page) {
-  const popup = page.getByRole('alert').filter({ hasText: 'Achievement Unlocked!' }).first()
+async function waitForToast(page: Page) {
+  const toast = page.getByTestId('achievement-toast')
 
   for (let attempt = 0; attempt < 3; attempt++) {
-    const isVisible = await popup.isVisible().catch(() => false)
-    if (isVisible) {
-      return popup
+    if (await toast.evaluate((element) => element.classList.contains('on')).catch(() => false)) {
+      return toast
     }
-
-    await triggerMidpointAchievement(page)
+    await armAndScrollToMidpoint(page)
     await page.waitForTimeout(600)
   }
 
-  return popup
+  return toast
 }
 
-test.describe('Desktop devtools and overlays', () => {
+test.describe('Desktop console and toast', () => {
   test.beforeEach(async ({ page }) => {
     await page.goto('/')
     await page.waitForLoadState('networkidle')
   })
 
-  test('devtools panel opens at readable default size', async ({ page }) => {
-    const toggleButton = page.getByRole('button', { name: 'Toggle debug console' })
-    await toggleButton.evaluate((btn: HTMLElement) => btn.click())
+  test('console pane opens at a readable size with three panes', async ({ page }) => {
+    await page.keyboard.press('d')
+    const pane = page.getByRole('dialog', { name: 'Developer console' })
+    await expect(pane).toBeVisible()
 
-    const panel = page.getByRole('region', { name: 'Developer debug console' })
-    await expect(panel).toBeVisible()
-
-    const panelContent = page.getByTestId('devtools-panel-content')
-    const contentStyle = await panelContent.evaluate((el) => {
-      const style = getComputedStyle(el)
-      return {
-        minWidth: Number.parseFloat(style.minWidth),
-        maxWidth: Number.parseFloat(style.maxWidth),
-        maxHeight: Number.parseFloat(style.maxHeight),
-      }
-    })
-
-    expect(contentStyle.minWidth).toBeGreaterThanOrEqual(420)
-    expect(contentStyle.maxWidth).toBeGreaterThanOrEqual(850)
-    expect(contentStyle.maxHeight).toBeGreaterThanOrEqual(600)
+    const box = await pane.boundingBox()
+    expect(box!.height).toBeGreaterThanOrEqual(250)
+    await expect(pane.locator('.pane')).toHaveCount(3)
   })
 
-  test('achievement popup is rendered above side dots navigation', async ({ page }) => {
-    await triggerMidpointAchievement(page)
+  test('opening with D moves focus into the pane and closing returns it', async ({ page }) => {
+    await page.getByRole('link', { name: 'LinkedIn' }).focus()
+    await page.keyboard.press('d')
+    await expect(page.getByRole('dialog', { name: 'Developer console' })).toBeFocused()
 
-    const popup = await waitForAchievementPopup(page)
-    await expect(popup).toBeVisible()
-
-    const popupBox = await popup.boundingBox()
-    const navBox = await page.getByRole('navigation', { name: 'Page navigation' }).boundingBox()
-
-    expect(popupBox).not.toBeNull()
-    expect(navBox).not.toBeNull()
-
-    if (popupBox && navBox) {
-      const popupRight = popupBox.x + popupBox.width
-      const navCenterX = navBox.x + navBox.width / 2
-      expect(popupRight).toBeLessThan(navCenterX + 10)
-
-      const viewportSize = page.viewportSize()
-      if (viewportSize) {
-        expect(popupBox.y).toBeGreaterThanOrEqual(0)
-        expect(popupBox.y + popupBox.height).toBeLessThanOrEqual(viewportSize.height)
-      }
-    }
-
-    const zLayerCheck = await page.evaluate(() => {
-      const popupContainer = document.querySelector('[data-testid="achievement-popup-layer"]')
-      const navContainer = document.querySelector('nav[aria-label="Page navigation"]')?.closest('.fixed')
-
-      const popupZ = popupContainer ? Number(getComputedStyle(popupContainer).zIndex || 0) : -1
-      const navZ = navContainer ? Number(getComputedStyle(navContainer).zIndex || 0) : -1
-
-      return { popupZ, navZ }
-    })
-
-    expect(zLayerCheck.popupZ).toBeGreaterThan(zLayerCheck.navZ)
-
-    await page.evaluate(() => {
-      document.documentElement.style.scrollSnapType = ''
-    })
+    await page.keyboard.press('Escape')
+    await expect(page.getByRole('link', { name: 'LinkedIn' })).toBeFocused()
   })
 
-  test('achievement popup is fully visible within viewport', async ({ page }) => {
-    await triggerMidpointAchievement(page)
+  test('the console is a dialog: Tab and Shift+Tab stay inside it and Escape hands focus back', async ({ page }) => {
+    const trigger = page.getByRole('link', { name: 'LinkedIn' })
+    await trigger.focus()
+    await page.keyboard.press('d')
+    const pane = page.getByRole('dialog', { name: 'Developer console' })
+    await expect(pane).toHaveAttribute('aria-modal', 'true')
+    await expect(pane).toBeFocused()
 
-    const popup = await waitForAchievementPopup(page)
-    await expect(popup).toBeVisible()
-
-    const popupBox = await popup.boundingBox()
-    expect(popupBox).not.toBeNull()
-
-    const viewportSize = page.viewportSize()
-    expect(viewportSize).not.toBeNull()
-
-    if (popupBox && viewportSize) {
-      expect(popupBox.x).toBeGreaterThanOrEqual(0)
-      expect(popupBox.y).toBeGreaterThanOrEqual(0)
-      expect(popupBox.x + popupBox.width).toBeLessThanOrEqual(viewportSize.width)
-      expect(popupBox.y + popupBox.height).toBeLessThanOrEqual(viewportSize.height)
+    for (let step = 0; step < 60; step++) {
+      await page.keyboard.press('Tab')
+      expect(await pane.evaluate((element) => element.contains(document.activeElement))).toBe(true)
+    }
+    for (let step = 0; step < 60; step++) {
+      await page.keyboard.press('Shift+Tab')
+      expect(await pane.evaluate((element) => element.contains(document.activeElement))).toBe(true)
     }
 
-    await page.evaluate(() => {
-      document.documentElement.style.scrollSnapType = ''
-    })
+    // Focus clicked out onto the page is pulled back by the next Tab
+    await page.mouse.click(700, 120)
+    await page.keyboard.press('Tab')
+    expect(await pane.evaluate((element) => element.contains(document.activeElement))).toBe(true)
+
+    await page.keyboard.press('Escape')
+    await expect(pane).toBeHidden()
+    await expect(trigger).toBeFocused()
   })
 
-  test('achievement popup remains visible above devtools when console is open', async ({ page }) => {
-    // Open devtools first
-    const toggleButton = page.getByRole('button', { name: 'Toggle debug console' })
-    await toggleButton.evaluate((btn: HTMLElement) => btn.click())
+  test('the shortcut is discoverable: top bar entry, status line key hint and the hero action open the console', async ({
+    page,
+  }) => {
+    const topBarEntry = page.locator('.topbar').getByRole('button', { name: /dev console/i })
+    await expect(topBarEntry).toBeVisible()
+    await expect(topBarEntry).toContainText('D')
+    await expect(page.locator('#status .st-key')).toBeVisible()
+    await expect(page.getByRole('button', { name: 'Toggle developer console' })).toHaveAttribute(
+      'aria-keyshortcuts',
+      'D',
+    )
 
-    const consoleRegion = page.getByRole('region', { name: 'Developer debug console' })
-    await expect(consoleRegion).toBeVisible()
+    await topBarEntry.click()
+    await expect(page.getByRole('dialog', { name: 'Developer console' })).toBeVisible()
+  })
 
-    // Trigger achievement while devtools is open
-    await triggerMidpointAchievement(page)
-
-    const popup = await waitForAchievementPopup(page)
-    await expect(popup).toBeVisible()
-
-    // Verify popup is still visible and positioned correctly
-    const popupBox = await popup.boundingBox()
-    expect(popupBox).not.toBeNull()
-
-    if (popupBox) {
-      const viewportSize = page.viewportSize()
-      expect(viewportSize).not.toBeNull()
-
-      // Popup should be within viewport
-      expect(popupBox.x).toBeGreaterThanOrEqual(0)
-      expect(popupBox.y).toBeGreaterThanOrEqual(0)
-
-      if (viewportSize) {
-        expect(popupBox.x + popupBox.width).toBeLessThanOrEqual(viewportSize.width)
-        expect(popupBox.y + popupBox.height).toBeLessThanOrEqual(viewportSize.height)
-      }
-    }
-
-    // Verify achievement was recorded in console – wait for the grid to reflect the unlock
-    const unlockedSlot = consoleRegion.locator('div[class*="border-yellow"]').first()
-    await expect(unlockedSlot).toBeVisible({ timeout: 5000 })
-
+  test('D is ignored while typing in a slider-free editable target and with modifiers', async ({ page }) => {
     await page.evaluate(() => {
-      document.documentElement.style.scrollSnapType = ''
+      const input = document.createElement('input')
+      input.id = 'probe'
+      document.body.append(input)
+    })
+    await page.locator('#probe').focus()
+    await page.keyboard.press('d')
+
+    await expect(page.getByRole('dialog', { name: 'Developer console' })).toBeHidden()
+  })
+
+  test('an unlock slides a one-line message out of the status line, above it and inside the viewport', async ({
+    page,
+  }) => {
+    await armAndScrollToMidpoint(page)
+    const toast = await waitForToast(page)
+
+    await expect(toast).toHaveClass(/on/)
+    await expect(toast).toContainText('achievement unlocked')
+    await expect(toast).toHaveAttribute('role', 'status')
+
+    const toastBox = await toast.boundingBox()
+    const barBox = await page.locator('#status').boundingBox()
+    const viewport = page.viewportSize()!
+
+    expect(toastBox!.y + toastBox!.height).toBeLessThanOrEqual(barBox!.y + 1)
+    expect(toastBox!.x + toastBox!.width).toBeLessThanOrEqual(viewport.width)
+    expect(toastBox!.y).toBeGreaterThanOrEqual(0)
+  })
+
+  test('the counter appears in the status line only after the console has been opened once', async ({ page }) => {
+    await page.evaluate(() => localStorage.removeItem('dev_console_opened'))
+    await page.reload()
+    await page.waitForLoadState('networkidle')
+    await expect(page.locator('.st-ach')).toBeHidden()
+
+    await page.keyboard.press('d')
+    await expect(page.locator('.st-ach')).toBeVisible()
+    await expect(page.locator('.st-ach')).toContainText('/16')
+  })
+
+  test('unlocked tiles light up in the console', async ({ page }) => {
+    await armAndScrollToMidpoint(page)
+    await waitForToast(page)
+    await page.keyboard.press('d')
+
+    await expect(
+      page.getByRole('dialog', { name: 'Developer console' }).locator('.tiles button[data-on]').first(),
+    ).toBeVisible({
+      timeout: 5000,
     })
   })
 })

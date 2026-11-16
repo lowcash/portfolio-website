@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 
-import { setOrbSetting } from '@/lib/orb-settings'
+import { setOrbSetting } from '@/lib/orbs/settings'
 
 import type { UnlockRef } from './types'
 
@@ -111,46 +111,56 @@ export function useShake(enabled: boolean, unlockAchievementRef: UnlockRef) {
           unlockAchievementRef.current('shake')
           scrollEvents = []
 
-          setOrbSetting('colorVariation', Math.random() * 100)
+          setOrbSetting('hue', Math.round(Math.random() * 72) * 5)
 
           console.log('%c📜 Rapid scroll detected! Colors shuffled!', 'color: #ec4899; font-size: 14px;')
         }
       }
     }
 
-    // DESKTOP: Mouse movement detection (keep existing logic)
-    let lastX = 0
-    let lastY = 0
-    let mouseMovements: Array<{ time: number; distance: number }> = []
+    // DESKTOP: a shake is the pointer swinging side to side. Real mice report small steps (a fast shake is ~10-30 px
+    // per event), so count direction reversals of the x movement after a swing of at least 60 px, within one second.
+    let lastX: number | null = null
+    let swingStartX = 0
+    let direction = 0
+    let reversals: number[] = []
 
     const handleMouseMove = (e: MouseEvent) => {
       if (mobileMode) return
 
       const now = Date.now()
-      const deltaX = Math.abs(e.clientX - lastX)
-      const deltaY = Math.abs(e.clientY - lastY)
-      const distance = Math.sqrt(deltaX * deltaX + deltaY * deltaY)
+      const previousX = lastX
+      lastX = e.clientX
 
-      if (distance > 100) {
-        mouseMovements.push({ time: now, distance })
-        mouseMovements = mouseMovements.filter((m) => now - m.time < 1000)
+      if (previousX === null || e.clientX === previousX) return
 
-        if (mouseMovements.length >= 8) {
-          const totalDistance = mouseMovements.reduce((sum, m) => sum + m.distance, 0)
+      const deltaX = e.clientX - previousX
 
-          if (totalDistance > 2000) {
-            unlockAchievementRef.current('shake')
-            mouseMovements = []
+      const nextDirection = Math.sign(deltaX)
 
-            setOrbSetting('colorVariation', Math.random() * 100)
+      if (direction === 0) {
+        direction = nextDirection
+        swingStartX = previousX
+      } else if (nextDirection !== direction) {
+        // Turning point: was the swing that just ended wide enough to count?
+        if (Math.abs(previousX - swingStartX) >= 60) {
+          reversals.push(now)
+        }
 
-            console.log('%c🖱️ Rapid mouse movement detected! Colors shuffled!', 'color: #ec4899; font-size: 14px;')
-          }
+        reversals = reversals.filter((time) => now - time < 1000)
+
+        direction = nextDirection
+        swingStartX = previousX
+
+        if (reversals.length >= 5) {
+          unlockAchievementRef.current('shake')
+          reversals = []
+
+          setOrbSetting('hue', Math.round(Math.random() * 72) * 5)
+
+          console.log('%c🖱️ Rapid mouse movement detected! Colors shuffled!', 'color: #ec4899; font-size: 14px;')
         }
       }
-
-      lastX = e.clientX
-      lastY = e.clientY
     }
 
     if (mobileMode) {
@@ -178,7 +188,8 @@ export function useRepeatVisitor(enabled: boolean, unlockAchievementRef: UnlockR
     const visitCount = localStorage.getItem('visit_count')
     const count = visitCount ? parseInt(visitCount, 10) : 0
 
-    if (count >= 3) {
+    // This visit counts too: the third visit is the one that unlocks
+    if (count + 1 >= 3) {
       unlockAchievementRef.current('repeat-visitor')
 
       console.log(

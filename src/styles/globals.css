@@ -1,20 +1,16 @@
 /**
- * Global Styles Entry Point
- * 
- * This file orchestrates the complete CSS architecture:
- * 0. Tailwind CSS entrypoint (generates utility classes and @apply support)
- * 1. Design system (theme variables, colors, spacing)
- * 2. Base reset & accessibility  
- * 3. Animations & effects
- * 4. Tailwind CSS integration (auto-applied in Tailwind v4+)
- * 
- * Layer order: theme → base → accessibility → animations
- * Tailwind directives (@layer base, utilities) are handled by Tailwind automatically.
+ * Night Paper: global styles entry point.
+ *
+ * theme.css      tokens (Tailwind 4 @theme: OKLCH with hex fallbacks), tone utilities
+ * base.css       reset additions, typography, focus, reduced-motion net
+ * layout.css     grid, sections, ledger entries, hero, contact
+ * chrome.css     top bar, status line, dev console pane, toast
+ * animations.css the three lights, grain, scenes and every opt-in animation
  */
 
 @import 'tailwindcss';
 @import './theme.css';
-@import './typography.css';
 @import './base.css';
-@import './accessibility.css';
+@import './layout.css';
+@import './chrome.css';
 @import './animations.css';

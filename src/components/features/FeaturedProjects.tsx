@@ -1,180 +1,111 @@
-import { Eye, Gamepad2, Globe, type LucideIcon, TrendingUp } from 'lucide-react'
-
-import { type FeaturedProjectIconKey, siteContent } from '@/lib/content'
+import { type Tone, siteContent } from '@/lib/content'
 import { formatTypography } from '@/lib/prevent-widows'
-import { SECTION_STYLES } from '@/lib/section-config'
 
-import { ContentCard } from '@/components/ui/card-layout'
-import { CARD_BODY_CLASS, CARD_MONO_LABEL_CLASS } from '@/components/ui/card-tokens'
-import { ExternalLinkIcon } from '@/components/ui/external-link-icon'
+import { Entry, TechList } from '@/components/ui/entry'
+import { ExternalLink } from '@/components/ui/external-link'
 import { SectionHeader } from '@/components/ui/section-header'
-import { SectionWrapper } from '@/components/ui/section-wrapper'
-import { TagList } from '@/components/ui/tag-list'
-import { TechTag } from '@/components/ui/tech-tag'
-
-const iconMap: Record<FeaturedProjectIconKey, LucideIcon> = {
-  eye: Eye,
-  gamepad: Gamepad2,
-  trendingUp: TrendingUp,
-  globe: Globe,
-}
 
 type Project = (typeof siteContent.featuredProjects.projects)[number]
-type TradingProject = Extract<Project, { layout: 'featured' }>
-type ProjectBullet = NonNullable<Extract<Project, { bullets: unknown }>['bullets']>[number]
-type LabeledBullet = Extract<ProjectBullet, { label: string }>
+type LabeledBullet = { label: string; description: string }
+type LinkedBullet = { name: string; url: string; description: string }
 
-const EXTERNAL_LINK_CLASS =
-  'group inline-flex items-center text-zinc-300 transition-colors duration-150 hover:text-white'
-const EXTERNAL_LINK_LABEL_CLASS = 'font-medium transition-colors duration-150'
+const isLabeled = (bullet: unknown): bullet is LabeledBullet =>
+  typeof bullet === 'object' && bullet !== null && 'label' in bullet
+const isLinked = (bullet: unknown): bullet is LinkedBullet =>
+  typeof bullet === 'object' && bullet !== null && 'url' in bullet
 
-function isLinkedBullet(bullet: ProjectBullet): bullet is Extract<ProjectBullet, { url: string }> {
-  return typeof bullet === 'object' && 'url' in bullet
-}
+const NON_ENGLISH = new Set(['Pohlazení po těle a duši', 'Živé Sklo'])
 
-function isLabeledBullet(bullet: ProjectBullet): bullet is LabeledBullet {
-  return typeof bullet === 'object' && 'label' in bullet
-}
+function ProjectEntry({ project, index }: { project: Project; index: number }) {
+  const num = `1.${index + 1}`
+  const bullets: readonly unknown[] = project.bullets
+  const tone: Tone = project.tone
+  const demo =
+    'demoUrl' in project ? (
+      <p>
+        <ExternalLink href={project.demoUrl}>{project.demoLabel}</ExternalLink>
+      </p>
+    ) : null
 
-function ClientProjectItem({ title, url, description }: { title: string; url: string; description: string }) {
-  return (
-    <li className='space-y-1'>
-      <div>
-        <a
-          href={url}
-          target='_blank'
-          rel='noopener noreferrer'
-          className='group inline-flex items-center text-zinc-200 transition-colors duration-150 hover:text-white'
-        >
-          <span className='text-sm font-medium'>{title}</span>
-          <ExternalLinkIcon className='ml-1 h-3 w-3' />
-        </a>
-      </div>
-      <p className='text-sm leading-relaxed text-zinc-300'>{formatTypography(description)}</p>
-    </li>
-  )
-}
+  if ('lead' in project) {
+    return (
+      <Entry
+        num={num}
+        badge={project.badges[0]}
+        tone={tone}
+        title={project.title}
+        lead
+        main={<p className='lead'>{formatTypography(project.lead)}</p>}
+      >
+        <dl className='flow'>
+          {bullets.filter(isLabeled).map((step) => (
+            <div key={step.label}>
+              <dt className='mono caps'>{step.label}</dt>
+              <dd>{formatTypography(step.description)}</dd>
+            </div>
+          ))}
+        </dl>
+        <TechList items={project.tech} />
+      </Entry>
+    )
+  }
 
-function ProjectBullets({ bullets }: { bullets: readonly ProjectBullet[] }) {
-  return (
-    <ul className={`list-disc space-y-2 pl-5 ${CARD_BODY_CLASS}`}>
-      {bullets.map((bullet, index) => {
-        if (typeof bullet === 'string') {
-          return (
-            <li key={index} className='leading-relaxed'>
-              {formatTypography(bullet)}
-            </li>
-          )
-        }
-
-        if (isLinkedBullet(bullet)) {
-          return (
-            <ClientProjectItem key={bullet.url} title={bullet.name} url={bullet.url} description={bullet.description} />
-          )
-        }
-
-        if (isLabeledBullet(bullet)) {
-          return (
-            <li key={bullet.label} className='leading-relaxed'>
-              <span className='font-medium text-zinc-100'>{bullet.label}:</span>{' '}
-              <span className='font-normal text-zinc-400'>{formatTypography(bullet.description)}</span>
-            </li>
-          )
-        }
-
-        return null
-      })}
-    </ul>
-  )
-}
-
-function SubsystemGrid({ subsystems }: { subsystems: readonly LabeledBullet[] }) {
-  return (
-    <div className='mt-3.5 grid grid-cols-1 gap-2.5 md:grid-cols-3'>
-      {subsystems.map((subsystem) => (
-        <div key={subsystem.label} className='min-w-0'>
-          <h4 className={CARD_MONO_LABEL_CLASS}>{subsystem.label}</h4>
-          <p className={`mt-1 ${CARD_BODY_CLASS}`}>{formatTypography(subsystem.description)}</p>
-        </div>
-      ))}
-    </div>
-  )
-}
-
-function FeaturedTradingCard({ project }: { project: TradingProject }) {
-  const subsystems = project.bullets.filter(isLabeledBullet)
+  const linked = bullets.filter(isLinked)
+  const plain = bullets.filter((bullet): bullet is string => typeof bullet === 'string')
 
   return (
-    <ContentCard
-      icon={iconMap[project.icon]}
-      iconColor={project.iconColor}
+    <Entry
+      num={num}
+      badge={project.badges[0]}
+      tone={tone}
       title={project.title}
-      badges={project.badges}
-      articleClassName='col-span-full md:col-span-2'
+      main={
+        <>
+          {demo}
+          <TechList items={project.tech} />
+        </>
+      }
     >
-      <p className={`max-w-3xl text-balance ${CARD_BODY_CLASS}`}>{formatTypography(project.lead)}</p>
-      <SubsystemGrid subsystems={subsystems} />
-      <TagList>
-        {project.tech.map((tech) => (
-          <TechTag key={tech}>{formatTypography(tech)}</TechTag>
-        ))}
-      </TagList>
-    </ContentCard>
-  )
-}
-
-function ProjectCard({
-  project,
-  fullWidth = false,
-}: {
-  project: Exclude<Project, TradingProject>
-  fullWidth?: boolean
-}) {
-  return (
-    <ContentCard
-      icon={iconMap[project.icon]}
-      iconColor={project.iconColor}
-      title={project.title}
-      badges={project.badges}
-      articleClassName={fullWidth ? 'md:col-span-2' : undefined}
-    >
-      {'bullets' in project && project.bullets ? <ProjectBullets bullets={project.bullets} /> : null}
-
-      {'demoUrl' in project && project.demoUrl ? (
-        <p className={`mt-2.5 ${CARD_BODY_CLASS}`}>
-          <a href={project.demoUrl} target='_blank' rel='noopener noreferrer' className={EXTERNAL_LINK_CLASS}>
-            <span className={EXTERNAL_LINK_LABEL_CLASS}>
-              {'demoLabel' in project && project.demoLabel ? project.demoLabel : 'Watch Demo Video'}
-            </span>
-            <ExternalLinkIcon />
-          </a>
-        </p>
-      ) : null}
-
-      <TagList>
-        {project.tech.map((tech) => (
-          <TechTag key={tech}>{formatTypography(tech)}</TechTag>
-        ))}
-      </TagList>
-    </ContentCard>
+      {linked.length > 0 ? (
+        <ul className='rows'>
+          {linked.map((site) => (
+            <li key={site.url}>
+              <ExternalLink href={site.url} lang={NON_ENGLISH.has(site.name) ? 'cs' : undefined}>
+                {site.name}
+              </ExternalLink>
+              <span className='sub'>{formatTypography(site.description)}</span>
+            </li>
+          ))}
+        </ul>
+      ) : (
+        <ul className='rows'>
+          {plain.map((point) => (
+            <li key={point}>{formatTypography(point)}</li>
+          ))}
+        </ul>
+      )}
+    </Entry>
   )
 }
 
 export function FeaturedProjects() {
   const { title, projects } = siteContent.featuredProjects
-  const [featured, ...rest] = projects
-  const oddHalfCount = rest.length % 2 === 1
 
   return (
-    <SectionWrapper id='featured-projects' maxWidth='5xl'>
-      <SectionHeader title={title} subtitle='' {...SECTION_STYLES.featuredProjects} />
+    <section id='featured-projects' className='section tone tone-violet' aria-labelledby='projects-h'>
+      <SectionHeader
+        id='projects-h'
+        index='01'
+        eyebrow='Selected work'
+        title={title}
+        meta={[`${projects.length} entries`]}
+      />
 
-      <div className='grid items-start gap-6 md:grid-cols-2'>
-        <FeaturedTradingCard project={featured} />
-        {rest.map((project, index) => (
-          <ProjectCard key={project.title} project={project} fullWidth={oddHalfCount && index === rest.length - 1} />
+      <div className='wrap'>
+        {projects.map((project, index) => (
+          <ProjectEntry key={project.title} project={project} index={index} />
         ))}
       </div>
-    </SectionWrapper>
+    </section>
   )
 }

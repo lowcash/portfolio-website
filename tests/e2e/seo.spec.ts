@@ -39,7 +39,7 @@ test.describe('SEO outputs', () => {
 
     const manifest = await manifestResponse.json()
     expect(manifest.name).toBe('Lukáš Machala (lowcash)')
-    expect(manifest.theme_color).toBe('#0f172a')
+    expect(manifest.theme_color).toBe('#0a0c12')
 
     const imageResponse = await request.get('/opengraph-image')
     expect(imageResponse.ok()).toBe(true)

@@ -1,28 +1,34 @@
 import { siteContent } from '@/lib/content'
-import { SECTION_STYLES } from '@/lib/section-config'
+import { formatTypography } from '@/lib/prevent-widows'
 
-import { ContactContent } from '@/components/ui/contact-content'
-import { SectionWrapper } from '@/components/ui/section-wrapper'
+import { ExternalLink } from '@/components/ui/external-link'
+import { SectionHeader } from '@/components/ui/section-header'
 
 export function Contact() {
-  const content = siteContent.contact
+  const { title, email, hint, socials } = siteContent.contact
 
   return (
-    <SectionWrapper
-      id='contact'
-      maxWidth='4xl'
-      fullHeight
-      className='items-center justify-center text-center'
-      containerClassName='mx-auto flex w-full max-w-4xl flex-col items-center justify-center text-center'
-    >
-      <ContactContent
-        title={content.title}
-        email={content.email}
-        hint={content.hint}
-        socials={content.socials}
-        gradient={SECTION_STYLES.contact.gradient}
-        glowColors={SECTION_STYLES.contact.glowColors}
-      />
-    </SectionWrapper>
+    <section id='contact' className='section contact tone tone-fuchsia' aria-labelledby='contact-h'>
+      <SectionHeader id='contact-h' index='03' eyebrow='Get in touch' title={title} />
+
+      <div className='contact-body wrap grid-12'>
+        <a className='mail l-col' href={`mailto:${email}`}>
+          {email}
+        </a>
+        <ul className='rows l-col'>
+          {socials.map((social) => (
+            <li key={social.label}>
+              <ExternalLink href={social.href} aria-label={`Connect with me on ${social.label}`}>
+                {social.label}
+              </ExternalLink>
+            </li>
+          ))}
+        </ul>
+        <p className='hint l-col mono'>
+          <span className='d'>{formatTypography(hint.desktop)}</span>
+          <span className='m'>{formatTypography(hint.mobile)}</span>
+        </p>
+      </div>
+    </section>
   )
 }

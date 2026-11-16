@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 
 import dynamic from 'next/dynamic'
 
-import { siteContent } from '@/lib/content'
+import { PORTFOLIO_SECTIONS, SECTION_SCENES } from '@/lib/content'
 import {
   resolveActiveSectionIndex,
   resolveHashSectionIndex,
@@ -12,19 +12,17 @@ import {
   setSectionHashByIndex,
   useActiveSection,
 } from '@/lib/navigation'
+import { resolveShortcut } from '@/lib/shortcuts'
 
+import { closeConsolePane, toggleConsolePane } from '@/components/features/devtools/console-actions'
+import { ConsolePane } from '@/components/features/devtools/console-pane'
 import { AnimatedBackground } from '@/components/shared/AnimatedBackground'
-import { ScrollNavigation } from '@/components/ui/scroll-navigation'
-import { ScrollProgress } from '@/components/ui/scroll-progress'
-import { ScrollToTop } from '@/components/ui/scroll-to-top'
+import { StatusLine } from '@/components/ui/status-line'
+import { TopBar } from '@/components/ui/top-bar'
 
 import { useIdleReady } from '@/hooks/use-idle-ready'
 
 // Non-critical, interaction-only features: split out of the initial bundle and mounted once the browser is idle
-const DeveloperConsole = dynamic(
-  () => import('@/components/features/devtools/DeveloperConsole').then((module) => module.DeveloperConsole),
-  { ssr: false },
-)
 const EasterEggs = dynamic(
   () => import('@/components/features/easter-eggs/EasterEggs').then((module) => module.EasterEggs),
   {
@@ -34,12 +32,11 @@ const EasterEggs = dynamic(
 
 type AppShellProps = {
   sectionIds: string[]
+  children: React.ReactNode
 }
 
-export function AppShell({ sectionIds }: AppShellProps) {
-  const sectionMeta = siteContent.navigation.sections
+export function AppShell({ sectionIds, children }: AppShellProps) {
   const areExtrasReady = useIdleReady()
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
   const [isRestoringScroll, setIsRestoringScroll] = useState(false)
   const hasInitializedHash = useRef(false)
   const hashRestoreTimeoutRef = useRef<number | null>(null)
@@ -47,7 +44,7 @@ export function AppShell({ sectionIds }: AppShellProps) {
   const navigationMonitorFrameRef = useRef<number | null>(null)
   const navigationMonitorTimeoutRef = useRef<number | null>(null)
 
-  const isScrollSpyPaused = useCallback(() => isUserNavigatingRef.current || isMobileMenuOpen, [isMobileMenuOpen])
+  const isScrollSpyPaused = useCallback(() => isUserNavigatingRef.current, [])
   const [currentSection, setCurrentSection] = useActiveSection(sectionIds, {
     isRestoringScroll,
     isPaused: isScrollSpyPaused,
@@ -165,6 +162,49 @@ export function AppShell({ sectionIds }: AppShellProps) {
     }
   }, [sectionIds, setCurrentSection])
 
+  // The scene (light composition and chrome hue) follows the active section
+  useEffect(() => {
+    document.documentElement.dataset.scene = SECTION_SCENES[currentSection]
+  }, [currentSection])
+
+  // User-initiated jumps (tabs, menu, wordmark, keys 0-3) are announced for the Nav Master and Round Trip achievements
+  const navigateToSection = (index: number) => {
+    window.dispatchEvent(
+      new CustomEvent('section-navigate', { detail: { sectionId: sectionIds[index], fromY: window.scrollY } }),
+    )
+    scrollToSection(index)
+  }
+
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      const action = resolveShortcut(event, PORTFOLIO_SECTIONS.length)
+      if (!action) return
+
+      if (action.type === 'console') {
+        event.preventDefault()
+        toggleConsolePane()
+      } else if (action.type === 'escape') {
+        closeConsolePane()
+      } else {
+        event.preventDefault()
+        navigateToSection(action.index)
+      }
+    }
+
+    // Four fingers toggle the console on touch devices
+    const handleTouchStart = (event: TouchEvent) => {
+      if (event.touches.length === 4) toggleConsolePane()
+    }
+
+    window.addEventListener('keydown', handleKeyDown)
+    window.addEventListener('touchstart', handleTouchStart, { passive: true })
+
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown)
+      window.removeEventListener('touchstart', handleTouchStart)
+    }
+  })
+
   useEffect(() => {
     if (!hasInitializedHash.current || isRestoringScroll) {
       return
@@ -175,22 +215,13 @@ export function AppShell({ sectionIds }: AppShellProps) {
 
   return (
     <>
+      <TopBar onSectionClick={navigateToSection} />
+      {children}
+
       {areExtrasReady ? <EasterEggs /> : null}
       <AnimatedBackground />
-
-      <ScrollToTop currentSection={currentSection} onGoToFirst={() => scrollToSection(0)} />
-
-      <ScrollNavigation
-        currentSection={currentSection}
-        totalSections={sectionMeta.length}
-        sectionNames={sectionMeta.map((section) => section.name)}
-        onSectionClick={scrollToSection}
-        onMenuStateChange={setIsMobileMenuOpen}
-        onScrollRestore={setIsRestoringScroll}
-      />
-
-      {areExtrasReady ? <DeveloperConsole isMobileMenuOpen={isMobileMenuOpen} /> : null}
-      <ScrollProgress />
+      <ConsolePane controlsReady={areExtrasReady} />
+      <StatusLine currentSection={currentSection} onSectionClick={navigateToSection} />
     </>
   )
 }

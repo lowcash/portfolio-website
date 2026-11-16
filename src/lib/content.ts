@@ -1,13 +1,14 @@
-export type ContactIconKey = 'github' | 'linkedin'
-export type FeaturedProjectIconKey = 'trendingUp' | 'globe' | 'eye' | 'gamepad'
+export type Tone = 'pink' | 'violet' | 'teal' | 'fuchsia' | 'mint' | 'sky' | 'amber'
 
-/** Single source of truth for portfolio section ids/names/layout flags */
+/** Single source of truth for portfolio section ids, names, light scenes and accent tones */
 export const PORTFOLIO_SECTIONS = [
-  { name: 'Intro', id: 'hero', centered: false },
-  { name: 'Projects', id: 'featured-projects', centered: false },
-  { name: 'Experience', id: 'experience', centered: false },
-  { name: 'Contact', id: 'contact', centered: true },
+  { name: 'Intro', id: 'hero', scene: 'hero', tone: 'pink' },
+  { name: 'Projects', id: 'featured-projects', scene: 'projects', tone: 'violet' },
+  { name: 'Experience', id: 'experience', scene: 'experience', tone: 'teal' },
+  { name: 'Contact', id: 'contact', scene: 'contact', tone: 'fuchsia' },
 ] as const
+
+export const SECTION_SCENES = PORTFOLIO_SECTIONS.map((section) => section.scene)
 
 export type PortfolioSectionId = (typeof PORTFOLIO_SECTIONS)[number]['id']
 
@@ -18,7 +19,8 @@ export const siteContent = {
     sections: PORTFOLIO_SECTIONS.map(({ name, id }) => ({ name, id })),
   },
   hero: {
-    heading: "Hey, I'm Lukáš Machala",
+    greeting: "Hey, I'm",
+    name: 'Lukáš Machala',
     role: 'Software Engineer building quantitative data pipelines, time-series systems, and modern web applications.',
     summary: 'Python · TypeScript · Next.js · PostgreSQL',
   },
@@ -31,12 +33,10 @@ export const siteContent = {
     },
     socials: [
       {
-        icon: 'github' as ContactIconKey,
         label: 'GitHub',
         href: 'https://github.com/lowcash',
       },
       {
-        icon: 'linkedin' as ContactIconKey,
         label: 'LinkedIn',
         href: 'https://linkedin.com/in/lukáš-machala-00549114a',
       },
@@ -46,7 +46,6 @@ export const siteContent = {
     title: 'Projects',
     projects: [
       {
-        icon: 'trendingUp' as FeaturedProjectIconKey,
         title: 'Quantitative Trading Engine',
         badges: ['Current'],
         lead: 'Event-driven quantitative framework engineered for cryptocurrency market data ingestion, time-series feature engineering, and robust strategy backtesting.',
@@ -66,11 +65,10 @@ export const siteContent = {
           },
         ],
         tech: ['Python', 'Data Pipelines', 'Time-Series', 'Machine Learning'],
-        iconColor: 'text-pink-400',
+        tone: 'pink' as Tone,
         layout: 'featured' as const,
       },
       {
-        icon: 'globe' as FeaturedProjectIconKey,
         title: 'Client Web Platforms',
         badges: ['Client Work'],
         bullets: [
@@ -91,11 +89,10 @@ export const siteContent = {
           },
         ],
         tech: ['TypeScript', 'Next.js', 'Tailwind CSS', 'PostgreSQL'],
-        iconColor: 'text-emerald-400',
+        tone: 'mint' as Tone,
         layout: 'half' as const,
       },
       {
-        icon: 'eye' as FeaturedProjectIconKey,
         title: 'Collaborative AR System',
         badges: ['MSc Thesis'],
         bullets: [
@@ -106,11 +103,10 @@ export const siteContent = {
         tech: ['C++', 'OpenCV', 'Computer Vision', 'OpenGL'],
         demoUrl: 'https://youtu.be/8PpEFLIw7TY',
         demoLabel: 'Watch Demo Video',
-        iconColor: 'text-blue-400',
+        tone: 'sky' as Tone,
         layout: 'half' as const,
       },
       {
-        icon: 'gamepad' as FeaturedProjectIconKey,
         title: 'Initial D Racing',
         badges: ['Playable'],
         bullets: [
@@ -121,33 +117,33 @@ export const siteContent = {
         tech: ['TypeScript', 'Phaser 3'],
         demoUrl: 'https://lowcash.github.io/initial-d/',
         demoLabel: 'Play Game',
-        iconColor: 'text-amber-400',
+        tone: 'amber' as Tone,
         layout: 'half' as const,
       },
     ],
   },
-  backgroundExperience: {
+  experience: {
     title: 'Experience',
     experiences: [
       {
-        title: 'Interactive Web Systems & Admin Tooling',
+        title: 'Web Games & Admin Dashboards',
         period: '4 years',
         bullets: [
           'Developed 2D web game mechanics, custom canvas interactions, and asset integration pipelines.',
-          'Engineered Next.js admin dashboards and interactive game galleries with role-based access control (RBAC).',
+          'Engineered Next.js admin dashboards and interactive game galleries with role-based access control.',
         ],
-        technologies: ['TypeScript', 'Next.js', 'React', 'Phaser', 'RBAC'],
-        iconColor: 'text-cyan-400',
+        technologies: ['TypeScript', 'Next.js', 'React', 'Phaser', 'Canvas'],
+        tone: 'teal' as Tone,
       },
       {
-        title: 'Fullstack Business Systems',
+        title: 'CRM & Client Management Systems',
         period: 'Part-time, 3 years',
         bullets: [
-          'Contributed to ASP.NET MVC platforms, implementing Razor views, jQuery UI components, and service-layer logic.',
+          'Contributed to ASP.NET MVC CRM platforms for customers (client management, records, workflows), implementing Razor views, jQuery UI components, and service-layer logic.',
           'Handled relational database queries (SQL), basic schema maintenance, and internal API endpoints.',
         ],
-        technologies: ['C# / .NET', 'ASP.NET MVC', 'SQL', 'REST APIs'],
-        iconColor: 'text-blue-400',
+        technologies: ['C#', '.NET', 'ASP.NET MVC', 'SQL', 'REST APIs'],
+        tone: 'sky' as Tone,
       },
     ],
     education: {
@@ -165,7 +161,7 @@ export const siteContent = {
           years: '2013 – 2017',
         },
       ],
-      iconColor: 'text-green-400',
+      tone: 'mint' as Tone,
     },
     beyondCodeNote: {
       before: 'When not writing software, I mix drum & bass sets',
